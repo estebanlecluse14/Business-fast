@@ -328,24 +328,11 @@ function houseVisual(level){
  return `<div class="houses clean-houses">${Array.from({length:level},()=>'<span class="mini-building"></span>').join('')}</div>`;
 }
 function buildingVisual(s){
- if(s.type==='beach'){
-   return `<div class="case-visual beach-card-visual">
-      <span class="beach-sun"></span><span class="beach-water"></span><span class="beach-sand"></span>
-      <span class="beach-palm"><i></i></span>
-      <span class="case-zone-label">${s.theme?.label||'Plage'}</span>
-   </div>`;
- }
- const slug=themeSlug(s.theme?.label||'quartier');
- return `<div class="case-visual building-card-visual theme-${slug}">
-    <div class="lot-shadow"></div>
-    <div class="lot-pad"></div>
-    <div class="skyline">
-      <span class="tower tower-a"></span>
-      <span class="tower tower-b"></span>
-      <span class="tower tower-c"></span>
-    </div>
-    <span class="district-mark">${(s.theme?.label||'Q').slice(0,1)}</span>
-    <span class="case-zone-label">${s.theme?.label||'Quartier'}</span>
+ const slug=s.type==='beach'?'beach':themeSlug(s.theme?.label||'business');
+ return `<div class="case-visual premium-art-card theme-${slug}">
+   <img class="case-art" src="assets/tiles/${slug}.svg" alt="" loading="eager">
+   <div class="case-art-gloss"></div>
+   <span class="district-mark">${(s.theme?.label||'Q').slice(0,1)}</span>
   </div>`;
 }
 function drawBoard(){
