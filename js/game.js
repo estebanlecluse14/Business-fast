@@ -321,7 +321,30 @@ function boardPos(i){
   if(j<=27)return {r:10,c:28-j};
   return {r:37-j,c:1};
 }
-function houseVisual(level){return `<div class="houses">${Array.from({length:level},()=>'<span class="house">🏠</span>').join('')}</div>`}
+function themeSlug(label=''){
+ return String(label).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-');
+}
+function houseVisual(level){
+ return `<div class="houses clean-houses">${Array.from({length:level},()=>'<span class="mini-building"></span>').join('')}</div>`;
+}
+function buildingVisual(s){
+ if(s.type==='beach'){
+   return `<div class="case-visual beach-card-visual">
+      <span class="beach-sun"></span><span class="beach-water"></span><span class="beach-sand"></span>
+      <span class="beach-palm"><i></i></span>
+      <span class="case-zone-label">${s.theme?.label||'Plage'}</span>
+   </div>`;
+ }
+ const slug=themeSlug(s.theme?.label||'quartier');
+ return `<div class="case-visual building-card-visual theme-${slug}">
+    <div class="skyline">
+      <span class="tower tower-a"></span>
+      <span class="tower tower-b"></span>
+      <span class="tower tower-c"></span>
+    </div>
+    <span class="case-zone-label">${s.theme?.label||'Quartier'}</span>
+  </div>`;
+}
 function drawBoard(){
   board.querySelectorAll('.space').forEach(e=>e.remove());
   spaces.forEach(s=>{
@@ -335,57 +358,61 @@ function drawBoard(){
     d.style.setProperty('--theme-color', s.theme?.color || '#64748b');
     if(s.owner!==null)d.style.setProperty('--owner-color',colors[s.owner]);
 
-    const icon={start:'🚀',beach:'🏖️',event:'⚡',global:'🌍',bank:'🏦',jail:'🚔',property:'🏙️'}[s.type];
     const ownerName=s.owner!==null?(players[s.owner]?.name||'Joueur'):'';
     const mp=zonePressureInfo(s);
     const district=s.district?wonderDistricts.find(d=>d.name===s.district):null;
     const districtState=(district&&s.owner!==null)?districtProgress(s.owner,district):null;
-    const districtBadge=district?`<div class="theme compact-district"><span class="theme-emoji">${s.theme?.emoji||'✨'}</span><span>${s.theme?.label||'Quartier'}</span>${districtState&&districtState.owned===districtState.total?'<span class="ready-badge">🏛️</span>':''}</div>`:
-      `<div class="theme"><span class="theme-emoji">${s.theme?.emoji||'✨'}</span><span>${s.theme?.label||'Case'}</span></div>`;
+    const tokensHtml=players.map((pl,idx)=>pl.active&&pl.pos===s.id?`<span class="token" title="${pl.name}" style="background:${colors[idx]}"></span>`:'').join('');
 
-    let mainInfo='';
     if(['property','beach'].includes(s.type)){
-      if(s.owner===null){
-        mainInfo=`<div class="compact-main compact-buy">Achat ${shortMoneyFmt(purchasePrice(s))}</div>`;
-      }else{
-        const sub=s.type==='property'?`Niv.${s.level} · Valeur ${shortMoneyFmt(parcelValue(s))}`:`Valeur ${shortMoneyFmt(parcelValue(s))}`;
-        mainInfo=`<div class="compact-main compact-rent">💸 ${shortMoneyFmt(currentRent(s))}</div>
-                  <div class="compact-sub">${sub.replace(String(parcelValue(s)), shortMoneyFmt(parcelValue(s))).replace(String(currentRent(s)), shortMoneyFmt(currentRent(s)))}</div>`;
-      }
+      const economyTitle=s.owner===null?'ACHAT':'LOYER';
+      const economyValue=s.owner===null?shortMoneyFmt(purchasePrice(s)):shortMoneyFmt(currentRent(s));
+      const valueLine=s.owner===null
+        ? `Valeur ${shortMoneyFmt(purchasePrice(s))}`
+        : `Valeur ${shortMoneyFmt(parcelValue(s))}${s.type==='property'? ` · Niv.${s.level}`:''}`;
+      const ownerBand=s.owner!==null
+        ? `<div class="case-owner-band" style="--band:${colors[s.owner]}"><span class="owner-swatch"></span><span>${ownerName}</span></div>`
+        : `<div class="case-owner-band available" style="--band:${s.theme?.color||'#94a3b8'}"><span class="owner-swatch"></span><span>Disponible</span></div>`;
+      const districtReady=districtState&&districtState.owned===districtState.total?'<span class="district-ready">M</span>':'';
+      const stressBadge=mp.level?`<div class="case-stress">${mp.label}</div>`:'';
+      const houses=s.type==='property'&&s.level>0?houseVisual(s.level):'<div class="houses clean-houses"></div>';
+
+      d.innerHTML=`<div class="tile-face property-layout">
+        <div class="case-pawn-slot">${tokensHtml}</div>
+        ${buildingVisual(s)}
+        ${ownerBand}
+        <div class="case-economy">
+          <div class="case-economy-label">${economyTitle}</div>
+          <div class="case-economy-value">${economyValue}</div>
+          <div class="case-economy-sub">${valueLine}</div>
+          ${stressBadge}
+          ${houses}
+        </div>
+        <div class="case-city"><span>${s.name}</span>${districtReady}</div>
+      </div>`;
       d.dataset.clickable='true';
-    }else if(s.type==='start'){
-      mainInfo=`<div class="compact-main compact-buy">+ ${shortMoneyFmt(30000)}</div>`;
-    }else if(s.type==='bank'){
-      mainInfo=`<div class="compact-main compact-buy">+ ${shortMoneyFmt(25000)}</div>`;
-    }else if(s.type==='jail'){
-      mainInfo=`<div class="compact-main compact-buy">Amende ${shortMoneyFmt(20000)}</div>`;
-    }else if(s.type==='event'){
-      mainInfo=`<div class="compact-main compact-buy">Effet surprise</div>`;
-    }else if(s.type==='global'){
-      mainInfo=`<div class="compact-main compact-buy">Tous les joueurs</div>`;
+      d.addEventListener('click',()=>openPropertyModal(s.id));
+      board.appendChild(d);
+      return;
     }
 
-    const ownerRibbon=s.owner!==null?`<div class="owner-ribbon compact-owner" title="Propriétaire : ${ownerName}"><span class="owner-dot"></span><span>${ownerName}</span></div>`:'';
-    const houses=s.type==='property' && s.level>0 ? houseVisual(s.level) : '<div class="houses mini-houses"></div>';
-    const tokensHtml=players.map((p,idx)=>p.active&&p.pos===s.id?`<span class="token" style="background:${colors[idx]}"></span>`:'').join('');
-    const stressBadge=mp.level?`<div class="compact-market">📉 ${mp.label}</div>`:'';
+    const icon={start:'🚀',event:'⚡',global:'🌍',bank:'🏦',jail:'🚔'}[s.type]||'';
+    const districtBadge=`<div class="theme"><span class="theme-emoji">${s.theme?.emoji||''}</span><span>${s.theme?.label||'Case'}</span></div>`;
+    let mainInfo='';
+    if(s.type==='start')mainInfo=`<div class="compact-main compact-buy">+ ${shortMoneyFmt(30000)}</div>`;
+    else if(s.type==='bank')mainInfo=`<div class="compact-main compact-buy">+ ${shortMoneyFmt(25000)}</div>`;
+    else if(s.type==='jail')mainInfo=`<div class="compact-main compact-buy">Amende ${shortMoneyFmt(20000)}</div>`;
+    else if(s.type==='event')mainInfo=`<div class="compact-main compact-buy">Effet surprise</div>`;
+    else if(s.type==='global')mainInfo=`<div class="compact-main compact-buy">Tous les joueurs</div>`;
+
     d.innerHTML=`<div class="tile-face">
-      ${ownerRibbon}
       <div class="tile-top">
         <div class="name">${icon} ${s.name}</div>
         ${districtBadge}
       </div>
-      <div class="tile-bottom">
-        ${mainInfo}
-        ${stressBadge}
-        ${houses}
-      </div>
+      <div class="tile-bottom">${mainInfo}</div>
       <div class="tokens">${tokensHtml}</div>
     </div>`;
-
-    if(['property','beach'].includes(s.type)){
-      d.addEventListener('click',()=>openPropertyModal(s.id));
-    }
     board.appendChild(d);
   });
 }
