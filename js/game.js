@@ -337,11 +337,14 @@ function buildingVisual(s){
  }
  const slug=themeSlug(s.theme?.label||'quartier');
  return `<div class="case-visual building-card-visual theme-${slug}">
+    <div class="lot-shadow"></div>
+    <div class="lot-pad"></div>
     <div class="skyline">
       <span class="tower tower-a"></span>
       <span class="tower tower-b"></span>
       <span class="tower tower-c"></span>
     </div>
+    <span class="district-mark">${(s.theme?.label||'Q').slice(0,1)}</span>
     <span class="case-zone-label">${s.theme?.label||'Quartier'}</span>
   </div>`;
 }
@@ -372,7 +375,7 @@ function drawBoard(){
         : `Valeur ${shortMoneyFmt(parcelValue(s))}${s.type==='property'? ` · Niv.${s.level}`:''}`;
       const ownerBand=s.owner!==null
         ? `<div class="case-owner-band" style="--band:${colors[s.owner]}"><span class="owner-swatch"></span><span>${ownerName}</span></div>`
-        : `<div class="case-owner-band available" style="--band:${s.theme?.color||'#94a3b8'}"><span class="owner-swatch"></span><span>Disponible</span></div>`;
+        : `<div class="case-owner-band available" style="--band:${s.theme?.color||'#94a3b8'}"><span class="owner-swatch"></span><span>À VENDRE</span></div>`;
       const districtReady=districtState&&districtState.owned===districtState.total?'<span class="district-ready">M</span>':'';
       const stressBadge=mp.level?`<div class="case-stress">${mp.label}</div>`:'';
       const houses=s.type==='property'&&s.level>0?houseVisual(s.level):'<div class="houses clean-houses"></div>';
