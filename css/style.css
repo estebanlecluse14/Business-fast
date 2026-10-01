@@ -3149,3 +3149,277 @@ body{
   .space.side-right .property-layout{grid-template-columns:38% 12% 34% 16%!important}
 }
 
+
+
+/* === V0.35 : refonte premium très poussée, inspiration jeu mobile de plateau === */
+.board{
+  width:min(1100px,calc(100vw - 540px))!important;
+  height:min(760px,calc(100vh - 28px))!important;
+  min-width:930px!important;
+  min-height:680px!important;
+  grid-template-columns:1.18fr repeat(8,1fr) 1.18fr!important;
+  grid-template-rows:1.42fr repeat(8,1fr) 1.42fr!important;
+  gap:8px!important;
+  padding:14px!important;
+  border-radius:38px!important;
+  background:linear-gradient(180deg,#e0b657,#c98822)!important;
+  box-shadow:
+    0 12px 0 #9b661d,
+    0 23px 0 #724814,
+    0 38px 64px rgba(63,43,9,.25)!important;
+}
+.board::before{
+  inset:8px!important;
+  border-radius:30px!important;
+  background:linear-gradient(180deg,#f4d47e,#dca844)!important;
+  box-shadow:inset 0 2px 0 rgba(255,255,255,.52),inset 0 0 0 2px rgba(115,78,15,.10)!important
+}
+.center{border-radius:25px!important}
+.space.property,.space.beach{
+  border:0!important;
+  border-radius:14px!important;
+  box-shadow:
+    0 6px 0 color-mix(in srgb,var(--theme-color) 20%,#a67b47),
+    0 9px 14px rgba(85,57,20,.12),
+    inset 0 1px 0 rgba(255,255,255,.95)!important;
+  background:linear-gradient(180deg,#f8fbfd,#e9eff2)!important;
+  transform:translateY(-1px);
+}
+.property-layout{
+  border-radius:14px!important;
+  overflow:hidden!important;
+  background:linear-gradient(180deg,#f7fbfd,#e8eef1)!important;
+}
+
+/* TOP/BOTTOM = vraie carte premium : visuel dominant + économie claire */
+.space.side-top .property-layout,
+.space.side-bottom .property-layout{
+  grid-template-rows:minmax(58px,1.55fr) 18px minmax(36px,.74fr) 26px!important;
+}
+.space.side-top .case-visual,
+.space.side-bottom .case-visual{
+  border-radius:14px 14px 0 0!important;
+  border-bottom:0!important;
+}
+.space.side-top .case-economy,
+.space.side-bottom .case-economy{
+  padding:3px 5px!important;
+}
+.space.side-top .case-economy-label,
+.space.side-bottom .case-economy-label{
+  font-size:6px!important;
+  letter-spacing:.16em!important;
+}
+.space.side-top .case-economy-value,
+.space.side-bottom .case-economy-value{
+  font-size:15px!important;
+  line-height:1!important;
+  margin-top:2px!important;
+}
+.space.side-top .case-economy-sub,
+.space.side-bottom .case-economy-sub{
+  font-size:6px!important;
+}
+.space.side-top .case-city,
+.space.side-bottom .case-city{
+  min-height:26px!important;
+  font-size:8.5px!important;
+  letter-spacing:-.01em!important;
+  padding:3px 4px!important;
+}
+
+/* image de ville pseudo-3D */
+.building-card-visual{
+  position:relative!important;
+  background:
+    radial-gradient(circle at 75% 15%,rgba(255,255,255,.75),transparent 25%),
+    linear-gradient(180deg,
+      color-mix(in srgb,var(--theme-color) 11%,#eaf8ff) 0%,
+      color-mix(in srgb,var(--theme-color) 7%,#dcecf2) 58%,
+      color-mix(in srgb,var(--theme-color) 15%,#cddfcf) 100%)!important;
+}
+.lot-shadow{
+  position:absolute;left:18%;right:16%;bottom:8%;height:16%;
+  border-radius:50%;background:rgba(45,63,70,.16);filter:blur(2px);
+  transform:skewX(-12deg)
+}
+.lot-pad{
+  position:absolute;left:12%;right:12%;bottom:9%;height:22%;
+  border-radius:4px;
+  background:linear-gradient(180deg,#eff3ed,#cfd9cf);
+  border:1px solid rgba(76,94,82,.18);
+  box-shadow:0 2px 0 rgba(96,110,94,.18);
+  transform:skewX(-9deg)
+}
+.skyline{
+  inset:9% 14% 14%!important;
+  gap:4px!important;
+  align-items:flex-end!important;
+  filter:drop-shadow(0 3px 3px rgba(41,58,67,.18))
+}
+.tower{
+  border-radius:4px 4px 1px 1px!important;
+  border:1px solid rgba(62,82,95,.16)!important;
+  box-shadow:
+    inset 1px 0 0 rgba(255,255,255,.68),
+    inset -2px 0 0 rgba(52,83,100,.10),
+    0 2px 0 rgba(70,93,105,.13)!important;
+  transform:skewY(-2deg)
+}
+.tower::before{
+  content:'';position:absolute;left:5%;right:5%;top:-5px;height:6px;border-radius:3px 3px 0 0;
+  background:inherit;filter:brightness(1.05)
+}
+.tower::after{
+  inset:5px 3px!important;
+  background:
+    repeating-linear-gradient(180deg,rgba(61,154,205,.55) 0 2px,transparent 2px 5px),
+    repeating-linear-gradient(90deg,transparent 0 4px,rgba(255,255,255,.45) 4px 5px)!important;
+}
+.tower-a{width:21%!important;height:62%!important}
+.tower-b{width:29%!important;height:88%!important}
+.tower-c{width:22%!important;height:71%!important}
+
+.district-mark{
+  position:absolute;right:6px;top:6px;width:17px;height:17px;border-radius:6px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:8px;font-weight:1000;color:#fff;
+  background:var(--theme-color);
+  border:1px solid rgba(255,255,255,.72);
+  box-shadow:0 3px 7px rgba(15,23,42,.15)
+}
+.case-zone-label{
+  left:6px!important;bottom:5px!important;
+  padding:2px 5px!important;
+  font-size:6px!important;
+  color:#26384a!important;
+  background:rgba(255,255,255,.93)!important;
+  border:1px solid rgba(255,255,255,.9)!important;
+  box-shadow:0 2px 5px rgba(15,23,42,.08)
+}
+
+/* bande propriétaire = vraie bande de statut */
+.case-owner-band{
+  min-height:18px!important;
+  background:linear-gradient(90deg,
+    color-mix(in srgb,var(--band) 34%,#f7fafc),
+    color-mix(in srgb,var(--band) 16%,#f8fafc))!important;
+  border-top:1px solid rgba(255,255,255,.72)!important;
+  border-bottom:1px solid color-mix(in srgb,var(--band) 35%,rgba(15,23,42,.08))!important;
+  font-size:6.5px!important;
+  letter-spacing:.04em!important;
+  color:#223247!important
+}
+.case-owner-band .owner-swatch{
+  width:7px!important;height:7px!important;
+  box-shadow:0 0 0 2px rgba(255,255,255,.75)!important
+}
+.case-owner-band.available{
+  background:linear-gradient(90deg,
+    color-mix(in srgb,var(--theme-color) 18%,#f1f5f7),
+    color-mix(in srgb,var(--theme-color) 7%,#f8fafb))!important;
+  color:#41566b!important
+}
+
+/* bloc prix plus proche d'une carte de jeu mobile */
+.case-economy{
+  background:
+    linear-gradient(180deg,rgba(255,255,255,.98),color-mix(in srgb,var(--theme-color) 8%,#edf3f5))!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.85)!important
+}
+.case-economy-label{color:#8794a3!important}
+.case-economy-value{
+  color:#172235!important;
+  text-shadow:0 1px 0 rgba(255,255,255,.8)
+}
+.case-economy-sub{color:#66778a!important}
+
+/* pied ville façon plaque */
+.case-city{
+  background:
+    linear-gradient(180deg,
+      color-mix(in srgb,var(--theme-color) 18%,#f1f5f7),
+      color-mix(in srgb,var(--theme-color) 26%,#dfe7ea))!important;
+  border-top:1px solid color-mix(in srgb,var(--theme-color) 26%,rgba(15,23,42,.10))!important;
+  color:#111c2d!important;
+  text-shadow:0 1px 0 rgba(255,255,255,.75);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.75)
+}
+
+/* pions posés au-dessus de la carte */
+.case-pawn-slot{
+  top:-10px!important;min-height:18px!important;z-index:20!important
+}
+.case-pawn-slot .token{
+  width:17px!important;height:17px!important;
+  border:2px solid #fff!important;
+  box-shadow:0 3px 8px rgba(15,23,42,.28)!important
+}
+
+/* thèmes davantage différenciés */
+.theme-tech .tower{background:linear-gradient(90deg,#a4dff5,#f3fbff 48%,#55abd3)!important}
+.theme-tech .tower-b{clip-path:polygon(12% 0,100% 7%,100% 100%,0 100%)}
+.theme-luxe .tower{background:linear-gradient(90deg,#eac8c1,#fff8f6 48%,#c88f84)!important;border-radius:7px 7px 2px 2px!important}
+.theme-port .tower{background:linear-gradient(90deg,#b8d1da,#f7fbfc 48%,#789dab)!important}
+.theme-culture .tower{background:linear-gradient(90deg,#e4b88f,#fff2df 48%,#b67843)!important}
+.theme-nature .tower{background:linear-gradient(90deg,#bcd5b5,#f6fbf4 48%,#7ba36f)!important}
+.theme-business .tower{background:linear-gradient(90deg,#b8c8dd,#f9fbff 48%,#718aa8)!important}
+.theme-gourmet .tower{background:linear-gradient(90deg,#ddb49f,#fff4ed 48%,#a86f54)!important}
+.theme-tourisme .tower{background:linear-gradient(90deg,#c7dce2,#fff 48%,#91adb5)!important}
+
+/* plages premium cohérentes avec les autres propriétés */
+.beach-card-visual{
+  background:
+    radial-gradient(circle at 82% 16%,rgba(255,255,255,.55),transparent 15%),
+    linear-gradient(180deg,#dbf9ff 0 44%,#55c6e7 45% 68%,#f4d796 69% 100%)!important
+}
+.beach-water{top:43%!important;height:27%!important}
+.beach-sand{height:34%!important}
+.beach-sun{width:12px!important;height:12px!important}
+.beach-palm{left:18px!important;bottom:9px!important;height:20px!important}
+.space.beach .case-city{
+  background:linear-gradient(180deg,#f8e7b8,#e9c46d)!important;
+  color:#5b4315!important
+}
+.space.beach .case-owner-band.available{
+  background:linear-gradient(90deg,#ddf7fb,#f3fcfd)!important
+}
+
+/* côtés aussi plus premium mais restent adaptés horizontalement */
+.space.side-left .property-layout,
+.space.side-right .property-layout{
+  grid-template-columns:43% 12% 30% 15%!important
+}
+.space.side-left .case-visual,
+.space.side-right .case-visual{
+  border-radius:14px 0 0 14px!important
+}
+.space.side-left .case-city,
+.space.side-right .case-city{
+  border-radius:0 14px 14px 0!important
+}
+.space.side-left .district-mark,
+.space.side-right .district-mark{width:14px;height:14px;font-size:7px}
+
+/* un peu plus de profondeur sur les cases spéciales */
+.space.event,.space.global,.space.bank,.space.jail,.space.start{
+  box-shadow:
+    0 6px 0 rgba(126,91,48,.16),
+    0 9px 14px rgba(79,52,18,.10),
+    inset 0 1px 0 rgba(255,255,255,.90)!important;
+  border-radius:14px!important
+}
+
+@media(max-width:1450px){
+  .board{
+    width:980px!important;
+    height:710px!important;
+    min-width:900px!important;
+    min-height:650px!important
+  }
+  .space.side-top .case-economy-value,
+  .space.side-bottom .case-economy-value{font-size:13px!important}
+  .space.side-top .case-city,
+  .space.side-bottom .case-city{font-size:7.5px!important}
+}
+
