@@ -3582,3 +3582,267 @@ body{
   .space.side-bottom .case-economy-value{font-size:13px!important}
 }
 
+
+
+/* === V0.37 : plateau XL, noms de ville visibles & effets premium === */
+:root{--v037-left:226px;--v037-right:278px}
+
+.board-wrap{
+  padding:10px var(--v037-right) 24px var(--v037-left)!important;
+  overflow:auto!important;
+  align-items:flex-start!important
+}
+.board-stage{
+  padding:8px 12px 36px!important;
+  min-width:max-content!important
+}
+
+/* Plateau plus grand et plus spectaculaire */
+.board{
+  width:min(1220px,calc(100vw - 520px))!important;
+  height:min(860px,calc(100vh - 18px))!important;
+  min-width:1040px!important;
+  min-height:740px!important;
+  grid-template-columns:1.20fr repeat(8,1fr) 1.20fr!important;
+  grid-template-rows:1.62fr repeat(8,1fr) 1.62fr!important;
+  gap:9px!important;
+  padding:16px!important;
+  border-radius:42px!important;
+  transform:rotateX(6deg) translateZ(0)!important;
+  background:
+    linear-gradient(180deg,rgba(255,255,255,.16),transparent 16%),
+    linear-gradient(180deg,#e3b95b,#c98620)!important;
+  box-shadow:
+    0 14px 0 #9a641b,
+    0 27px 0 #70450f,
+    0 46px 78px rgba(55,37,8,.28),
+    0 0 0 1px rgba(255,255,255,.15) inset!important
+}
+.board::before{
+  inset:9px!important;
+  border-radius:33px!important;
+  background:
+    radial-gradient(circle at 50% 0%,rgba(255,255,255,.28),transparent 26%),
+    linear-gradient(180deg,#f5d780,#dba744)!important
+}
+.board::after{
+  height:20px!important;
+  bottom:-18px!important;
+  left:22px!important;
+  right:22px!important
+}
+
+/* Centre légèrement comprimé pour donner plus de place aux cases */
+.center{
+  border-radius:27px!important;
+  box-shadow:
+    inset 0 0 0 5px rgba(255,255,255,.14),
+    inset 0 0 0 1px rgba(88,128,43,.28),
+    0 9px 20px rgba(84,112,38,.08)!important
+}
+.center::after{inset:20px!important}
+.center-face{top:49%!important}
+.wonder-site{bottom:18px!important;width:350px!important}
+
+/* Cases haut/bas nettement plus grandes */
+.space.side-top,
+.space.side-bottom{
+  border-radius:16px!important;
+  box-shadow:
+    0 7px 0 color-mix(in srgb,var(--theme-color) 20%,#9a754d),
+    0 11px 18px rgba(73,49,16,.12),
+    inset 0 1px 0 rgba(255,255,255,.95)!important
+}
+.space.side-top .property-layout,
+.space.side-bottom .property-layout{
+  grid-template-rows:minmax(82px,1.95fr) 21px minmax(42px,.76fr) 34px!important;
+  border-radius:16px!important
+}
+.space.side-top .premium-art-card,
+.space.side-bottom .premium-art-card{
+  border-radius:16px 16px 0 0!important
+}
+.space.side-top .case-art,
+.space.side-bottom .case-art{
+  transform:scale(1.06)!important
+}
+.space.side-top .case-owner-band,
+.space.side-bottom .case-owner-band{
+  min-height:21px!important;
+  font-size:7px!important;
+  letter-spacing:.07em!important
+}
+.space.side-top .case-economy,
+.space.side-bottom .case-economy{
+  min-height:42px!important;
+  padding:3px 6px!important
+}
+.space.side-top .case-economy-label,
+.space.side-bottom .case-economy-label{
+  font-size:6.5px!important
+}
+.space.side-top .case-economy-value,
+.space.side-bottom .case-economy-value{
+  font-size:17px!important;
+  margin-top:1px!important
+}
+.space.side-top .case-economy-sub,
+.space.side-bottom .case-economy-sub{
+  font-size:6.5px!important
+}
+.space.side-top .case-city,
+.space.side-bottom .case-city{
+  min-height:34px!important;
+  font-size:10px!important;
+  font-weight:1000!important;
+  padding:4px 5px!important;
+  line-height:1.05!important;
+  white-space:normal!important;
+  overflow:visible!important;
+  text-overflow:clip!important;
+  letter-spacing:-.015em!important;
+  background:
+    linear-gradient(180deg,
+      color-mix(in srgb,var(--theme-color) 22%,#f6f8f9),
+      color-mix(in srgb,var(--theme-color) 38%,#d8e1e4))!important
+}
+.space.side-top .case-city span:first-child,
+.space.side-bottom .case-city span:first-child{
+  display:block!important;
+  overflow:visible!important;
+  -webkit-line-clamp:unset!important;
+  white-space:normal!important
+}
+
+/* Assets plus présents */
+.premium-art-card{
+  box-shadow:inset 0 -1px 0 rgba(15,23,42,.08)!important
+}
+.case-art{
+  filter:saturate(1.13) contrast(1.055) brightness(1.02)!important
+}
+.case-art-gloss{
+  background:
+    linear-gradient(145deg,rgba(255,255,255,.52) 0%,rgba(255,255,255,.13) 24%,transparent 41%),
+    linear-gradient(180deg,transparent 55%,rgba(15,23,42,.10) 100%)!important
+}
+.case-art-gloss::after{
+  content:'';
+  position:absolute;
+  left:-35%;top:-10%;
+  width:32%;height:140%;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.34),transparent);
+  transform:skewX(-18deg);
+  animation:tileSheen 6.5s ease-in-out infinite
+}
+@keyframes tileSheen{
+  0%,55%{left:-38%;opacity:0}
+  65%{opacity:.65}
+  86%{left:118%;opacity:.25}
+  100%{left:118%;opacity:0}
+}
+
+/* Plus de relief sur chaque carte */
+.space.property,.space.beach{
+  transition:transform .16s ease,box-shadow .16s ease,filter .16s ease!important
+}
+.space.property:hover,.space.beach:hover{
+  transform:translateY(-5px) scale(1.035)!important;
+  z-index:40!important;
+  filter:brightness(1.03)!important;
+  box-shadow:
+    0 10px 0 color-mix(in srgb,var(--theme-color) 24%,#9a754d),
+    0 18px 28px rgba(61,42,15,.18),
+    0 0 0 2px rgba(255,255,255,.66) inset!important
+}
+
+/* Case où se trouve un joueur : halo doux */
+.space:has(.case-pawn-slot .token),
+.space:has(> .tile-face > .tokens .token){
+  z-index:28!important;
+  box-shadow:
+    0 8px 0 color-mix(in srgb,var(--theme-color) 25%,#9a754d),
+    0 14px 24px rgba(30,80,110,.18),
+    0 0 0 2px rgba(255,255,255,.78) inset,
+    0 0 22px rgba(76,185,225,.24)!important
+}
+.case-pawn-slot .token{
+  animation:pawnFloat 1.8s ease-in-out infinite!important
+}
+@keyframes pawnFloat{
+  0%,100%{transform:translateY(0);box-shadow:0 3px 8px rgba(15,23,42,.28)}
+  50%{transform:translateY(-3px);box-shadow:0 6px 12px rgba(15,23,42,.23)}
+}
+
+/* Bande propriétaire/vente plus premium */
+.case-owner-band{
+  text-shadow:0 1px 0 rgba(255,255,255,.72)!important
+}
+.case-owner-band.available{
+  background:
+    linear-gradient(90deg,
+      color-mix(in srgb,var(--theme-color) 28%,#eef4f6),
+      color-mix(in srgb,var(--theme-color) 12%,#f8fafb))!important
+}
+
+/* Coins et côtés aussi légèrement agrandis */
+.space.side-left .property-layout,
+.space.side-right .property-layout{
+  grid-template-columns:48% 11% 28% 13%!important
+}
+.space.side-left .case-art,
+.space.side-right .case-art{
+  transform:scale(1.12)!important
+}
+.space.side-left .case-economy-value,
+.space.side-right .case-economy-value{font-size:11px!important}
+.space.side-left .case-city,
+.space.side-right .case-city{font-size:7.5px!important}
+
+/* Fleuve plus riche visuellement */
+.center-river .river-bank{
+  stroke:#77bea9!important;
+  stroke-width:60!important;
+  opacity:.24!important
+}
+.center-river .river-water{
+  stroke-width:45!important;
+  filter:drop-shadow(0 7px 8px rgba(37,120,154,.18))!important
+}
+.center-river .river-shine{
+  stroke-width:6!important;
+  opacity:.85!important
+}
+
+/* Décors extérieurs moins perdus dans le vide */
+.decor-cash{opacity:.9!important;filter:drop-shadow(0 6px 8px rgba(40,70,80,.12))}
+.decor-city{opacity:.82!important;filter:drop-shadow(0 7px 10px rgba(40,70,80,.15))}
+.decor-chip{opacity:.82!important}
+
+/* amélioration résolution moyenne */
+@media(max-width:1600px){
+  .board{
+    width:1100px!important;
+    height:800px!important;
+    min-width:980px!important;
+    min-height:710px!important
+  }
+  .space.side-top .property-layout,
+  .space.side-bottom .property-layout{
+    grid-template-rows:minmax(72px,1.8fr) 20px minmax(39px,.74fr) 31px!important
+  }
+  .space.side-top .case-city,
+  .space.side-bottom .case-city{font-size:9px!important}
+}
+@media(max-width:1350px){
+  :root{--v037-left:0px;--v037-right:0px}
+  .board-wrap{height:auto!important;min-height:100vh!important;padding:10px!important;overflow:auto!important}
+  .sidebar,.sidebar .player-panel{position:static!important}
+  .board{
+    width:1000px!important;
+    height:750px!important;
+    min-width:1000px!important;
+    min-height:750px!important
+  }
+}
+
