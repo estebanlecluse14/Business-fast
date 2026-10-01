@@ -3423,3 +3423,162 @@ body{
   .space.side-bottom .case-city{font-size:7.5px!important}
 }
 
+
+
+/* === V0.36 : vrais assets vectoriels dans les propriétés === */
+.space.property,.space.beach{
+  overflow:visible!important;
+  background:#e8eef2!important;
+}
+.property-layout{
+  background:#e7edf1!important;
+}
+
+/* Le visuel prend franchement la majorité de la carte */
+.space.side-top .property-layout,
+.space.side-bottom .property-layout{
+  grid-template-rows:minmax(68px,1.75fr) 18px minmax(34px,.68fr) 25px!important;
+}
+.space.corner .property-layout{
+  grid-template-rows:minmax(54px,1.45fr) 18px minmax(34px,.70fr) 24px!important;
+}
+
+.premium-art-card{
+  position:relative!important;
+  overflow:hidden!important;
+  border-radius:14px 14px 0 0!important;
+  background:#dce8ed!important;
+  border-bottom:0!important;
+}
+.case-art{
+  position:absolute!important;
+  inset:0!important;
+  width:100%!important;
+  height:100%!important;
+  object-fit:cover!important;
+  object-position:center!important;
+  display:block!important;
+  transform:scale(1.035);
+  filter:saturate(1.08) contrast(1.03)!important;
+}
+.case-art-gloss{
+  position:absolute;inset:0;
+  background:
+    linear-gradient(145deg,rgba(255,255,255,.40) 0%,rgba(255,255,255,.09) 27%,transparent 43%),
+    linear-gradient(180deg,transparent 58%,rgba(15,23,42,.08) 100%);
+  pointer-events:none
+}
+.premium-art-card::after{
+  content:'';position:absolute;left:7px;right:7px;bottom:5px;height:8px;border-radius:50%;
+  background:rgba(21,43,54,.10);filter:blur(3px);pointer-events:none
+}
+.district-mark{
+  right:6px!important;top:6px!important;width:18px!important;height:18px!important;
+  font-size:8px!important;border-radius:6px!important;z-index:4!important;
+  box-shadow:0 3px 8px rgba(15,23,42,.22)!important
+}
+
+/* La bande statut devient plus graphique et plus haute en haut/bas */
+.space.side-top .case-owner-band,
+.space.side-bottom .case-owner-band{
+  min-height:19px!important;
+  font-size:6.5px!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.85)
+}
+
+/* bloc prix/loyer plus dense */
+.space.side-top .case-economy,
+.space.side-bottom .case-economy{
+  min-height:34px!important;
+  padding:2px 4px!important;
+  background:
+    linear-gradient(180deg,rgba(255,255,255,.98),color-mix(in srgb,var(--theme-color) 11%,#edf3f5))!important
+}
+.space.side-top .case-economy-value,
+.space.side-bottom .case-economy-value{
+  font-size:15px!important;
+  margin-top:0!important
+}
+.space.side-top .case-economy-sub,
+.space.side-bottom .case-economy-sub{
+  font-size:6px!important
+}
+.space.side-top .case-city,
+.space.side-bottom .case-city{
+  min-height:25px!important;
+  font-size:8.5px!important;
+  background:
+    linear-gradient(180deg,
+      color-mix(in srgb,var(--theme-color) 22%,#f3f5f6),
+      color-mix(in srgb,var(--theme-color) 33%,#dde5e8))!important
+}
+
+/* Sur les côtés, l'art remplit toute la première zone sans blanc mort */
+.space.side-left .property-layout,
+.space.side-right .property-layout{
+  grid-template-columns:46% 11% 29% 14%!important;
+}
+.space.side-left .premium-art-card,
+.space.side-right .premium-art-card{
+  height:100%!important;border-radius:14px 0 0 14px!important
+}
+.space.side-left .case-art,
+.space.side-right .case-art{
+  object-fit:cover!important;
+  object-position:center!important;
+  transform:scale(1.08)
+}
+.space.side-left .district-mark,
+.space.side-right .district-mark{
+  width:15px!important;height:15px!important;font-size:7px!important
+}
+
+/* léger fond couleur thème derrière les panneaux texte */
+.case-owner-band.available{
+  background:
+    linear-gradient(90deg,
+      color-mix(in srgb,var(--theme-color) 24%,#eef4f6),
+      color-mix(in srgb,var(--theme-color) 10%,#f8fafb))!important
+}
+.case-economy{
+  background:
+    linear-gradient(180deg,
+      #ffffff,
+      color-mix(in srgb,var(--theme-color) 12%,#edf2f4))!important
+}
+.case-city{
+  background:
+    linear-gradient(180deg,
+      color-mix(in srgb,var(--theme-color) 20%,#f1f5f6),
+      color-mix(in srgb,var(--theme-color) 30%,#dfe6e8))!important
+}
+
+/* Les anciens faux bâtiments CSS ne sont plus utilisés */
+.building-card-visual .lot-shadow,
+.building-card-visual .lot-pad,
+.building-card-visual .skyline,
+.beach-card-visual .beach-water,
+.beach-card-visual .beach-sand,
+.beach-card-visual .beach-sun,
+.beach-card-visual .beach-palm,
+.case-zone-label{display:none!important}
+
+/* plus de présence globale sur le plateau */
+.space.property:hover,.space.beach:hover{
+  transform:translateY(-3px) scale(1.025)!important;
+  z-index:25!important;
+  transition:transform .14s ease,box-shadow .14s ease
+}
+.space.property,.space.beach{
+  transition:transform .14s ease,box-shadow .14s ease
+}
+
+@media(max-width:1450px){
+  .space.side-top .property-layout,
+  .space.side-bottom .property-layout{
+    grid-template-rows:minmax(58px,1.60fr) 18px minmax(32px,.68fr) 24px!important
+  }
+  .space.side-top .case-economy-value,
+  .space.side-bottom .case-economy-value{font-size:13px!important}
+}
+
