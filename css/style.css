@@ -3033,3 +3033,119 @@ body{
   .case-city{font-size:7px}
 }
 
+
+
+/* === V0.34 : cases compactes, moins de blanc vide === */
+.space.property,.space.beach{
+  background:color-mix(in srgb,var(--theme-color) 4%,#eef3f5)!important
+}
+.property-layout{
+  background:color-mix(in srgb,var(--theme-color) 5%,#edf3f5)!important
+}
+
+/* Répartition verticale : chaque zone occupe réellement sa place */
+.space.side-top .property-layout,
+.space.side-bottom .property-layout,
+.space.corner .property-layout{
+  grid-template-rows:minmax(38px,1.25fr) 17px minmax(34px,.82fr) 24px!important
+}
+.case-visual{
+  min-height:0!important;
+  background:color-mix(in srgb,var(--theme-color) 10%,#e8f0f3)!important
+}
+.building-card-visual{
+  background:
+    linear-gradient(180deg,
+      color-mix(in srgb,var(--theme-color) 10%,#eef8fb) 0%,
+      color-mix(in srgb,var(--theme-color) 6%,#e2edf1) 66%,
+      color-mix(in srgb,var(--theme-color) 10%,#d7e4de) 100%)!important
+}
+.case-owner-band{
+  background:color-mix(in srgb,var(--band) 24%,#eef2f4)!important;
+  color:#213044!important
+}
+.case-owner-band.available{
+  background:color-mix(in srgb,var(--theme-color) 11%,#edf2f4)!important;
+  color:#5f6f7f!important
+}
+.case-economy{
+  background:
+    linear-gradient(180deg,
+      color-mix(in srgb,var(--theme-color) 4%,#ffffff),
+      color-mix(in srgb,var(--theme-color) 10%,#edf3f5))!important;
+  border-top:1px solid rgba(15,23,42,.04);
+  border-bottom:1px solid rgba(15,23,42,.05)
+}
+.case-economy-value{
+  font-size:13px!important;
+  letter-spacing:-.02em!important
+}
+.case-economy-sub{
+  font-size:6px!important;
+  opacity:.78!important
+}
+.case-city{
+  min-height:24px!important;
+  background:color-mix(in srgb,var(--theme-color) 13%,#e8eef1)!important;
+  color:#152236!important;
+  border-top:1px solid color-mix(in srgb,var(--theme-color) 20%,rgba(15,23,42,.07))!important
+}
+
+/* côtés : fini le grand bloc blanc, les 4 zones remplissent 100% de la case */
+.space.side-left .property-layout,
+.space.side-right .property-layout{
+  grid-template-columns:39% 12% 33% 16%!important;
+  grid-template-rows:1fr!important;
+  background:color-mix(in srgb,var(--theme-color) 7%,#eaf0f2)!important
+}
+.space.side-left .case-visual,
+.space.side-right .case-visual{
+  height:100%!important;
+  background:color-mix(in srgb,var(--theme-color) 10%,#e5eef1)!important
+}
+.space.side-left .case-owner-band,
+.space.side-right .case-owner-band{
+  height:100%!important;
+  justify-content:center!important
+}
+.space.side-left .case-economy,
+.space.side-right .case-economy{
+  height:100%!important;
+  justify-content:center!important;
+  background:
+    linear-gradient(90deg,
+      color-mix(in srgb,var(--theme-color) 4%,#fff),
+      color-mix(in srgb,var(--theme-color) 12%,#edf3f5))!important
+}
+.space.side-left .case-city,
+.space.side-right .case-city{
+  height:100%!important;
+  background:color-mix(in srgb,var(--theme-color) 14%,#e7edf0)!important
+}
+
+/* plages : mêmes proportions, aucune zone floue/blanche inutile */
+.space.beach .case-economy{
+  background:linear-gradient(180deg,#f7fdff,#dff7fb)!important
+}
+.space.beach .case-city{
+  background:linear-gradient(180deg,#f7e8bd,#edd08a)!important;
+  color:#6b4e18!important
+}
+.space.beach .case-owner-band.available{
+  background:#e3f8fc!important;color:#39798a!important
+}
+
+/* un peu plus de présence visuelle du bâtiment */
+.skyline{inset:5px 6px 4px!important}
+.tower-a{width:20%!important;height:68%!important}
+.tower-b{width:26%!important;height:91%!important}
+.tower-c{width:20%!important;height:75%!important}
+.case-zone-label{font-size:5.5px!important;bottom:3px!important}
+
+/* Sur petit affichage, conserver la densité sans recréer de vide */
+@media(max-width:1450px){
+  .case-economy-value{font-size:11px!important}
+  .space.side-left .property-layout,
+  .space.side-right .property-layout{grid-template-columns:38% 12% 34% 16%!important}
+}
+
