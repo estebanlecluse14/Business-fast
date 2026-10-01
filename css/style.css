@@ -2860,3 +2860,176 @@ body{
   .sidebar .player-panel{grid-column:1/-1!important}
 }
 
+
+
+/* === V0.33 : cases prototype, plateau rectangulaire & nouveau fleuve === */
+.board{
+  width:min(980px,calc(100vw - 540px))!important;
+  height:min(790px,calc(100vh - 24px))!important;
+  min-width:860px!important;min-height:700px!important;
+  aspect-ratio:auto!important;
+  grid-template-columns:1.25fr repeat(8,1fr) 1.25fr!important;
+  grid-template-rows:1.30fr repeat(8,1fr) 1.30fr!important;
+  gap:7px!important;padding:13px!important;
+  border-radius:34px!important;
+}
+.center{border-radius:24px!important}
+.center-face{top:48%!important}
+.center-plaza{width:94px!important;height:94px!important}
+.center-hills{width:108px!important;height:62px!important}
+
+/* Fleuve SVG : forme plus naturelle, sans barre droite */
+.center-river{
+  position:absolute!important;left:5%!important;top:5%!important;width:62%!important;height:24%!important;
+  transform:none!important;overflow:visible!important;z-index:1!important;
+  background:none!important;box-shadow:none!important;border-radius:0!important
+}
+.center-river .river-bank{
+  fill:none;stroke:#7fc7b8;stroke-width:54;stroke-linecap:round;stroke-linejoin:round;opacity:.30
+}
+.center-river .river-water{
+  fill:none;stroke:url(#riverGradient);stroke-width:42;stroke-linecap:round;stroke-linejoin:round;
+  filter:drop-shadow(0 5px 6px rgba(37,120,154,.14))
+}
+.center-river .river-shine{
+  fill:none;stroke:rgba(255,255,255,.62);stroke-width:5;stroke-linecap:round;opacity:.75
+}
+
+/* Propriété : structure du prototype */
+.space.property,.space.beach{
+  overflow:visible!important;background:#f7fafc!important;padding:0!important;
+  border:1px solid rgba(34,51,69,.13)!important;
+  border-radius:12px!important;
+  box-shadow:0 5px 0 rgba(128,91,43,.14),0 8px 12px rgba(91,61,18,.07)!important
+}
+.space.property::before,.space.property::after,
+.space.beach::before,.space.beach::after{display:none!important;content:none!important}
+.property-layout{
+  position:absolute!important;inset:0!important;padding:0!important;
+  display:grid!important;
+  grid-template-rows:minmax(35px,1.05fr) 18px minmax(31px,.70fr) 22px!important;
+  overflow:visible!important;border-radius:12px!important
+}
+.case-pawn-slot{
+  position:absolute;left:50%;top:-11px;transform:translateX(-50%);z-index:9;
+  display:flex;gap:2px;align-items:center;justify-content:center;min-height:16px
+}
+.case-pawn-slot .token{
+  width:16px!important;height:16px!important;border:2px solid #fff!important;
+  box-shadow:0 2px 5px rgba(15,23,42,.26)!important
+}
+.case-visual{
+  position:relative;overflow:hidden;border-radius:11px 11px 0 0;
+  background:linear-gradient(180deg,#eaf6ff,#d9eaf2);
+  border-bottom:1px solid rgba(15,23,42,.08)
+}
+.case-zone-label{
+  position:absolute;left:5px;bottom:4px;z-index:4;
+  font-size:6px;font-weight:1000;line-height:1;text-transform:uppercase;letter-spacing:.06em;
+  color:#334155;background:rgba(255,255,255,.90);border:1px solid rgba(15,23,42,.08);
+  padding:2px 4px;border-radius:999px
+}
+.building-card-visual{background:linear-gradient(180deg,#e9f7ff 0%,#dcecf2 62%,#d2e4dc 100%)}
+.skyline{position:absolute;inset:7px 7px 5px;display:flex;align-items:flex-end;justify-content:center;gap:3px}
+.tower{
+  display:block;position:relative;border-radius:3px 3px 1px 1px;
+  background:linear-gradient(90deg,#dce8ef,#f8fbfd 45%,#c2d5df);
+  border:1px solid rgba(71,85,105,.16);box-shadow:0 2px 4px rgba(71,85,105,.12)
+}
+.tower::after{
+  content:'';position:absolute;inset:4px 3px;
+  background:repeating-linear-gradient(180deg,rgba(66,153,198,.40) 0 2px,transparent 2px 5px);
+  opacity:.85
+}
+.tower-a{width:18%;height:64%}.tower-b{width:24%;height:86%}.tower-c{width:19%;height:72%}
+
+/* variations de bâtiment selon quartier */
+.theme-tech .tower{background:linear-gradient(90deg,#c8ecff,#f2fbff 45%,#86c8e8)}
+.theme-tech .tower-b{height:94%;clip-path:polygon(12% 0,100% 0,100% 100%,0 100%)}
+.theme-luxe{background:linear-gradient(180deg,#fff0f3,#f6e7dc 65%,#e9d4c2)}
+.theme-luxe .tower{background:linear-gradient(90deg,#f8e6df,#fff,#d7b5a9);border-radius:5px 5px 2px 2px}
+.theme-port{background:linear-gradient(180deg,#dff6fb 0 58%,#b8dde7 59% 100%)}
+.theme-port .tower{background:linear-gradient(90deg,#d7e1e5,#f5f6f7,#9eb0b9)}
+.theme-culture{background:linear-gradient(180deg,#fff4e9,#f0dfca)}
+.theme-culture .tower{background:linear-gradient(90deg,#e9c9aa,#fff2df,#c49169)}
+.theme-nature{background:linear-gradient(180deg,#e8f7e2,#d9ecd0)}
+.theme-nature .tower{background:linear-gradient(90deg,#d8e5d1,#f7fbf4,#9fbd95)}
+.theme-business{background:linear-gradient(180deg,#eaf2ff,#dbe7f7)}
+.theme-business .tower{background:linear-gradient(90deg,#cbd7e8,#f8fbff,#8fa8c7)}
+.theme-gourmet{background:linear-gradient(180deg,#fff0eb,#f3ded4)}
+.theme-gourmet .tower{background:linear-gradient(90deg,#e2c0ae,#fff5ee,#b98368)}
+.theme-tourisme{background:linear-gradient(180deg,#eaf8ff,#e8efd9)}
+.theme-tourisme .tower{background:linear-gradient(90deg,#d8e5e9,#fff,#b8c7cd)}
+
+.case-owner-band{
+  min-height:18px;display:flex;align-items:center;justify-content:center;gap:4px;
+  padding:2px 4px;background:color-mix(in srgb,var(--band) 24%,#fff);
+  border-bottom:1px solid color-mix(in srgb,var(--band) 40%,transparent);
+  font-size:7px;font-weight:1000;color:#27364a;white-space:nowrap;overflow:hidden
+}
+.case-owner-band .owner-swatch{width:6px;height:6px;border-radius:50%;background:var(--band);box-shadow:0 0 0 1px rgba(255,255,255,.8)}
+.case-owner-band.available{background:#f3f6f8;color:#718096;border-bottom-color:#dfe7ec}
+.case-economy{
+  position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:2px 4px;background:#fff;color:#18212f;text-align:center;overflow:hidden
+}
+.case-economy-label{font-size:6px;font-weight:1000;letter-spacing:.12em;color:#94a3b8;line-height:1}
+.case-economy-value{font-size:12px;font-weight:1000;line-height:1.05;margin-top:1px;color:#101827}
+.case-economy-sub{font-size:6px;color:#64748b;line-height:1.1;margin-top:2px;white-space:nowrap}
+.case-stress{position:absolute;right:3px;top:3px;font-size:5px;font-weight:900;color:#b45309}
+.clean-houses{position:absolute;left:3px;bottom:2px;display:flex;gap:1px}
+.mini-building{width:5px;height:7px;border-radius:1px;background:var(--theme-color);box-shadow:inset 0 0 0 1px rgba(255,255,255,.35)}
+.case-city{
+  display:flex;align-items:center;justify-content:center;gap:3px;
+  padding:2px 4px;background:#eef2f5;border-radius:0 0 11px 11px;
+  border-top:1px solid rgba(15,23,42,.09);
+  font-size:8px;font-weight:1000;color:#172033;text-align:center;line-height:1.05;
+  overflow:hidden
+}
+.case-city span:first-child{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.district-ready{
+  width:11px;height:11px;border-radius:50%;background:#7c3aed;color:white;
+  display:inline-flex;align-items:center;justify-content:center;font-size:6px;flex:0 0 auto
+}
+
+/* plage entièrement nette et intégrée */
+.beach-card-visual{
+  background:linear-gradient(180deg,#dff9ff 0 46%,#55c6e7 47% 67%,#f5d995 68% 100%)!important
+}
+.beach-water{position:absolute;left:0;right:0;top:45%;height:23%;background:linear-gradient(180deg,#89e3f5,#43b7dd)}
+.beach-water::after{content:'';position:absolute;left:0;right:0;top:-2px;height:4px;background:rgba(255,255,255,.82);border-radius:50%}
+.beach-sand{position:absolute;left:0;right:0;bottom:0;height:34%;background:linear-gradient(180deg,#f7e4ae,#eccb7e)}
+.beach-sun{position:absolute;right:8px;top:7px;width:10px;height:10px;border-radius:50%;background:#ffd45d;box-shadow:0 0 0 3px rgba(255,212,93,.18)}
+.beach-palm{position:absolute;left:13px;bottom:7px;width:3px;height:17px;background:#7a5428;border-radius:3px;transform:rotate(9deg)}
+.beach-palm::before{
+  content:'';position:absolute;left:-8px;top:-5px;width:19px;height:10px;
+  background:radial-gradient(ellipse at center,#51a74d 0 38%,transparent 40%);
+  transform:rotate(-8deg)
+}
+.beach-palm i{display:none}
+
+/* Cases verticales en haut/bas, plus larges latéralement sur les côtés */
+.space.side-top .property-layout,.space.side-bottom .property-layout{grid-template-rows:minmax(42px,1.2fr) 18px minmax(34px,.72fr) 23px!important}
+.space.side-left .property-layout,.space.side-right .property-layout{
+  grid-template-columns:44% 15% 27% 14%!important;grid-template-rows:1fr!important
+}
+.space.side-left .case-visual,.space.side-right .case-visual{border-radius:11px 0 0 11px!important;border-bottom:0;border-right:1px solid rgba(15,23,42,.08)}
+.space.side-left .case-owner-band,.space.side-right .case-owner-band{
+  min-width:0;writing-mode:vertical-rl;transform:rotate(180deg);font-size:6px;padding:2px!important;border-bottom:0;border-right:1px solid rgba(15,23,42,.08)
+}
+.space.side-left .case-economy,.space.side-right .case-economy{padding:2px!important}
+.space.side-left .case-city,.space.side-right .case-city{
+  border-radius:0 11px 11px 0!important;border-top:0;border-left:1px solid rgba(15,23,42,.09);
+  writing-mode:vertical-rl;transform:rotate(180deg);font-size:7px;padding:2px!important
+}
+.space.side-left .case-economy-value,.space.side-right .case-economy-value{font-size:10px!important}
+.space.side-left .case-economy-sub,.space.side-right .case-economy-sub{display:none}
+.space.side-left .case-zone-label,.space.side-right .case-zone-label{font-size:5px}
+.space.corner .property-layout{grid-template-rows:minmax(39px,1fr) 17px minmax(31px,.7fr) 22px!important}
+
+@media(max-width:1450px){
+  .board{width:900px!important;height:735px!important;min-width:820px!important;min-height:660px!important}
+  .case-economy-value{font-size:10px}
+  .case-city{font-size:7px}
+}
+
