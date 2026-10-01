@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Business Fast V0.31</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<section id="startScreen" class="screen active">
+  <div class="start-wrap">
+    <h1 class="logo">BUSINESS <span>FAST</span></h1>
+    <div class="subtitle">Prototype jouable V0.31 — loyers arrondis & projet GitHub</div>
+    <div class="card">
+      <div class="setup-grid">
+        <div class="field"><label>Nombre de joueurs</label><select id="playerCount"><option>2</option><option>3</option><option selected>4</option></select></div>
+        <div class="field"><label>Objectif</label><select id="winMode"><option value="both" selected>Faillite OU 4 plages OU Merveille</option><option value="bankrupt">Faillite des rivaux OU Merveille</option><option value="beaches">4 plages OU Merveille</option></select></div>
+        <div class="field"><label>Joueur 1</label><input id="p1" value="Esteban"></div>
+        <div class="field"><label>Joueur 2</label><input id="p2" value="Joueur 2"></div>
+        <div class="field"><label>Joueur 3</label><input id="p3" value="Joueur 3"></div>
+        <div class="field"><label>Joueur 4</label><input id="p4" value="Joueur 4"></div>
+      </div>
+      <div class="start-actions" style="margin-top:22px">
+  <button class="primary" id="startBtn">Lancer la partie</button>
+  <button class="secondary updates-btn" id="updatesBtn">📋 Mises à jour</button>
+</div>
+    </div>
+  </div>
+</section>
+
+<section id="gameScreen" class="screen">
+<div class="game">
+  <div class="board-wrap"><div class="board-stage">
+  <div class="stage-decor decor-cash cash-a"></div>
+  <div class="stage-decor decor-cash cash-b"></div>
+  <div class="stage-decor decor-cash cash-c"></div>
+  <div class="stage-decor decor-chip chip-a"></div>
+  <div class="stage-decor decor-chip chip-b"></div>
+  <div class="stage-decor decor-city city-a"><span class="building b1"></span><span class="building b2"></span><span class="building b3"></span></div>
+  <div class="stage-decor decor-city city-b"><span class="building b1"></span><span class="building b2"></span><span class="building b3"></span><span class="building b4"></span></div>
+  <div id="board" class="board"><div class="center">
+  <div class="center-river"></div>
+  <div class="center-plaza"></div>
+  <div class="center-forest forest-a"><span class="tree t1"></span><span class="tree t2"></span><span class="tree t3"></span></div>
+  <div class="center-forest forest-b"><span class="tree t1"></span><span class="tree t2"></span></div>
+  <div class="center-forest forest-c"><span class="tree t1"></span><span class="tree t2"></span><span class="tree t3"></span></div>
+  <div class="center-hills"></div>
+  <div class="wonder-site" id="wonderSite">
+    <div class="wonder-site-title">Zone de construction de la Merveille</div>
+    <div id="wonderSiteInner" class="wonder-site-inner">
+      <div class="wonder-placeholder">Aucune Merveille en chantier pour le moment.</div>
+    </div>
+  </div>
+  <div class="center-face">
+    <div class="brand-pill">BUSINESS CITY</div>
+    <div class="dice-dock"><div id="dice" class="dice">🎲</div></div>
+    <p id="turnText">Tour</p>
+    <div id="centerTokens" class="tokens"></div>
+  </div>
+</div></div></div>
+  <aside class="sidebar">
+    <div class="panel"><h3>👥 Joueurs</h3><div id="players"></div></div>
+    <div class="panel"><h3>🎮 Actions</h3><div class="actions"><button id="rollBtn" class="roll">🎲 Lancer</button><button id="buyBtn" class="buy" disabled>🏙️ Acheter</button><button id="buildBtn" class="build" disabled>🏠 Améliorer</button><button id="endBtn" class="end" disabled>➡️ Fin du tour</button><button id="wonderBtn" class="wonder-action" disabled>🏛️ Construire une Merveille</button></div><div id="status" style="margin-top:12px;color:#cbd5e1;font-size:13px">Lance les dés.</div></div>
+    <div class="panel"><div class="legend"><span class="pill">🏖️ Plage</span><span class="pill">⚡ Événement</span><span class="pill">🌍 Mondial</span><span class="pill">🏦 Banque</span><span class="pill">🚔 Prison</span><span class="pill">🏠 Maisons visibles</span></div><button id="journalBtn" class="secondary" style="width:100%">📜 Ouvrir le journal</button><button id="settingsBtn" class="settings-btn">⚙️ Paramètres audio</button><div style="margin-top:10px"><button id="devToggle" class="secondary" style="width:100%">🧪 Mode développeur</button></div><div style="margin-top:10px"><button id="restartBtn" class="secondary danger" style="width:100%">Recommencer</button></div></div>
+    <div id="devPanel" class="panel dev-panel" style="display:none">
+      <div class="dev-head"><h3>🧪 Mode développeur</h3><span id="devState" class="dev-chip">LIVE</span></div>
+      <div id="devStats" class="dev-stats"></div>
+      <div class="dev-actions">
+        <button id="devCash" type="button">+50k joueur</button>
+        <button id="devDebt" type="button">Dette test 250k</button>
+        <button id="devEvent" type="button">⚡ Événement</button>
+        <button id="devFiscal" type="button">🧾 Contrôle fiscal</button>
+        <button id="devWorks" type="button">🚧 Travaux</button>
+        <button id="devTax" type="button">🏠 Taxe foncière</button>
+        <button id="devWonderLine" type="button">🏛️ Donner quartier Tech</button>
+        <button id="devFinishWonder" type="button">🏁 Finir Merveille</button>
+        <button id="devGlobal" type="button">🌍 Mondial</button>
+      </div>
+      <div class="dev-sim">
+        <div class="dev-sim-title">🤖 Simulations rapides</div>
+        <div class="dev-actions">
+          <button id="sim100" type="button">100 parties</button>
+          <button id="sim1000" type="button">1 000 parties</button>
+        </div>
+        <div id="simResult" class="sim-result">Les simulations utilisent des bots simplifiés pour repérer les tendances d'équilibrage.</div>
+      </div>
+    </div>
+  </aside>
+</div>
+</section>
+
+
+
+<div id="journalModal" class="journal-modal" aria-hidden="true">
+  <div class="journal-box" role="dialog" aria-modal="true" aria-labelledby="journalTitle">
+    <div class="journal-head">
+      <div>
+        <div class="journal-kicker">BUSINESS FAST</div>
+        <h2 id="journalTitle">📜 Journal de partie</h2>
+        <p>Toutes les actions importantes de la partie sont listées ici.</p>
+      </div>
+      <button id="journalClose" class="journal-close" type="button" aria-label="Fermer">✕</button>
+    </div>
+    <div id="log" class="log journal-log"></div>
+  </div>
+</div>
+
+<div id="updatesModal" class="updates-modal" aria-hidden="true">
+  <div class="updates-box" role="dialog" aria-modal="true" aria-labelledby="updatesTitle">
+    <div class="updates-header">
+      <div>
+        <div class="updates-kicker">BUSINESS FAST</div>
+        <h2 id="updatesTitle">📋 Historique des mises à jour</h2>
+        <p>Les versions majeures ajoutent ou transforment une mécanique centrale. Les versions mineures améliorent surtout l'interface, le confort ou corrigent des bugs.</p>
+      </div>
+      <button id="updatesClose" class="updates-close" type="button" aria-label="Fermer">✕</button>
+    </div>
+    <div class="updates-list">
+      <article class="update-item current">
+        <div class="update-version">V0.31</div><div class="update-copy"><div class="update-title">Loyers arrondis & passage sur GitHub <span class="update-tag balance">Équilibrage</span></div><p>Les loyers sont désormais arrondis par paliers de 5 000 € pour gagner en lisibilité, et le projet est restructuré sur GitHub avec HTML, CSS et JavaScript séparés.</p></div>
+      </article>
+      <article class="update-item">
+        <div class="update-version">V0.30</div><div class="update-copy"><div class="update-title">Plages nettes & cases spéciales améliorées <span class="update-tag major">Majeure</span></div><p>Correction du rendu flou des cases Plage, avec un visuel plus net et plus lisible, puis amélioration du style des autres cases spéciales pour homogénéiser le plateau.</p></div>
+      </article>
+      <article class="update-item">
+        <div class="update-version">V0.29</div><div class="update-copy"><div class="update-title">Cases agrandies & plages retravaillées <span class="update-tag major">Majeure</span></div><p>Les cases sont agrandies d’environ 15 % pour améliorer la lisibilité, et les cases Plage adoptent un rendu plus visuel, plus cohérent avec le décor et le plateau central.</p></div>
+      </article>
+      <article class="update-item">
+        <div class="update-version">V0.28</div><div class="update-copy"><div class="update-title">Plateau plus visuel sans emojis <span class="update-tag major">Majeure</span></div><p>Retour à une base propre puis refonte décorative du centre du plateau : arbres, bâtiments et décors remplacés par des formes graphiques plus propres, sans rendu emoji.</p></div>
+      </article>
+      <article class="update-item">
+        <div class="update-version">V0.26</div><div class="update-copy"><div class="update-title">Départ déplacé & titre retiré <span class="update-tag minor">Mineure</span></div><p>Suppression du bloc BUSINESS FAST qui masquait le plateau et déplacement du DÉPART sur le coin inférieur droit, à l'emplacement visuel occupé auparavant par Nîmes.</p></div>
+      </article>
+      <article class="update-item">
+        <div class="update-version">V0.25</div><div class="update-copy"><div class="update-title">Premium 2.5D propre <span class="update-tag major">Majeure</span></div><p>Abandon de la rotation diamant trop déformante : plateau presque à plat, légère perspective, bordures épaisses, cases droites et décor central plus propre.</p></div>
+      </article>
+      <article class="update-item">
+        <div class="update-version">V0.24</div><div class="update-copy"><div class="update-title">Lisibilité renforcée & style mobile premium <span class="update-tag major">Majeure</span></div><p>Plateau rendu beaucoup plus lisible, perspective adoucie, cases agrandies, texte renforcé et direction visuelle encore plus proche d’un jeu mobile de type Business Tour.</p></div>
+      </article>
+      <article class="update-item">
+        <div class="update-version">V0.23</div><div class="update-copy"><div class="update-title">Menus en coins & plateau HD <span class="update-tag major">Majeure</span></div><p>Menus déplacés dans les coins, plateau plus HD et plus 3D, et le DÉPART est maintenant placé sur la case avant où se trouvait Nîmes.</p></div>
+      </article>
+      <article class="update-item">
+        <div class="update-version">V0.22</div><div class="update-copy"><div class="update-title">2.5D & lisibilité économique <span class="update-tag major">Majeure</span></div><p>Plateau poussé vers un rendu 2.5D, menus rapprochés, journal en fenêtre dédiée et prix des terrains simplifiés en valeurs rondes comme 35k, 100k, etc.</p></div>
+      </article>
+      <article class="update-item">
+        <div class="update-version">V0.21</div><div class="update-copy"><div class="update-title">Refonte visuelle inspirée Business Tour <span class="update-tag major">Majeure</span></div><p>Nouveau plateau pseudo-isométrique, décor plus premium, ambiance plus mobile game et style plus spectaculaire tout en gardant la lisibilité.</p></div>
+      </article>
+      <article class="update-item">
+        <div class="update-version">V0.20</div><div class="update-copy"><div class="update-title">Lisibilité du plateau & zone Merveille <span class="update-tag major">Majeure</span></div><p>Cases agrandies et simplifiées, centre du plateau plus visuel, zone dédiée à la Merveille et nouveau bouton développeur pour terminer une construction.</p></div>
+      </article>
+      <article class="update-item">
+        <div class="update-version">V0.19</div><div class="update-copy"><div class="update-title">Journal des mises à jour <span class="update-tag minor">Mineure</span></div><p>Ajout de cet historique directement depuis l'écran d'accueil.</p></div>
+      </article>
+      <article class="update-item">
+        <div class="update-version">V0.18</div><div class="update-copy"><div class="update-title">Économie resserrée <span class="update-tag balance">Équilibrage</span></div><p>Passage par DÉPART réduit à 30 000 € et loyers augmentés de 20 %.</p></div>
+      </article>
+      <article class="update-item">
+        <div class="update-version">V0.17</div><div class="update-copy"><div class="update-title">Quartiers & Merveilles <span class="update-tag major">Majeure</span></div><p>Les Merveilles se débloquent désormais en contrôlant un quartier complet de 3 propriétés.</p></div>
+      </article>
+      <article class="update-item">
+        <div class="update-version">V0.16</div><div class="update-copy"><div class="update-title">Victoire par Merveille <span class="update-tag major">Majeure</span></div><p>Nouvelle condition de victoire avec construction accélérée ou collective.</p></div>
+      </article>
+      <article class="update-item">
+        <div class="update-version">V0.15</div><div class="update-copy"><div class="update-title">Malus économiques <span class="update-tag major">Majeure</span></div><p>Contrôle fiscal différé, travaux échelonnés et nouvelle taxe foncière à 35 % du patrimoine.</p></div>
+      </article>
+      <article class="update-item">
+        <div class="update-version">V0.14</div><div class="update-copy"><div class="update-title">Mode développeur <span class="update-tag major">Majeure</span></div><p>Statistiques live, outils de test, simulations 100/1 000 parties, valeurs et loyers rééquilibrés.</p></div>
+      </article>
+      <article class="update-item">
+        <div class="update-version">V0.13</div><div class="update-copy"><div class="update-title">Liquidation & marché local <span class="update-tag major">Majeure</span></div><p>Ventes d'urgence progressives, faillite évitable et pression immobilière temporaire sur les quartiers.</p></div>
+      </article>
+      <article class="update-item">
+        <div class="update-version">V0.12</div><div class="update-copy"><div class="update-title">Refonte visuelle du plateau <span class="update-tag major">Majeure</span></div><p>Nouvelle direction 2D plus lisible, centre de plateau retravaillé et interface plus claire.</p></div>
+      </article>
+      <article class="update-item">
+        <div class="update-version">V0.11</div><div class="update-copy"><div class="update-title">Audio & paramètres <span class="update-tag major">Majeure</span></div><p>Musique d'ambiance, bruitages et réglages séparés du volume musique/SFX.</p></div>
+      </article>
+      <article class="update-item">
+        <div class="update-version">V0.10</div><div class="update-copy"><div class="update-title">Popups d'événements <span class="update-tag minor">Mineure</span></div><p>Présentations dédiées pour Banque, Prison, événements et événements mondiaux.</p></div>
+      </article>
+      <article class="update-item">
+        <div class="update-version">V0.9</div><div class="update-copy"><div class="update-title">Rachat de propriétés <span class="update-tag major">Majeure</span></div><p>Sur une propriété adverse, choix entre payer le loyer ou racheter le bien avec ses constructions.</p></div>
+      </article>
+      <article class="update-item">
+        <div class="update-version">V0.8</div><div class="update-copy"><div class="update-title">Valeurs & loyers dynamiques <span class="update-tag major">Majeure</span></div><p>Valeur du bien, loyer, niveaux et améliorations consultables depuis les propriétés.</p></div>
+      </article>
+      <article class="update-item">
+        <div class="update-version">V0.7</div><div class="update-copy"><div class="update-title">Retour au plateau 2D <span class="update-tag minor">Mineure</span></div><p>Abandon de l'isométrique au profit d'une meilleure lisibilité du plateau.</p></div>
+      </article>
+      <article class="update-item">
+        <div class="update-version">V0.6</div><div class="update-copy"><div class="update-title">Tests isométriques <span class="update-tag minor">Mineure</span></div><p>Ajustements visuels de la tentative de plateau en perspective.</p></div>
+      </article>
+      <article class="update-item">
+        <div class="update-version">V0.5</div><div class="update-copy"><div class="update-title">Première map isométrique <span class="update-tag minor">Mineure</span></div><p>Expérimentation d'un rendu 3D/isométrique pour le plateau.</p></div>
+      </article>
+      <article class="update-item">
+        <div class="update-version">V0.4</div><div class="update-copy"><div class="update-title">Propriétaires & profondeur visuelle <span class="update-tag minor">Mineure</span></div><p>Amélioration de l'affichage des propriétaires et premières tentatives de profondeur.</p></div>
+      </article>
+      <article class="update-item">
+        <div class="update-version">V0.3</div><div class="update-copy"><div class="update-title">Cases thématiques <span class="update-tag minor">Mineure</span></div><p>Ajout des thèmes de quartiers, couleurs de propriétaires et maisons visibles.</p></div>
+      </article>
+      <article class="update-item">
+        <div class="update-version">V0.2</div><div class="update-copy"><div class="update-title">Animations du plateau <span class="update-tag minor">Mineure</span></div><p>Plateau agrandi, animation du dé et déplacement animé des pions.</p></div>
+      </article>
+      <article class="update-item">
+        <div class="update-version">V0.1</div><div class="update-copy"><div class="update-title">Prototype jouable <span class="update-tag major">Majeure</span></div><p>Première version : 36 cases, 2–4 joueurs, achats, loyers, constructions, événements, faillite et conditions de victoire.</p></div>
+      </article>
+    </div>
+  </div>
+</div>
+
+<div id="modal" class="modal"><div class="box"><h2 id="modalTitle"></h2><div id="modalBody"></div><div class="row"><button id="modalOk" class="primary">OK</button></div></div></div>
+<div id="settingsModal" class="settings-modal" aria-hidden="true">
+ <div class="settings-box" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+  <h2 id="settingsTitle">⚙️ Paramètres audio</h2>
+  <div class="setting-row"><div class="setting-copy"><b>🎵 Musique d'ambiance</b><small>Musique calme pendant la partie</small></div><button id="musicToggle" class="audio-toggle on">Activée</button></div>
+  <div class="setting-row"><div class="setting-copy"><b>🔊 Bruitages</b><small>Dés, déplacements, achats et fenêtres</small></div><button id="sfxToggle" class="audio-toggle on">Activés</button></div>
+  <div class="setting-row"><div class="setting-copy"><b>Volume musique</b><small>Réglage indépendant</small></div><input id="musicVolume" class="setting-slider" type="range" min="0" max="100" value="28" aria-label="Volume musique"></div>
+  <div class="setting-row"><div class="setting-copy"><b>Volume bruitages</b><small>Réglage indépendant</small></div><input id="sfxVolume" class="setting-slider" type="range" min="0" max="100" value="55" aria-label="Volume bruitages"></div>
+  <div class="audio-indicator">La musique démarre après une interaction avec le jeu, conformément aux règles des navigateurs.</div>
+  <div class="settings-actions"><button id="settingsClose" class="primary">Fermer</button></div>
+ </div>
+</div>
+
+<script src="js/game.js"></script>
+</body>
+</html>
