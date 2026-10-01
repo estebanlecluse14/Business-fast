@@ -3,14 +3,14 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Business Fast V0.32</title>
+<title>Business Fast V0.33</title>
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 <section id="startScreen" class="screen active">
   <div class="start-wrap">
     <h1 class="logo">BUSINESS <span>FAST</span></h1>
-    <div class="subtitle">Prototype jouable V0.32 — plateau compact, plages nettes & joueurs à gauche</div>
+    <div class="subtitle">Prototype jouable V0.33 — nouvelles cases & fleuve retravaillé</div>
     <div class="card">
       <div class="setup-grid">
         <div class="field"><label>Nombre de joueurs</label><select id="playerCount"><option>2</option><option>3</option><option selected>4</option></select></div>
@@ -39,7 +39,18 @@
   <div class="stage-decor decor-city city-a"><span class="building b1"></span><span class="building b2"></span><span class="building b3"></span></div>
   <div class="stage-decor decor-city city-b"><span class="building b1"></span><span class="building b2"></span><span class="building b3"></span><span class="building b4"></span></div>
   <div id="board" class="board"><div class="center">
-  <div class="center-river"></div>
+  <svg class="center-river" viewBox="0 0 520 140" preserveAspectRatio="none" aria-hidden="true">
+    <defs>
+      <linearGradient id="riverGradient" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#d8f7ff"/>
+        <stop offset="42%" stop-color="#79d1f0"/>
+        <stop offset="100%" stop-color="#2999cf"/>
+      </linearGradient>
+    </defs>
+    <path class="river-bank" d="M8 95 C92 20 166 118 252 72 C333 28 396 104 512 32"/>
+    <path class="river-water" d="M8 95 C92 20 166 118 252 72 C333 28 396 104 512 32"/>
+    <path class="river-shine" d="M15 86 C96 28 168 106 254 64 C335 27 399 92 506 31"/>
+  </svg>
   <div class="center-plaza"></div>
   <div class="center-forest forest-a"><span class="tree t1"></span><span class="tree t2"></span><span class="tree t3"></span></div>
   <div class="center-forest forest-b"><span class="tree t1"></span><span class="tree t2"></span></div>
@@ -117,6 +128,9 @@
     </div>
     <div class="updates-list">
       <article class="update-item current">
+        <div class="update-version">V0.33</div><div class="update-copy"><div class="update-title">Nouvelles cases & fleuve retravaillé <span class="update-tag major">Majeure</span></div><p>Les propriétés adoptent une présentation inspirée du prototype : bâtiment visible, bande propriétaire, loyer ou valeur bien séparé, nom de ville en pied de case et pion au-dessus. Le plateau devient légèrement rectangulaire et le fleuve central est redessiné.</p></div>
+      </article>
+      <article class="update-item">
         <div class="update-version">V0.32</div><div class="update-copy"><div class="update-title">Plateau compact & interface joueurs <span class="update-tag major">Majeure</span></div><p>Le plateau tient désormais beaucoup mieux dans un seul écran, la zone centrale est réduite, les plages sont rendues nettes, le fleuve est retravaillé et le panneau des joueurs passe à gauche dans une présentation plus propre.</p></div>
       </article>
       <article class="update-item">
