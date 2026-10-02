@@ -298,6 +298,7 @@ function startWonder(mode,districtName){
  document.getElementById('modal').classList.remove('open');
  addLog(`🏛️ <b>${p.name}</b> lance une Merveille dans <b>${districtName}</b> — ${mode==='fast'?`${moneyFmt(400000)} payés, victoire dans 5 tours`:'construction collective, loyers -65 %, victoire dans 8 tours'}.`);
  status.textContent=`Merveille de ${p.name} en construction : ${p.wonderTurnsLeft} tours restants.`;
+ showCinematic('wonder','NOUVEAU PROJET','MERVEILLE LANCÉE',`${p.name} · ${districtName} · ${p.wonderTurnsLeft} tours`,1900);
  playSfx('build');refresh();
 }
 function advanceWonderForPlayer(playerIndex){
@@ -306,6 +307,8 @@ function advanceWonderForPlayer(playerIndex){
  if(p.wonderSkipCountdown){p.wonderSkipCountdown=false;return false}
  p.wonderTurnsLeft--;
  addLog(`🏗️ Merveille de <b>${p.name}</b> : ${p.wonderTurnsLeft} tour(s) restant(s).`);
+ refresh();
+ showWonderProgress(playerIndex);
  if(p.wonderTurnsLeft<=0){
    stat('wonderWins');
    declareWinner(p,'achève sa Merveille');
@@ -429,21 +432,28 @@ function drawBoard(){
 function renderWonderSite(){
  const slot=document.getElementById('wonderSiteInner');
  if(!slot)return;
+ const site=document.getElementById('wonderSite');
  const activeWonder=players.find(p=>p.active&&p.wonderMode&&p.wonderTurnsLeft>0);
  if(!activeWonder){
-   slot.innerHTML=`<div class="wonder-placeholder">Aucune Merveille en chantier pour le moment.<br><small>Complétez un quartier de 3 propriétés pour lancer la construction.</small></div>`;
-   document.getElementById('wonderSite').classList.remove('live');
+   slot.innerHTML=`<div class="wonder-empty-visual"><div class="wonder-blueprint"><span></span><span></span><span></span></div><div class="wonder-placeholder"><b>EMPLACEMENT MERVEILLE</b><small>Complétez un quartier de 3 propriétés pour lancer le chantier.</small></div></div>`;
+   site.classList.remove('live','stage-1','stage-2','stage-3');
    return;
  }
- document.getElementById('wonderSite').classList.add('live');
+ site.classList.add('live');
  const totalTurns=activeWonder.wonderMode==='communist'?8:5;
  const done=Math.max(0,totalTurns-activeWonder.wonderTurnsLeft);
+ const ratio=done/totalTurns;
+ const stage=ratio<.34?1:ratio<.72?2:3;
+ site.classList.remove('stage-1','stage-2','stage-3');
+ site.classList.add('stage-'+stage);
+ const art=`assets/wonder/stage${stage}.svg`;
  const bars=Array.from({length:totalTurns},(_,i)=>`<span class="wonder-step ${i<done?'done':''} ${i===done?'current':''}"></span>`).join('');
  slot.innerHTML=`<div class="wonder-live-card ${activeWonder.wonderMode}">
-   <div class="wonder-hero">🏛️</div>
+   <div class="wonder-art-shell"><img class="wonder-stage-art" src="${art}" alt="" loading="eager"><div class="wonder-crane-light"></div></div>
    <div class="wonder-live-copy">
-     <div class="wonder-live-title">${activeWonder.name} construit une Merveille</div>
-     <div class="wonder-live-sub">${activeWonder.wonderLine} · ${activeWonder.wonderMode==='communist'?'collective':'accélérée'} · ${activeWonder.wonderTurnsLeft} tour(s) restant(s)</div>
+     <div class="wonder-live-kicker">CHANTIER · ÉTAPE ${stage}/3</div>
+     <div class="wonder-live-title">${activeWonder.name} construit sa Merveille</div>
+     <div class="wonder-live-sub">${activeWonder.wonderLine} · ${activeWonder.wonderMode==='communist'?'collective':'accélérée'} · ${activeWonder.wonderTurnsLeft} tour(s)</div>
      <div class="wonder-progress-bar">${bars}</div>
    </div>
  </div>`;
@@ -463,7 +473,8 @@ function modal(title,html){
  const row=document.querySelector('#modal .row');
  row.innerHTML='<button id="modalOk" class="primary">Fermer</button>';
  document.getElementById('modalOk').onclick=closeModal;
- document.getElementById('modal').classList.add('open');
+ const modalEl=document.getElementById('modal');
+ modalEl.classList.add('open','visual-alpha-modal');
  playSfx('open');
 }
 function closeModal(){
@@ -551,12 +562,13 @@ function upgradeProperty(spaceId){
  refresh();
  animateBuild(s.id);
  pulsePlayerCard(current,'positive');
+ if(s.level===3)showCinematic('level3','NIVEAU MAXIMUM',s.name,'La propriété atteint son développement maximal.',1450);
  playSfx('build');
 }
 document.getElementById('modalOk').onclick=closeModal;
 function refresh(){drawBoard();renderPlayers();updateActions();refreshDevStats();renderWonderSite();}
 function updateActions(){if(gameOver||animating||pendingDebt){[rollBtn,buyBtn,buildBtn,endBtn,wonderBtn].forEach(b=>b.disabled=true);return} const p=players[current],s=spaces[p.pos]; rollBtn.disabled=rolled; buyBtn.disabled=!rolled||!['property','beach'].includes(s.type)||s.owner!==null||p.money<purchasePrice(s); buildBtn.disabled=!rolled||s.type!=='property'||s.owner!==current||s.level>=3||p.money<upgradeCosts[s.level+1]; endBtn.disabled=!rolled; wonderBtn.disabled=!canLaunchWonder(current)||pendingRentDecision;}
-function passStart(p,steps){if(p.pos+steps>=36){p.money+=30000;stat('moneyInjected',30000);addLog(`💰 <b>${p.name}</b> passe par DÉPART : +${moneyFmt(30000)}`)}}
+function passStart(p,steps){if(p.pos+steps>=36){p.money+=30000;stat('moneyInjected',30000);addLog(`💰 <b>${p.name}</b> passe par DÉPART : +${moneyFmt(30000)}`);showCinematic('start','PASSAGE DÉPART','+30 000 €',`${p.name} reçoit son bonus de tour.`,1450);pulsePlayerCard(players.indexOf(p),'positive')}}
 function sleep(ms){return new Promise(r=>setTimeout(r,ms))}
 async function animateDice(finalRoll){
  const dice=document.getElementById('dice');
@@ -869,6 +881,7 @@ function finalizeBankruptcy(playerIndex){
  p.props=[];p.beaches=0;p.active=false;p.money=0;p.wonderMode=null;p.wonderTurnsLeft=0;stat('bankruptcies');
  addLog(`💀 <b>${p.name}</b> ne peut pas couvrir sa dette et fait faillite.`);
  status.textContent=`${p.name} fait faillite.`;
+ showCinematic('bankrupt','FAILLITE',p.name,'Les actifs restants retournent sur le marché.',1900);
  const callback=d?.onResolved;
  pendingDebt=null;
  document.getElementById('modal').classList.remove('open');
@@ -1200,10 +1213,37 @@ function runDevSimulation(count){
  },20);
 }
 
+function showCinematic(kind,kicker,title,sub='',duration=1750){
+ const el=document.getElementById('cinematicOverlay');if(!el)return;
+ const iconMap={
+   start:'➜',bank:'€',build:'▲',wonder:'★',bankrupt:'×',victory:'◆',level3:'III'
+ };
+ document.getElementById('cinematicIcon').textContent=iconMap[kind]||'◆';
+ document.getElementById('cinematicKicker').textContent=kicker||'BUSINESS FAST';
+ document.getElementById('cinematicTitle').textContent=title||'';
+ document.getElementById('cinematicSub').textContent=sub||'';
+ el.className='cinematic-overlay '+kind;
+ el.setAttribute('aria-hidden','false');
+ void el.offsetWidth;el.classList.add('show');
+ clearTimeout(showCinematic._timer);
+ showCinematic._timer=setTimeout(()=>{
+   el.classList.remove('show');
+   el.setAttribute('aria-hidden','true');
+ },duration);
+}
+function showWonderProgress(playerIndex){
+ const p=players[playerIndex];if(!p?.wonderMode)return;
+ const total=p.wonderMode==='communist'?8:5;
+ const done=Math.max(0,total-p.wonderTurnsLeft);
+ if(done>0&&p.wonderTurnsLeft>0){
+   showCinematic('wonder','CHANTIER MERVEILLE',`Étape ${Math.min(3,Math.ceil((done/total)*3))} / 3`,`${p.name} · ${p.wonderTurnsLeft} tour(s) restant(s)`,1250);
+ }
+}
 function declareWinner(winner,reason='remporte Business Fast'){
  if(gameOver||!winner)return;
  gameOver=true;
- modal('🏆 Victoire !',`<div class="winner">${winner.name}</div><p>${reason} et remporte Business Fast !</p>`);
+ showCinematic('victory','VICTOIRE',winner.name,`${reason} · BUSINESS FAST`,2600);
+ modal('🏆 Victoire !',`<div class="winner visual-alpha-winner"><img src="assets/wonder/final.svg" alt=""><strong>${winner.name}</strong></div><p>${reason} et remporte Business Fast !</p>`);
  addLog(`🏆 <b>${winner.name}</b> ${reason} et gagne la partie !`);
  refresh();
 }
