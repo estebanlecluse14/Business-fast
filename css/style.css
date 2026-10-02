@@ -6049,3 +6049,230 @@ body{
   }
 }
 
+
+
+/* === V0.43 ANIMATIONS LÉGÈRES & RENDU NET === */
+
+/* Le plateau reste parfaitement droit : les rotateX/translateZ forçaient le navigateur
+   à rasteriser une grande partie de l'interface et produisaient le rendu "basse résolution". */
+.board{
+  transform:none!important;
+  perspective:none!important;
+  transform-style:flat!important
+}
+.board-stage,
+.board-wrap,
+.center,
+.space,
+.tile-face,
+.property-layout,
+.special-layout{
+  transform-style:flat!important
+}
+
+/* SVG / illustrations : jamais de zoom CSS permanent. */
+.case-art,
+.special-art,
+.level-building-art,
+.player-pawn,
+.moving-pawn,
+.wonder-stage-art{
+  image-rendering:auto!important;
+  shape-rendering:geometricPrecision;
+  transform:none!important;
+  filter:none!important;
+  backface-visibility:visible!important
+}
+.premium-art-card .case-art,
+.space.owned .premium-art-card:has(.level-building-art) .case-art,
+.space.side-top .case-art,
+.space.side-bottom .case-art{
+  transform:none!important
+}
+
+/* Le pion en déplacement doit rester net : aucune mise à l'échelle ni ombre floue. */
+.moving-pawn{
+  width:30px!important;
+  height:38px!important;
+  filter:none!important;
+  will-change:transform;
+}
+.player-pawn{
+  will-change:auto!important
+}
+
+/* Plus de zoom au survol : lisibilité nette et zéro recalcul de texture. */
+.space:hover,
+.space[data-clickable="true"]:hover,
+.space.property:hover,
+.space.beach:hover{
+  transform:none!important;
+  filter:none!important
+}
+
+/* Animations principales : translation + opacité uniquement.
+   On redéfinit les keyframes lourdes des anciennes versions. */
+@keyframes pawnIdleV038{
+  0%,100%{transform:translateY(0)}
+  50%{transform:translateY(-2px)}
+}
+@keyframes buildingSettle{
+  from{opacity:0;transform:translateY(5px)}
+  to{opacity:1;transform:translateY(0)}
+}
+@keyframes purchasePulseV038{
+  0%{opacity:0}
+  18%{opacity:1}
+  65%{opacity:.72}
+  100%{opacity:0}
+}
+@keyframes purchaseParticlesV038{
+  0%{opacity:0;transform:translate(-50%,-50%)}
+  25%{opacity:.85}
+  100%{opacity:0;transform:translate(-50%,-70%)}
+}
+@keyframes buildToastV038{
+  0%{opacity:0;transform:translate(-50%,8px)}
+  20%,68%{opacity:1;transform:translate(-50%,0)}
+  100%{opacity:0;transform:translate(-50%,-8px)}
+}
+@keyframes landingTileV039{
+  0%,100%{transform:none}
+}
+@keyframes landingRingV039{
+  0%{opacity:0}
+  25%{opacity:.8}
+  100%{opacity:0}
+}
+@keyframes playerGainV039{
+  0%{box-shadow:none}
+  30%{box-shadow:0 0 0 2px rgba(34,197,94,.28)}
+  100%{box-shadow:none}
+}
+@keyframes playerLossV039{
+  0%{box-shadow:none}
+  30%{box-shadow:0 0 0 2px rgba(239,68,68,.26)}
+  100%{box-shadow:none}
+}
+@keyframes playerTurnV039{
+  0%,100%{transform:none}
+}
+@keyframes centerTurnSwapV039{
+  0%{opacity:.55;transform:translate(-50%,-50%)}
+  100%{opacity:1;transform:translate(-50%,-50%)}
+}
+@keyframes eventModalInV039{
+  from{opacity:0;transform:translateY(12px)}
+  to{opacity:1;transform:translateY(0)}
+}
+@keyframes eventIconV039{
+  from{opacity:0;transform:translateY(7px)}
+  to{opacity:1;transform:translateY(0)}
+}
+@keyframes eventEffectV039{
+  from{opacity:0;transform:translateY(5px)}
+  to{opacity:1;transform:translateY(0)}
+}
+@keyframes dieSettleV039{
+  from{transform:rotate(-3deg)}
+  to{transform:rotate(0)}
+}
+@keyframes diceSpinPremium{
+  0%{transform:rotate(0deg)}
+  50%{transform:rotate(7deg)}
+  100%{transform:rotate(0deg)}
+}
+@keyframes cinematicInV040{
+  from{opacity:0;transform:translateY(16px)}
+  to{opacity:1;transform:translateY(0)}
+}
+@keyframes cineParticleV040{
+  from{opacity:.8}
+  to{opacity:0}
+}
+
+/* Dé net : pas d'angle permanent ni de perspective. */
+.premium-die,
+.premium-die:not(.rolling){
+  transform:none!important;
+  filter:none!important;
+  will-change:auto!important
+}
+.premium-die.rolling{
+  animation:diceSpinPremium .16s linear infinite!important
+}
+
+/* Les effets décoratifs continus sont désactivés.
+   Les feedbacks importants restent visibles, mais courts. */
+.case-pawn-slot .board-pawn,
+.special-layout > .tokens .board-pawn,
+.center-plaza::after,
+.wonder-crane-light,
+.center-skyline::after{
+  animation:none!important
+}
+.case-art-gloss,
+.special-gloss{
+  opacity:.28!important
+}
+
+/* Pas de flou ni de filtres sur les gros conteneurs. */
+.board,
+.center,
+.space,
+.sidebar .panel,
+#modal.visual-alpha-modal .box,
+.cinematic-content,
+.wonder-site,
+.wonder-art-shell{
+  filter:none!important;
+  backdrop-filter:none!important;
+  -webkit-backdrop-filter:none!important
+}
+
+/* Ombres fortement simplifiées : moins de couches à recomposer. */
+.space{
+  box-shadow:0 4px 8px rgba(49,38,18,.12)!important
+}
+.board{
+  box-shadow:0 12px 0 #9a641b,0 22px 32px rgba(55,37,8,.18)!important
+}
+.sidebar .panel{
+  box-shadow:0 7px 18px rgba(15,23,42,.12)!important
+}
+.cinematic-content{
+  box-shadow:0 18px 42px rgba(0,0,0,.28)!important
+}
+
+/* Cinématiques plus rapides et plus propres. */
+.cinematic-overlay.show .cinematic-content{
+  animation:cinematicInV040 .28s ease-out forwards!important
+}
+.cinematic-particles{
+  display:none!important
+}
+
+/* Les effets d'argent restent mais avec moins d'objets animés. */
+.money-stream i:nth-child(n+3),
+.cash-burst i:nth-of-type(n+4){
+  display:none!important
+}
+
+/* Évite les micro-flous liés aux coordonnées sub-pixel sur les textes. */
+.case-city,
+.case-economy,
+.special-copy,
+.center-face,
+.sidebar{
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility
+}
+
+/* Plus de transition globale sur les tuiles. */
+.space,
+.case-art,
+.level-building-art,
+.player-pawn{
+  transition:none!important
+}
+
