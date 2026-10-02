@@ -3,17 +3,29 @@
 Prototype web du jeu de plateau **Business Fast**.
 
 ## Version actuelle
-**V0.40 — Visual Alpha**
+**V0.41 — Debug & stabilité**
 
-### Nouveautés V0.40
-- Première version officiellement orientée **Visual Alpha**.
-- Cinématiques plein écran pour le passage DÉPART, la faillite, le niveau 3, la Merveille et la victoire.
-- Merveille représentée comme un vrai chantier en **3 étapes visuelles** avec nouveaux assets SVG.
-- Progression de la Merveille directement visible au centre du plateau.
-- Écran de victoire enrichi avec illustration finale de la Merveille.
-- Modales harmonisées et davantage intégrées à la direction artistique premium.
-- Feedback joueur renforcé lors des moments importants.
-- Conservation de toutes les améliorations de structure V0.38 et de game feel V0.39.
+### Nouveautés V0.41
+- Grosse passe de débogage après la Visual Alpha V0.40.
+- Validation syntaxique complète du JavaScript.
+- Test de démarrage et des principaux parcours de jeu.
+- 200 simulations automatiques exécutées sans erreur bloquante.
+- Correction du sélecteur des modales événementielles (`.modal-box` → `.box`).
+- Nettoyage systématique des états de modale et de cinématique.
+- Redémarrage de partie plus propre : overlays, dettes temporaires et musique sont réinitialisés.
+- Protection de la file de dettes lorsque la partie est déjà terminée.
+- Suppression des anciens effets de pion rond pouvant interférer avec les nouveaux pions SVG.
+- Stabilisation de BUSINESS CITY et de la zone Merveille face aux anciennes couches CSS.
+- Aucun changement volontaire des règles ou de l'économie du jeu.
+
+## Contrôles effectués
+- 36 cases présentes et chargées.
+- Aucun ID HTML dupliqué.
+- Toutes les références DOM statiques principales sont présentes.
+- Achat de propriété testé.
+- Passage niveau 1 → 3 testé.
+- Lancement de Merveille testé.
+- Simulateur de parties testé sur 200 exécutions.
 
 ## Structure
 - `index.html` — structure de l'interface
