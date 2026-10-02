@@ -5929,3 +5929,123 @@ body{
   }
 }
 
+
+
+/* === V0.42 FLUIDITÉ & PERFORMANCES === */
+
+/* Les éléments animés sont composités une seule fois au lieu de recalculer tout le plateau. */
+.moving-pawn,
+.premium-die,
+.cinematic-content,
+.landing-ring,
+.money-flow,
+.cash-burst{
+  will-change:transform,opacity;
+  backface-visibility:hidden;
+  transform-style:flat
+}
+.moving-pawn{
+  contain:layout paint style;
+  filter:drop-shadow(0 4px 3px rgba(15,23,42,.22))!important
+}
+
+/* Les flous plein écran sont parmi les effets les plus coûteux. */
+#modal.visual-alpha-modal,
+.cinematic-vignette,
+.sidebar .panel,
+.city-emblem{
+  backdrop-filter:none!important;
+  -webkit-backdrop-filter:none!important
+}
+#modal.visual-alpha-modal{
+  background:rgba(8,15,26,.72)!important
+}
+.cinematic-vignette{
+  background:radial-gradient(circle at 50% 48%,rgba(15,23,42,.08),rgba(6,11,18,.86) 72%),rgba(4,8,14,.28)!important
+}
+
+/* Animations continues réduites : elles n'apportent presque rien visuellement mais sollicitent le GPU. */
+.case-pawn-slot .board-pawn,
+.special-layout > .tokens .board-pawn{
+  animation-duration:3.2s!important
+}
+.center-plaza::after{
+  animation-duration:6s!important
+}
+.wonder-crane-light{
+  animation-duration:6.5s!important
+}
+
+/* Ne pas animer les grosses ombres des tuiles au survol. */
+.space{
+  transition:transform .14s ease,filter .14s ease!important
+}
+.space:hover{
+  filter:none!important
+}
+
+/* Mode automatique pour écran plus petit / CPU plus limité. */
+.performance-lite .case-pawn-slot .board-pawn,
+.performance-lite .special-layout > .tokens .board-pawn,
+.performance-lite .center-plaza::after,
+.performance-lite .wonder-crane-light,
+.performance-lite .center-skyline::after{
+  animation:none!important
+}
+.performance-lite .player-pawn,
+.performance-lite .level-building-art,
+.performance-lite .case-art,
+.performance-lite .center-skyline{
+  filter:none!important
+}
+.performance-lite .board{
+  box-shadow:
+    0 12px 0 #9a641b,
+    0 22px 0 #70450f,
+    0 32px 48px rgba(55,37,8,.22)!important
+}
+.performance-lite .space,
+.performance-lite .sidebar .panel,
+.performance-lite #modal.visual-alpha-modal .box{
+  box-shadow:none!important
+}
+.performance-lite .space.property,
+.performance-lite .space.beach,
+.performance-lite .special-layout,
+.performance-lite .premium-art-card{
+  contain:layout paint style
+}
+.performance-lite .case-art-gloss,
+.performance-lite .special-gloss{
+  opacity:.55!important
+}
+.performance-lite .cinematic-particles{
+  display:none!important
+}
+.performance-lite .money-stream i:nth-child(n+4),
+.performance-lite .cash-burst i:nth-of-type(n+5){
+  display:none!important
+}
+
+/* Sur les écrans moyens, on privilégie franchement la fluidité. */
+@media(max-width:1450px){
+  .case-pawn-slot .board-pawn,
+  .special-layout > .tokens .board-pawn,
+  .center-plaza::after,
+  .wonder-crane-light{
+    animation:none!important
+  }
+  .board{
+    transform:none!important
+  }
+}
+
+/* Respect des réglages système. */
+@media(prefers-reduced-motion:reduce){
+  *,
+  *::before,
+  *::after{
+    scroll-behavior:auto!important
+  }
+}
+
