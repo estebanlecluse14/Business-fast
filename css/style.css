@@ -3846,3 +3846,296 @@ body{
   }
 }
 
+
+
+/* === V0.38 : structure premium, cases latérales XL === */
+
+/* Plateau global : plus large, côtés plus généreux, centre moins dominant */
+.board{
+  width:min(1320px,calc(100vw - 500px))!important;
+  height:min(860px,calc(100vh - 16px))!important;
+  min-width:1120px!important;
+  min-height:760px!important;
+
+  /* les colonnes de gauche/droite gagnent fortement en largeur */
+  grid-template-columns:1.62fr repeat(8,1fr) 1.62fr!important;
+
+  /* haut/bas restent généreux */
+  grid-template-rows:1.62fr repeat(8,1fr) 1.62fr!important;
+
+  gap:9px!important;
+  padding:16px!important;
+  border-radius:42px!important;
+  transform:rotateX(5deg) translateZ(0)!important;
+}
+
+/* Centre visuellement plus compact */
+.center{
+  border-radius:25px!important;
+}
+.center::after{
+  inset:18px!important;
+}
+.center-face{
+  top:49%!important;
+  width:225px!important;
+}
+.center-plaza{
+  width:86px!important;
+  height:86px!important;
+}
+.center-hills{
+  width:98px!important;
+  height:58px!important;
+}
+.wonder-site{
+  width:330px!important;
+  bottom:16px!important;
+}
+
+/* ---- CASES GAUCHE / DROITE : vraie grosse refonte ---- */
+.space.side-left,
+.space.side-right{
+  border-radius:16px!important;
+  box-shadow:
+    0 7px 0 color-mix(in srgb,var(--theme-color) 22%,#9a754d),
+    0 12px 18px rgba(72,48,15,.13),
+    inset 0 1px 0 rgba(255,255,255,.95)!important;
+}
+
+.space.side-left .property-layout,
+.space.side-right .property-layout{
+  /* +30/35% de confort visuel côté structure */
+  grid-template-columns:52% 10% 25% 13%!important;
+  grid-template-rows:1fr!important;
+  min-width:0!important;
+  background:#e7edf1!important;
+  border-radius:16px!important;
+}
+
+/* Asset du quartier plus grand */
+.space.side-left .premium-art-card,
+.space.side-right .premium-art-card{
+  height:100%!important;
+  min-width:0!important;
+  border-radius:16px 0 0 16px!important;
+  overflow:hidden!important;
+}
+.space.side-left .case-art,
+.space.side-right .case-art{
+  width:100%!important;
+  height:100%!important;
+  object-fit:cover!important;
+  object-position:center!important;
+  transform:scale(1.16)!important;
+}
+.space.side-left .case-art-gloss,
+.space.side-right .case-art-gloss{
+  opacity:.92!important;
+}
+
+/* Bande propriétaire plus lisible et pas trop écrasée */
+.space.side-left .case-owner-band,
+.space.side-right .case-owner-band{
+  min-width:0!important;
+  width:100%!important;
+  height:100%!important;
+  writing-mode:vertical-rl!important;
+  transform:rotate(180deg)!important;
+  font-size:7px!important;
+  letter-spacing:.05em!important;
+  padding:4px 2px!important;
+  gap:5px!important;
+}
+.space.side-left .case-owner-band .owner-swatch,
+.space.side-right .case-owner-band .owner-swatch{
+  width:8px!important;
+  height:8px!important;
+}
+
+/* Zone prix/loyer plus confortable */
+.space.side-left .case-economy,
+.space.side-right .case-economy{
+  min-width:0!important;
+  height:100%!important;
+  padding:5px 4px!important;
+  justify-content:center!important;
+  background:
+    linear-gradient(90deg,#fff,color-mix(in srgb,var(--theme-color) 12%,#edf3f5))!important;
+}
+.space.side-left .case-economy-label,
+.space.side-right .case-economy-label{
+  font-size:7px!important;
+  letter-spacing:.12em!important;
+}
+.space.side-left .case-economy-value,
+.space.side-right .case-economy-value{
+  font-size:13px!important;
+  line-height:1!important;
+  margin-top:3px!important;
+}
+.space.side-left .case-economy-sub,
+.space.side-right .case-economy-sub{
+  display:block!important;
+  font-size:6px!important;
+  white-space:normal!important;
+  text-align:center!important;
+  margin-top:3px!important;
+  line-height:1.1!important;
+}
+
+/* Nom de ville sur les côtés plus lisible */
+.space.side-left .case-city,
+.space.side-right .case-city{
+  min-width:0!important;
+  height:100%!important;
+  writing-mode:vertical-rl!important;
+  transform:rotate(180deg)!important;
+  font-size:8.5px!important;
+  font-weight:1000!important;
+  padding:5px 3px!important;
+  line-height:1.05!important;
+  border-radius:0 16px 16px 0!important;
+  overflow:visible!important;
+}
+.space.side-left .case-city span:first-child,
+.space.side-right .case-city span:first-child{
+  display:block!important;
+  overflow:visible!important;
+  -webkit-line-clamp:unset!important;
+}
+
+/* ---- CASES HAUT / BAS : encore un peu plus confortables ---- */
+.space.side-top .property-layout,
+.space.side-bottom .property-layout{
+  grid-template-rows:minmax(88px,2.05fr) 22px minmax(44px,.78fr) 36px!important;
+}
+.space.side-top .case-city,
+.space.side-bottom .case-city{
+  min-height:36px!important;
+  font-size:10.5px!important;
+}
+.space.side-top .case-economy-value,
+.space.side-bottom .case-economy-value{
+  font-size:17px!important;
+}
+
+/* ---- COINS : visuellement plus importants ---- */
+.space.corner{
+  border-radius:18px!important;
+  transform:scale(1.01);
+}
+.space.corner .property-layout{
+  grid-template-rows:minmax(72px,1.7fr) 20px minmax(40px,.74fr) 32px!important;
+}
+.space.corner .case-city{
+  min-height:32px!important;
+  font-size:9.5px!important;
+}
+
+/* ---- EFFETS PREMIUM ---- */
+.space.property,
+.space.beach,
+.space.event,
+.space.global,
+.space.bank,
+.space.jail,
+.space.start{
+  transition:
+    transform .16s ease,
+    box-shadow .16s ease,
+    filter .16s ease!important;
+}
+
+/* relief plus net sur les cases */
+.space.property,
+.space.beach{
+  box-shadow:
+    0 7px 0 color-mix(in srgb,var(--theme-color) 23%,#9a754d),
+    0 12px 20px rgba(60,42,16,.13),
+    inset 0 1px 0 rgba(255,255,255,.96)!important;
+}
+
+/* asset plus vivant */
+.case-art{
+  filter:saturate(1.17) contrast(1.065) brightness(1.025)!important;
+}
+.case-art-gloss{
+  background:
+    linear-gradient(145deg,rgba(255,255,255,.56) 0%,rgba(255,255,255,.14) 23%,transparent 40%),
+    linear-gradient(180deg,transparent 56%,rgba(15,23,42,.11) 100%)!important;
+}
+
+/* meilleur effet au survol */
+.space.property:hover,
+.space.beach:hover{
+  transform:translateY(-6px) scale(1.04)!important;
+  z-index:50!important;
+  filter:brightness(1.045)!important;
+  box-shadow:
+    0 11px 0 color-mix(in srgb,var(--theme-color) 27%,#9a754d),
+    0 20px 34px rgba(54,37,14,.20),
+    0 0 0 2px rgba(255,255,255,.72) inset!important;
+}
+
+/* joueur présent : effet plus lisible */
+.space:has(.case-pawn-slot .token),
+.space:has(> .tile-face > .tokens .token){
+  z-index:30!important;
+  box-shadow:
+    0 8px 0 color-mix(in srgb,var(--theme-color) 26%,#9a754d),
+    0 15px 26px rgba(30,80,110,.18),
+    0 0 0 2px rgba(255,255,255,.82) inset,
+    0 0 26px rgba(76,185,225,.28)!important;
+}
+
+/* centre : fleuve plus élégant et mieux intégré */
+.center-river{
+  left:7%!important;
+  top:7%!important;
+  width:58%!important;
+  height:23%!important;
+}
+.center-river .river-bank{
+  stroke-width:58!important;
+  opacity:.22!important;
+}
+.center-river .river-water{
+  stroke-width:44!important;
+}
+.center-river .river-shine{
+  stroke-width:5.5!important;
+}
+
+/* Responsive intermédiaire */
+@media(max-width:1700px){
+  .board{
+    width:1180px!important;
+    height:820px!important;
+    min-width:1040px!important;
+    min-height:720px!important;
+    grid-template-columns:1.55fr repeat(8,1fr) 1.55fr!important;
+  }
+}
+@media(max-width:1450px){
+  .board{
+    width:1060px!important;
+    height:780px!important;
+    min-width:980px!important;
+    min-height:700px!important;
+    grid-template-columns:1.48fr repeat(8,1fr) 1.48fr!important;
+  }
+  .space.side-left .property-layout,
+  .space.side-right .property-layout{
+    grid-template-columns:49% 10% 27% 14%!important;
+  }
+}
+@media(max-width:1250px){
+  .board{
+    width:1040px!important;
+    min-width:1040px!important;
+    height:760px!important;
+    min-height:760px!important;
+  }
+}
+
