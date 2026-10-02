@@ -17,6 +17,9 @@ Prototype web du jeu de plateau **Business Fast**.
 - Bâtiments évolutifs visibles directement sur les propriétés (niveaux 1, 2 et 3).
 - Vrais pions joueurs SVG sur le plateau et dans l’interface.
 - Effets d’achat et de construction renforcés.
+- Interface gauche/droite premium et plus hiérarchisée.
+- Dé central entièrement redessiné avec faces à points et animation.
+- BUSINESS CITY renforcé au centre du plateau.
 
 ## Structure
 - `index.html` — structure de l'interface
