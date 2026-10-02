@@ -324,13 +324,22 @@ function boardPos(i){
 function themeSlug(label=''){
  return String(label).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-');
 }
+const pawnFiles=['pawn-green.svg','pawn-blue.svg','pawn-red.svg','pawn-yellow.svg'];
+function pawnVisual(playerIndex,name='',extraClass=''){
+ const file=pawnFiles[playerIndex%pawnFiles.length];
+ return `<img class="player-pawn ${extraClass}" src="assets/pawns/${file}" alt="" title="${name}" loading="eager">`;
+}
 function houseVisual(level){
- return `<div class="houses clean-houses">${Array.from({length:level},()=>'<span class="mini-building"></span>').join('')}</div>`;
+ return level>0?`<div class="property-level-badge">NIV. ${level}</div>`:'';
 }
 function buildingVisual(s){
  const slug=s.type==='beach'?'beach':themeSlug(s.theme?.label||'business');
+ const levelOverlay=(s.type==='property'&&s.level>0)
+   ?`<img class="level-building-art level-${s.level}" src="assets/buildings/level${s.level}.svg" alt="" loading="eager">`
+   :'';
  return `<div class="case-visual premium-art-card theme-${slug}">
    <img class="case-art" src="assets/tiles/${slug}.svg" alt="" loading="eager">
+   ${levelOverlay}
    <div class="case-art-gloss"></div>
    <span class="district-mark">${(s.theme?.label||'Q').slice(0,1)}</span>
   </div>`;
@@ -352,7 +361,7 @@ function drawBoard(){
     const mp=zonePressureInfo(s);
     const district=s.district?wonderDistricts.find(d=>d.name===s.district):null;
     const districtState=(district&&s.owner!==null)?districtProgress(s.owner,district):null;
-    const tokensHtml=players.map((pl,idx)=>pl.active&&pl.pos===s.id?`<span class="token" title="${pl.name}" style="background:${colors[idx]}"></span>`:'').join('');
+    const tokensHtml=players.map((pl,idx)=>pl.active&&pl.pos===s.id?pawnVisual(idx,pl.name,'board-pawn'):'').join('');
 
     if(['property','beach'].includes(s.type)){
       const economyTitle=s.owner===null?'ACHAT':'LOYER';
@@ -440,10 +449,10 @@ function renderWonderSite(){
  </div>`;
 }
 function renderPlayers(){
- playerBox.innerHTML=players.map((p,i)=>`<div class="player ${i===current&&p.active?'active':''}"><span class="dot" style="background:${colors[i]}"></span><div class="pmeta"><div class="pname">${p.name}${!p.active?' 💀':''}</div><div class="pmoney">${moneyFmt(p.money)} · ${p.props.length} biens · ${p.beaches} plage(s)</div>${p.wonderMode&&p.active?`<div class="wonder-progress">🏛️ ${p.wonderLine} · ${p.wonderTurnsLeft} tour(s) · ${p.wonderMode==='communist'?'collective':'accélérée'}</div>`:''}</div></div>`).join('');
+ playerBox.innerHTML=players.map((p,i)=>`<div class="player ${i===current&&p.active?'active':''}">${pawnVisual(i,p.name,'panel-pawn')}<div class="pmeta"><div class="pname">${p.name}${!p.active?' 💀':''}</div><div class="pmoney">${moneyFmt(p.money)} · ${p.props.length} biens · ${p.beaches} plage(s)</div>${p.wonderMode&&p.active?`<div class="wonder-progress">🏛️ ${p.wonderLine} · ${p.wonderTurnsLeft} tour(s) · ${p.wonderMode==='communist'?'collective':'accélérée'}</div>`:''}</div></div>`).join('');
  const activeWonder=players.find(p=>p.active&&p.wonderMode&&p.wonderTurnsLeft>0);
  document.getElementById('turnText').innerHTML=gameOver?'Partie terminée':`Tour de ${players[current]?.name||''}${communistWonderActive()?'<div class="global-rent-alert">☭ Construction collective : tous les loyers -65 %</div>':activeWonder?`<div class="wonder-banner">🏛️ ${activeWonder.name} construit une Merveille · ${activeWonder.wonderTurnsLeft} tour(s)</div>`:''}`;
- document.getElementById('centerTokens').innerHTML=players.filter(p=>p.active).map((p,i)=>`<span class="token" title="${p.name}" style="background:${colors[players.indexOf(p)]}"></span>`).join('');
+ document.getElementById('centerTokens').innerHTML=players.filter(p=>p.active).map(p=>pawnVisual(players.indexOf(p),p.name,'center-pawn')).join('');
  renderWonderSite();
 }
 
