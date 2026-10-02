@@ -481,6 +481,10 @@ function showEventResult({title,icon='✨',description='',effect='',tone='neutra
    <div class="balance">${players[current]?`${players[current].name} · ${moneyFmt(players[current].money)}`:''}</div>
   </div>`;
  modal(title,body);
+ const eventModal=document.getElementById('modal');
+ eventModal.classList.remove('event-positive','event-negative','event-neutral');
+ eventModal.classList.add('event-'+tone);
+ setTimeout(()=>eventModal.classList.remove('event-positive','event-negative','event-neutral'),900);
  const btn=document.getElementById('modalOk');
  btn.textContent='Continuer';
  if(afterClose)btn.onclick=()=>{document.getElementById('modal').classList.remove('open');playSfx('close');afterClose();};
@@ -546,6 +550,7 @@ function upgradeProperty(spaceId){
  closeModal();
  refresh();
  animateBuild(s.id);
+ pulsePlayerCard(current,'positive');
  playSfx('build');
 }
 document.getElementById('modalOk').onclick=closeModal;
@@ -591,6 +596,8 @@ async function movePlayer(steps){
    await animateTokenStep(idx,from,to);
  }
  addLog(`🎲 <b>${p.name}</b> avance de ${steps} case(s) de <b>${spaces[initial].name}</b> vers <b>${spaces[p.pos].name}</b>.`);
+ animateLanding(p.pos);
+ await sleep(260);
  resolveSpace();
 }
 function resolveSpace(){const p=players[current],s=spaces[p.pos];
@@ -608,6 +615,7 @@ function resolveSpace(){const p=players[current],s=spaces[p.pos];
  p.money+=amount;stat('bankVisits');stat('moneyInjected',amount);
  addLog(`🏦 La banque verse ${moneyFmt(amount)} à <b>${p.name}</b>.`);
  status.textContent='Prime bancaire reçue.';
+ animateBankGain(s.id,current,amount);
  showEventResult({title:'🏦 Banque',icon:'🏦',description:'La banque vous accorde une prime exceptionnelle.',effect:`+ ${moneyFmt(amount)}`,tone:'positive'});
 }
  else if(s.type==='jail'){
@@ -682,6 +690,7 @@ function payRentChoice(spaceId){
  const full=requestPayment(current,rent,ownerIndex,`Loyer de ${s.name}`);
  if(full){
    status.textContent=`Loyer payé : ${moneyFmt(rent)}.`;playSfx('money');
+   animateMoneyFlow(spaceId,current,ownerIndex,rent,'LOYER');
  }else{
    status.textContent=`Fonds insuffisants : liquidation nécessaire pour ${s.name}.`;
  }
@@ -706,6 +715,7 @@ function buyoutChoice(spaceId){
  status.textContent=`${buyer.name} devient propriétaire de ${s.name}.`;playSfx('buy');
  closeRentChoice();
  animatePurchase(s.id,current);
+ pulsePlayerCard(current,'positive');
 }
 
 function liquidationRate(saleIndex){return Math.max(.50,.90-(saleIndex*.10))}
@@ -1198,6 +1208,43 @@ function declareWinner(winner,reason='remporte Business Fast'){
  refresh();
 }
 function checkWin(){if(gameOver)return; const active=players.filter(p=>p.active); let winner=null,reason=''; if((winMode==='both'||winMode==='bankrupt')&&active.length===1){winner=active[0];reason='reste le dernier joueur solvable'} if(!winner&&(winMode==='both'||winMode==='beaches')){winner=players.find(p=>p.active&&p.beaches===4);if(winner)reason='contrôle les 4 plages'} if(winner)declareWinner(winner,reason);}
+function pulsePlayerCard(playerIndex,tone='positive'){
+ const cards=playerBox.querySelectorAll('.player');
+ const el=cards[playerIndex];if(!el)return;
+ el.classList.remove('money-positive','money-negative','turn-pulse');
+ void el.offsetWidth;
+ el.classList.add(tone==='negative'?'money-negative':tone==='turn'?'turn-pulse':'money-positive');
+ setTimeout(()=>el.classList.remove('money-positive','money-negative','turn-pulse'),900);
+}
+function animateLanding(spaceId){
+ const tile=board.querySelector(`.space[data-space-id="${spaceId}"]`);if(!tile)return;
+ tile.classList.remove('landing-hit');void tile.offsetWidth;tile.classList.add('landing-hit');
+ const ring=document.createElement('div');ring.className='landing-ring';tile.appendChild(ring);
+ setTimeout(()=>{tile.classList.remove('landing-hit');ring.remove()},760);
+}
+function animateMoneyFlow(spaceId,fromIndex,toIndex,amount,label='LOYER'){
+ const tile=board.querySelector(`.space[data-space-id="${spaceId}"]`);if(!tile)return;
+ const layer=document.createElement('div');layer.className='money-flow';
+ layer.innerHTML=`<div class="money-flow-label">${label}</div><div class="money-chip minus">-${shortMoneyFmt(amount)}</div>${toIndex!==null?'<div class="money-stream"><i></i><i></i><i></i><i></i><i></i></div>':''}${toIndex!==null?`<div class="money-chip plus">+${shortMoneyFmt(amount)}</div>`:''}`;
+ tile.appendChild(layer);
+ pulsePlayerCard(fromIndex,'negative');
+ if(toIndex!==null)pulsePlayerCard(toIndex,'positive');
+ setTimeout(()=>layer.remove(),1350);
+}
+function animateBankGain(spaceId,playerIndex,amount){
+ const tile=board.querySelector(`.space[data-space-id="${spaceId}"]`);if(!tile)return;
+ const burst=document.createElement('div');burst.className='cash-burst';
+ burst.innerHTML=`<span>+${shortMoneyFmt(amount)}</span><i></i><i></i><i></i><i></i><i></i><i></i>`;
+ tile.appendChild(burst);pulsePlayerCard(playerIndex,'positive');
+ setTimeout(()=>burst.remove(),1150);
+}
+function animateTurnChange(playerIndex){
+ document.querySelector('.center-face')?.classList.remove('turn-swap');
+ void document.querySelector('.center-face')?.offsetWidth;
+ document.querySelector('.center-face')?.classList.add('turn-swap');
+ pulsePlayerCard(playerIndex,'turn');
+ setTimeout(()=>document.querySelector('.center-face')?.classList.remove('turn-swap'),760);
+}
 function animatePurchase(spaceId, ownerIndex){
  const tile=board.querySelector(`.space[data-space-id="${spaceId}"]`); if(!tile) return;
  const flash=document.createElement('div'); flash.className='buy-flash'; flash.style.setProperty('--flash-color', colors[ownerIndex]);
@@ -1226,8 +1273,8 @@ endBtn.onclick=()=>{if(!rolled||gameOver||pendingRentDecision||pendingDebt)retur
  if(advanceWonderForPlayer(previous))return;
  do{current=(current+1)%players.length}while(!players[current].active);
  if(current<=previous){roundNumber++;recoverZonePressure();}
- document.getElementById('dice').dataset.face='1';status.textContent='Lance les dés.';addLog(`➡️ Tour de <b>${players[current].name}</b> · tour de table ${roundNumber}.`);refresh()};
-function startGame(){pendingRentDecision=false;pendingDebt=null;debtQueue=[];zonePressure={};roundNumber=1;resetDevStats();ensureAudio();playSfx('start');startAmbient();const n=+document.getElementById('playerCount').value;winMode=document.getElementById('winMode').value;players=[];for(let i=0;i<n;i++){players.push({name:(document.getElementById('p'+(i+1)).value||`Joueur ${i+1}`).trim(),money:200000,pos:0,props:[],beaches:0,active:true,fiscalRollsLeft:0,worksInstallmentsLeft:0,wonderMode:null,wonderTurnsLeft:0,wonderLine:null,wonderSkipCountdown:false})}spaces.forEach(s=>{s.owner=null;s.level=0;s.rent=rents[s.id];s.baseRent=rents[s.id]});current=0;rolled=false;gameOver=false;logBox.innerHTML='';document.getElementById('startScreen').classList.remove('active');document.getElementById('gameScreen').classList.add('active');addLog(`🚀 Partie lancée avec ${n} joueurs. Chacun commence avec ${moneyFmt(200000)}.`);refresh()}
+ document.getElementById('dice').dataset.face='1';status.textContent='Lance les dés.';addLog(`➡️ Tour de <b>${players[current].name}</b> · tour de table ${roundNumber}.`);refresh();animateTurnChange(current)};
+function startGame(){pendingRentDecision=false;pendingDebt=null;debtQueue=[];zonePressure={};roundNumber=1;resetDevStats();ensureAudio();playSfx('start');startAmbient();const n=+document.getElementById('playerCount').value;winMode=document.getElementById('winMode').value;players=[];for(let i=0;i<n;i++){players.push({name:(document.getElementById('p'+(i+1)).value||`Joueur ${i+1}`).trim(),money:200000,pos:0,props:[],beaches:0,active:true,fiscalRollsLeft:0,worksInstallmentsLeft:0,wonderMode:null,wonderTurnsLeft:0,wonderLine:null,wonderSkipCountdown:false})}spaces.forEach(s=>{s.owner=null;s.level=0;s.rent=rents[s.id];s.baseRent=rents[s.id]});current=0;rolled=false;gameOver=false;logBox.innerHTML='';document.getElementById('startScreen').classList.remove('active');document.getElementById('gameScreen').classList.add('active');addLog(`🚀 Partie lancée avec ${n} joueurs. Chacun commence avec ${moneyFmt(200000)}.`);refresh();setTimeout(()=>animateTurnChange(0),120)}
 document.getElementById('startBtn').onclick=startGame;
 document.getElementById('restartBtn').onclick=()=>{if(confirm('Recommencer la partie ?')){playSfx('close');document.getElementById('gameScreen').classList.remove('active');document.getElementById('startScreen').classList.add('active')}};
 
