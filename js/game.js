@@ -45,6 +45,14 @@ const shortMoneyFmt = n => {
 };
 const colors=['#22c55e','#3b82f6','#ef4444','#eab308'];
 const diceFaces=[0,1,2,3,4,5,6];
+const performanceLiteMode=(()=>{
+  const cores=navigator.hardwareConcurrency||8;
+  const smallScreen=window.innerWidth<1450;
+  const limited=cores<=4;
+  const lite=smallScreen||limited;
+  if(lite)document.documentElement.classList.add('performance-lite');
+  return lite;
+})();
 
 /* --- Moteur audio synthétique, sans fichier externe --- */
 let audioCtx=null,musicGain=null,sfxGain=null,musicTimer=null,musicStep=0;
@@ -581,42 +589,69 @@ async function animateDice(finalRoll){
  const dice=document.getElementById('dice');
  dice.classList.add('rolling');
  const reduced=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
- const duration=reduced?180:760, start=performance.now();
+ const duration=reduced?160:(performanceLiteMode?430:560), start=performance.now();
+ let tick=0;
  while(performance.now()-start<duration){
    dice.dataset.face=String(1+Math.floor(Math.random()*6));
-   playSfx('dice');
-   await sleep(reduced?90:75);
+   if((tick++%2)===0)playSfx('dice');
+   await sleep(reduced?80:(performanceLiteMode?90:82));
  }
  dice.dataset.face=String(finalRoll);
  dice.classList.remove('rolling');
  if(!reduced) await sleep(180);
 }
-async function animateTokenStep(playerIndex,from,to){
+async function animateTokenStep(playerIndex,from,to,movingPawn=null){
  const reduced=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
  const fromEl=board.querySelector(`.space[data-space-id="${from}"]`);
  const toEl=board.querySelector(`.space[data-space-id="${to}"]`);
- if(!fromEl||!toEl||reduced){players[playerIndex].pos=to;drawBoard();await sleep(reduced?30:0);return}
- const dot=document.createElement('img'); dot.className='moving-token moving-pawn'; dot.src='assets/pawns/'+pawnFiles[playerIndex%pawnFiles.length]; dot.alt='';
- const x1=fromEl.offsetLeft+fromEl.offsetWidth/2-15, y1=fromEl.offsetTop+fromEl.offsetHeight/2-15;
- const x2=toEl.offsetLeft+toEl.offsetWidth/2-15, y2=toEl.offsetTop+toEl.offsetHeight/2-15;
- dot.style.left=x1+'px';dot.style.top=y1+'px';board.appendChild(dot);
+ if(!fromEl||!toEl){players[playerIndex].pos=to;return movingPawn}
+ if(reduced){players[playerIndex].pos=to;return movingPawn}
+
+ let dot=movingPawn;
+ if(!dot){
+   dot=document.createElement('img');
+   dot.className='moving-token moving-pawn';
+   dot.src='assets/pawns/'+pawnFiles[playerIndex%pawnFiles.length];
+   dot.alt='';
+   board.appendChild(dot);
+ }
+ const x1=fromEl.offsetLeft+fromEl.offsetWidth/2-15;
+ const y1=fromEl.offsetTop+fromEl.offsetHeight/2-18;
+ const x2=toEl.offsetLeft+toEl.offsetWidth/2-15;
+ const y2=toEl.offsetTop+toEl.offsetHeight/2-18;
+
+ dot.style.left=x1+'px';
+ dot.style.top=y1+'px';
+ dot.style.transform='translate3d(0,0,0)';
+ const duration=performanceLiteMode?150:190;
  const anim=dot.animate([
-   {transform:'translate(0,0) scale(1)'},
-   {transform:`translate(${x2-x1}px,${y2-y1}px) scale(1.26)`}
- ],{duration:260,easing:'cubic-bezier(.2,.8,.2,1)',fill:'forwards'});
+   {transform:'translate3d(0,0,0) scale(1)'},
+   {transform:`translate3d(${x2-x1}px,${y2-y1}px,0) scale(1.12)`}
+ ],{duration,easing:'cubic-bezier(.22,.78,.24,1)',fill:'forwards'});
  try{await anim.finished}catch(e){}
- dot.remove(); players[playerIndex].pos=to; drawBoard(); playSfx('step'); await sleep(45);
+ dot.style.left=x2+'px';
+ dot.style.top=y2+'px';
+ dot.style.transform='translate3d(0,0,0)';
+ players[playerIndex].pos=to;
+ playSfx('step');
+ await sleep(performanceLiteMode?8:18);
+ return dot;
 }
 async function movePlayer(steps){
  const p=players[current],idx=current,initial=p.pos;
  passStart(p,steps);
+ const staticPawns=board.querySelectorAll(`.space[data-space-id="${initial}"] .board-pawn`);
+ staticPawns.forEach(el=>el.style.opacity='0');
+ let movingPawn=null;
  for(let n=0;n<steps;n++){
    const from=p.pos,to=(from+1)%36;
-   await animateTokenStep(idx,from,to);
+   movingPawn=await animateTokenStep(idx,from,to,movingPawn);
  }
+ if(movingPawn)movingPawn.remove();
+ drawBoard();
  addLog(`🎲 <b>${p.name}</b> avance de ${steps} case(s) de <b>${spaces[initial].name}</b> vers <b>${spaces[p.pos].name}</b>.`);
  animateLanding(p.pos);
- await sleep(260);
+ await sleep(performanceLiteMode?90:160);
  resolveSpace();
 }
 function resolveSpace(){const p=players[current],s=spaces[p.pos];
