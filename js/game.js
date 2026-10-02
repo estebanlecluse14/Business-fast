@@ -386,21 +386,31 @@ function drawBoard(){
       return;
     }
 
-    const icon={start:'🚀',event:'⚡',global:'🌍',bank:'🏦',jail:'🚔'}[s.type]||'';
-    const districtBadge=`<div class="theme"><span class="theme-emoji">${s.theme?.emoji||''}</span><span>${s.theme?.label||'Case'}</span></div>`;
-    let mainInfo='';
-    if(s.type==='start')mainInfo=`<div class="compact-main compact-buy">+ ${shortMoneyFmt(30000)}</div>`;
-    else if(s.type==='bank')mainInfo=`<div class="compact-main compact-buy">+ ${shortMoneyFmt(25000)}</div>`;
-    else if(s.type==='jail')mainInfo=`<div class="compact-main compact-buy">Amende ${shortMoneyFmt(20000)}</div>`;
-    else if(s.type==='event')mainInfo=`<div class="compact-main compact-buy">Effet surprise</div>`;
-    else if(s.type==='global')mainInfo=`<div class="compact-main compact-buy">Tous les joueurs</div>`;
-
-    d.innerHTML=`<div class="tile-face">
-      <div class="tile-top">
-        <div class="name">${icon} ${s.name}</div>
-        ${districtBadge}
+    const specialAsset={start:'start',event:'event',global:'global',bank:'bank',jail:'jail'}[s.type]||'';
+    const specialEffect={
+      start:'+30k au passage',
+      bank:'+25k',
+      jail:'Amende 20k',
+      event:'Effet surprise',
+      global:'Tous les joueurs'
+    }[s.type]||'';
+    const specialKicker={
+      start:'BONUS',
+      bank:'FINANCE',
+      jail:'RISQUE',
+      event:'CARTE',
+      global:'MONDE'
+    }[s.type]||'';
+    d.innerHTML=`<div class="tile-face special-layout">
+      <div class="special-art-wrap">
+        <img class="special-art" src="assets/special/${specialAsset}.svg" alt="" loading="eager">
+        <div class="special-gloss"></div>
       </div>
-      <div class="tile-bottom">${mainInfo}</div>
+      <div class="special-copy">
+        <div class="special-kicker">${specialKicker}</div>
+        <div class="special-name">${s.name}</div>
+        <div class="special-effect">${specialEffect}</div>
+      </div>
       <div class="tokens">${tokensHtml}</div>
     </div>`;
     board.appendChild(d);
