@@ -3,14 +3,14 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Business Fast V0.43</title>
+<title>Business Fast V0.44</title>
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 <section id="startScreen" class="screen active">
   <div class="start-wrap">
     <h1 class="logo">BUSINESS <span>FAST</span></h1>
-    <div class="subtitle">V0.43 — animations légères & rendu net</div>
+    <div class="subtitle">V0.44 — UX des tours</div>
     <div class="card">
       <div class="setup-grid">
         <div class="field"><label>Nombre de joueurs</label><select id="playerCount"><option>2</option><option>3</option><option selected>4</option></select></div>
@@ -83,7 +83,23 @@
 </div></div></div>
   <aside class="sidebar">
     <div class="panel player-panel"><div class="players-panel-title">JOUEURS</div><div id="players"></div></div>
-    <div class="panel action-panel"><div class="panel-kicker">COMMANDES</div><h3>Tour de jeu</h3><div class="actions"><button id="rollBtn" class="roll"><span class="action-icon">◆</span><span>Lancer les dés</span></button><button id="buyBtn" class="buy" disabled><span class="action-icon">€</span><span>Acheter</span></button><button id="buildBtn" class="build" disabled><span class="action-icon">▲</span><span>Améliorer</span></button><button id="wonderBtn" class="wonder-action" disabled><span class="action-icon">★</span><span>Construire une Merveille</span></button><button id="endBtn" class="end" disabled><span class="action-icon">→</span><span>Fin du tour</span></button></div><div id="status" class="turn-status">Lance les dés.</div></div>
+    <div class="panel action-panel">
+      <div class="panel-kicker">COMMANDES</div>
+      <div class="turn-head"><h3>Tour de jeu</h3><span id="turnPhase" class="turn-phase">À JOUER</span></div>
+      <div id="turnGuide" class="turn-guide">
+        <div class="turn-guide-label">ACTION CONSEILLÉE</div>
+        <div id="turnGuideMain" class="turn-guide-main">Lance les dés</div>
+        <div id="turnGuideDetail" class="turn-guide-detail">Commence ton tour en lançant les dés.</div>
+      </div>
+      <div class="actions">
+        <button id="rollBtn" class="roll"><span class="action-icon">◆</span><span class="action-copy"><b>Lancer les dés</b><small id="rollHint">Commencer le tour</small></span></button>
+        <button id="buyBtn" class="buy" disabled><span class="action-icon">€</span><span class="action-copy"><b id="buyLabel">Acheter</b><small id="buyHint">Aucune propriété disponible</small></span></button>
+        <button id="buildBtn" class="build" disabled><span class="action-icon">▲</span><span class="action-copy"><b id="buildLabel">Améliorer</b><small id="buildHint">Aucune amélioration disponible</small></span></button>
+        <button id="wonderBtn" class="wonder-action" disabled><span class="action-icon">★</span><span class="action-copy"><b>Construire une Merveille</b><small id="wonderHint">Quartier complet requis</small></span></button>
+        <button id="endBtn" class="end" disabled><span class="action-icon">→</span><span class="action-copy"><b>Fin du tour</b><small id="endHint">Lance d'abord les dés</small></span></button>
+      </div>
+      <div id="status" class="turn-status">Lance les dés.</div>
+    </div>
     <div class="panel utility-panel"><div class="panel-kicker">OUTILS</div><div class="legend"><span class="pill">Plage</span><span class="pill">Événement</span><span class="pill">Mondial</span><span class="pill">Banque</span><span class="pill">Prison</span><span class="pill">Bâtiments</span></div><button id="journalBtn" class="secondary" style="width:100%">📜 Ouvrir le journal</button><button id="settingsBtn" class="settings-btn">⚙️ Paramètres audio</button><div style="margin-top:10px"><button id="devToggle" class="secondary" style="width:100%">🧪 Mode développeur</button></div><div style="margin-top:10px"><button id="restartBtn" class="secondary danger" style="width:100%">Recommencer</button></div></div>
     <div id="devPanel" class="panel dev-panel" style="display:none">
       <div class="dev-head"><h3>🧪 Mode développeur</h3><span id="devState" class="dev-chip">LIVE</span></div>
@@ -140,6 +156,9 @@
     </div>
     <div class="updates-list">
       <article class="update-item current">
+        <div class="update-version">V0.44</div><div class="update-copy"><div class="update-title">UX des tours <span class="update-tag minor">Confort</span></div><p>Le tour devient beaucoup plus clair : action recommandée, phase en cours, détails utiles, prix directement dans les boutons, raisons de blocage et meilleure mise en avant du joueur actif.</p></div>
+      </article>
+      <article class="update-item">
         <div class="update-version">V0.43</div><div class="update-copy"><div class="update-title">Animations légères & rendu net <span class="update-tag minor">Optimisation</span></div><p>Deuxième passe performance : suppression des transformations 3D qui rendaient le plateau flou, animations sans zoom, suppression des effets continus coûteux et priorité au rendu SVG net à l'écran.</p></div>
       </article>
       <article class="update-item">
