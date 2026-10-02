@@ -4746,3 +4746,404 @@ body{
   .player-panel .panel-pawn{width:22px!important;height:29px!important}
 }
 
+
+
+/* === V0.38 PASS 4 : UI premium + dé graphique + BUSINESS CITY === */
+
+/* ---------- PANNEAUX GLOBAUX ---------- */
+.sidebar{
+  gap:12px!important;
+}
+.sidebar .panel{
+  position:relative!important;
+  overflow:hidden!important;
+  background:
+    linear-gradient(180deg,rgba(32,44,60,.97),rgba(20,29,41,.97))!important;
+  border:1px solid rgba(255,255,255,.09)!important;
+  border-radius:18px!important;
+  box-shadow:
+    0 18px 42px rgba(15,23,42,.20),
+    inset 0 1px 0 rgba(255,255,255,.05)!important;
+  backdrop-filter:blur(14px)!important
+}
+.sidebar .panel::before{
+  content:'';
+  position:absolute;
+  left:0;right:0;top:0;
+  height:2px;
+  background:linear-gradient(90deg,transparent,rgba(125,211,252,.75),transparent);
+  opacity:.65
+}
+.panel-kicker{
+  font-size:8px;
+  font-weight:1000;
+  letter-spacing:.20em;
+  color:#7dd3fc;
+  margin-bottom:4px
+}
+.sidebar h3{
+  margin:0 0 11px!important;
+  font-size:17px!important;
+  color:#f8fafc!important;
+  letter-spacing:-.02em
+}
+
+/* panneau joueurs */
+.sidebar .player-panel{
+  width:214px!important;
+  padding:13px!important;
+  background:
+    radial-gradient(circle at 30% 0%,rgba(56,189,248,.09),transparent 30%),
+    linear-gradient(180deg,rgba(28,39,54,.98),rgba(14,22,32,.98))!important
+}
+.players-panel-title{
+  color:#d8f3ff!important;
+  font-size:10px!important;
+  letter-spacing:.19em!important;
+  margin-bottom:10px!important
+}
+.player-panel .player{
+  position:relative;
+  padding:9px 9px!important;
+  border-radius:13px!important;
+  background:
+    linear-gradient(180deg,rgba(255,255,255,.065),rgba(255,255,255,.025))!important;
+  border:1px solid rgba(255,255,255,.065)!important;
+  transition:transform .18s ease,border-color .18s ease,background .18s ease!important
+}
+.player-panel .player::after{
+  content:'';
+  position:absolute;
+  left:0;top:8px;bottom:8px;
+  width:3px;
+  border-radius:0 999px 999px 0;
+  background:transparent
+}
+.player-panel .player.active{
+  transform:translateX(3px);
+  background:
+    linear-gradient(90deg,rgba(34,197,94,.13),rgba(255,255,255,.04))!important;
+  border-color:rgba(74,222,128,.32)!important;
+  box-shadow:0 7px 18px rgba(15,23,42,.12)!important
+}
+.player-panel .player.active::after{background:#4ade80}
+.player-panel .pname{
+  font-size:13px!important;
+  font-weight:1000!important
+}
+.player-panel .pmoney{
+  font-size:9px!important;
+  line-height:1.3!important;
+  color:#aebdca!important
+}
+
+/* panneau actions */
+.action-panel{
+  padding:14px!important;
+}
+.actions{
+  display:grid!important;
+  grid-template-columns:1fr 1fr!important;
+  gap:8px!important
+}
+.actions button{
+  position:relative!important;
+  min-height:48px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:flex-start!important;
+  gap:8px!important;
+  border-radius:12px!important;
+  padding:8px 10px!important;
+  font-size:10px!important;
+  line-height:1.1!important;
+  text-align:left!important;
+  overflow:hidden!important;
+  border:1px solid rgba(255,255,255,.09)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 6px 13px rgba(0,0,0,.10)!important
+}
+.actions button::after{
+  content:'';
+  position:absolute;
+  left:-40%;top:-20%;
+  width:32%;height:140%;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.18),transparent);
+  transform:skewX(-18deg);
+  transition:left .32s ease
+}
+.actions button:not(:disabled):hover::after{left:118%}
+.action-icon{
+  width:23px;height:23px;
+  flex:0 0 23px;
+  border-radius:8px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(255,255,255,.15);
+  font-size:12px;
+  font-weight:1000
+}
+#rollBtn{
+  grid-column:1/-1!important;
+  justify-content:center!important;
+  min-height:58px!important;
+  font-size:14px!important;
+  background:linear-gradient(135deg,#16a34a,#22c55e)!important;
+  border-color:rgba(134,239,172,.35)!important;
+  box-shadow:0 8px 18px rgba(22,163,74,.20),inset 0 1px 0 rgba(255,255,255,.24)!important
+}
+#rollBtn .action-icon{background:rgba(255,255,255,.20)}
+#buyBtn{background:linear-gradient(135deg,#0369a1,#0284c7)!important}
+#buildBtn{background:linear-gradient(135deg,#7c3aed,#8b5cf6)!important}
+#wonderBtn{
+  grid-column:1/-1!important;
+  background:linear-gradient(135deg,#a16207,#d97706)!important
+}
+#endBtn{
+  grid-column:1/-1!important;
+  justify-content:center!important;
+  background:linear-gradient(135deg,#334155,#475569)!important
+}
+.actions button:disabled{
+  filter:saturate(.35) brightness(.72)!important;
+  opacity:.48!important;
+  box-shadow:none!important
+}
+.turn-status{
+  margin-top:10px!important;
+  padding:9px 10px!important;
+  border-radius:11px!important;
+  background:rgba(2,132,199,.10)!important;
+  border:1px solid rgba(56,189,248,.15)!important;
+  color:#d7eef8!important;
+  font-size:10px!important;
+  line-height:1.3!important
+}
+
+/* panneau outils */
+.utility-panel .legend{
+  display:grid!important;
+  grid-template-columns:1fr 1fr!important;
+  gap:6px!important;
+  margin-bottom:10px!important
+}
+.utility-panel .legend .pill{
+  text-align:center!important;
+  border-radius:9px!important;
+  background:rgba(255,255,255,.055)!important;
+  border:1px solid rgba(255,255,255,.06)!important;
+  padding:6px 5px!important;
+  color:#cbd5e1!important
+}
+.utility-panel button{
+  border-radius:11px!important
+}
+
+/* ---------- BUSINESS CITY CENTRAL ---------- */
+.center-face{
+  width:235px!important;
+  padding:0!important;
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:center!important;
+  justify-content:center!important
+}
+.brand-pill{display:none!important}
+.city-emblem{
+  position:relative;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  min-width:164px;
+  padding:9px 22px 10px;
+  margin-bottom:5px;
+  border-radius:17px;
+  background:
+    linear-gradient(180deg,rgba(19,41,51,.91),rgba(15,29,40,.91));
+  border:1px solid rgba(255,255,255,.18);
+  box-shadow:
+    0 9px 20px rgba(34,68,80,.18),
+    inset 0 1px 0 rgba(255,255,255,.12);
+  backdrop-filter:blur(8px)
+}
+.city-emblem::before{
+  content:'';
+  position:absolute;
+  inset:5px;
+  border:1px solid rgba(125,211,252,.20);
+  border-radius:12px;
+  pointer-events:none
+}
+.emblem-top{
+  font-size:8px;
+  line-height:1;
+  letter-spacing:.28em;
+  color:#7dd3fc;
+  font-weight:1000;
+  padding-left:.28em
+}
+.emblem-main{
+  margin-top:2px;
+  font-size:24px;
+  line-height:1;
+  letter-spacing:.16em;
+  padding-left:.16em;
+  font-weight:1000;
+  color:#fff;
+  text-shadow:0 2px 8px rgba(56,189,248,.18)
+}
+.turn-chip{
+  margin-bottom:6px;
+  padding:4px 8px;
+  border-radius:999px;
+  background:rgba(255,255,255,.64);
+  border:1px solid rgba(255,255,255,.76);
+  color:#49656a;
+  font-size:6px;
+  font-weight:1000;
+  letter-spacing:.16em
+}
+
+/* ---------- DÉ CENTRAL EN CSS ---------- */
+.dice-dock{
+  width:112px!important;
+  height:112px!important;
+  border-radius:29px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  background:
+    radial-gradient(circle at 50% 38%,rgba(255,255,255,.28),transparent 55%),
+    rgba(255,255,255,.16)!important;
+  border:1px solid rgba(255,255,255,.24)!important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.24),
+    0 12px 24px rgba(30,66,72,.14)!important;
+  backdrop-filter:blur(7px)
+}
+.premium-die{
+  position:relative!important;
+  width:76px!important;
+  height:76px!important;
+  border-radius:18px!important;
+  background:
+    radial-gradient(circle at 30% 22%,rgba(255,255,255,.98),rgba(255,255,255,.88) 44%,#dce5eb 100%)!important;
+  border:1px solid rgba(71,85,105,.18)!important;
+  box-shadow:
+    0 8px 0 #b8c5cd,
+    0 13px 20px rgba(31,54,66,.25),
+    inset 0 2px 0 #fff,
+    inset -3px -3px 9px rgba(80,103,118,.10)!important;
+  transform:rotate(-5deg);
+  transition:transform .18s ease!important;
+  font-size:0!important
+}
+.premium-die::after{
+  content:'';
+  position:absolute;
+  inset:6px;
+  border-radius:13px;
+  border:1px solid rgba(255,255,255,.72)
+}
+.premium-die .pip{
+  position:absolute;
+  width:11px;height:11px;
+  border-radius:50%;
+  background:radial-gradient(circle at 35% 30%,#3d5260,#101820 75%);
+  box-shadow:inset 0 1px 1px rgba(255,255,255,.20),0 1px 1px rgba(255,255,255,.65);
+  opacity:0
+}
+.p1{left:14px;top:14px}.p2{left:32px;top:14px}.p3{right:14px;top:14px}
+.p4{left:14px;top:32px}.p5{left:32px;top:32px}.p6{right:14px;top:32px}
+.p7{left:14px;bottom:14px}.p8{left:32px;bottom:14px}.p9{right:14px;bottom:14px}
+
+/* faces */
+.premium-die[data-face="1"] .p5{opacity:1}
+.premium-die[data-face="2"] .p1,.premium-die[data-face="2"] .p9{opacity:1}
+.premium-die[data-face="3"] .p1,.premium-die[data-face="3"] .p5,.premium-die[data-face="3"] .p9{opacity:1}
+.premium-die[data-face="4"] .p1,.premium-die[data-face="4"] .p3,.premium-die[data-face="4"] .p7,.premium-die[data-face="4"] .p9{opacity:1}
+.premium-die[data-face="5"] .p1,.premium-die[data-face="5"] .p3,.premium-die[data-face="5"] .p5,.premium-die[data-face="5"] .p7,.premium-die[data-face="5"] .p9{opacity:1}
+.premium-die[data-face="6"] .p1,.premium-die[data-face="6"] .p3,.premium-die[data-face="6"] .p4,.premium-die[data-face="6"] .p6,.premium-die[data-face="6"] .p7,.premium-die[data-face="6"] .p9{opacity:1}
+
+.premium-die.rolling{
+  animation:diceSpinPremium .18s linear infinite!important
+}
+@keyframes diceSpinPremium{
+  0%{transform:rotate(-6deg) translateY(0) scale(1)}
+  25%{transform:rotate(7deg) translateY(-7px) scale(1.04)}
+  50%{transform:rotate(13deg) translateY(-2px) scale(.98)}
+  75%{transform:rotate(-9deg) translateY(-8px) scale(1.03)}
+  100%{transform:rotate(-6deg) translateY(0) scale(1)}
+}
+
+#turnText{
+  margin:8px 0 2px!important;
+  font-size:18px!important;
+  font-weight:1000!important;
+  color:#fff!important;
+  text-shadow:0 3px 9px rgba(37,73,76,.24)!important
+}
+
+/* pions centraux sous le nom du tour */
+#centerTokens{
+  margin-top:2px!important
+}
+
+/* ---------- DEPLACEMENT : VRAI PION ---------- */
+.moving-pawn{
+  position:absolute!important;
+  width:31px!important;
+  height:40px!important;
+  object-fit:contain!important;
+  z-index:160!important;
+  pointer-events:none!important;
+  filter:drop-shadow(0 6px 5px rgba(15,23,42,.30))!important
+}
+
+/* skyline plus spectaculaire */
+.center-skyline{
+  width:148px!important;
+  height:95px!important;
+  gap:6px!important
+}
+.center-skyline .cs{
+  width:25px!important;
+  box-shadow:
+    inset 1px 0 0 rgba(255,255,255,.58),
+    inset -2px 0 0 rgba(65,87,98,.10),
+    0 4px 7px rgba(45,67,76,.10)!important
+}
+.center-skyline .c1{height:55px!important}
+.center-skyline .c2{height:86px!important}
+.center-skyline .c3{height:69px!important}
+.center-skyline .c4{height:47px!important}
+.center-skyline::after{
+  content:'';
+  position:absolute;
+  left:8%;right:8%;bottom:-5px;
+  height:10px;
+  border-radius:50%;
+  background:rgba(35,70,76,.12);
+  filter:blur(3px)
+}
+
+/* lumière douce sur la place centrale */
+.center-plaza::after{
+  content:'';
+  position:absolute;
+  inset:18%;
+  border-radius:50%;
+  background:radial-gradient(circle,rgba(255,255,255,.42),rgba(255,255,255,.08) 52%,transparent 70%);
+  animation:plazaGlow 3.8s ease-in-out infinite
+}
+@keyframes plazaGlow{
+  0%,100%{opacity:.55;transform:scale(.92)}
+  50%{opacity:.9;transform:scale(1.04)}
+}
+
+/* largeur droite légèrement optimisée */
+.sidebar{
+  width:264px!important
+}
+
