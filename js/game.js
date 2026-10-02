@@ -45,14 +45,8 @@ const shortMoneyFmt = n => {
 };
 const colors=['#22c55e','#3b82f6','#ef4444','#eab308'];
 const diceFaces=[0,1,2,3,4,5,6];
-const performanceLiteMode=(()=>{
-  const cores=navigator.hardwareConcurrency||8;
-  const smallScreen=window.innerWidth<1450;
-  const limited=cores<=4;
-  const lite=smallScreen||limited;
-  if(lite)document.documentElement.classList.add('performance-lite');
-  return lite;
-})();
+const performanceLiteMode=true;
+document.documentElement.classList.add('performance-lite','crisp-render');
 
 /* --- Moteur audio synthétique, sans fichier externe --- */
 let audioCtx=null,musicGain=null,sfxGain=null,musicTimer=null,musicStep=0;
@@ -589,12 +583,12 @@ async function animateDice(finalRoll){
  const dice=document.getElementById('dice');
  dice.classList.add('rolling');
  const reduced=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
- const duration=reduced?160:(performanceLiteMode?430:560), start=performance.now();
+ const duration=reduced?120:320, start=performance.now();
  let tick=0;
  while(performance.now()-start<duration){
    dice.dataset.face=String(1+Math.floor(Math.random()*6));
    if((tick++%2)===0)playSfx('dice');
-   await sleep(reduced?80:(performanceLiteMode?90:82));
+   await sleep(reduced?70:88);
  }
  dice.dataset.face=String(finalRoll);
  dice.classList.remove('rolling');
@@ -623,18 +617,18 @@ async function animateTokenStep(playerIndex,from,to,movingPawn=null){
  dot.style.left=x1+'px';
  dot.style.top=y1+'px';
  dot.style.transform='translate3d(0,0,0)';
- const duration=performanceLiteMode?150:190;
+ const duration=125;
  const anim=dot.animate([
-   {transform:'translate3d(0,0,0) scale(1)'},
-   {transform:`translate3d(${x2-x1}px,${y2-y1}px,0) scale(1.12)`}
- ],{duration,easing:'cubic-bezier(.22,.78,.24,1)',fill:'forwards'});
+   {transform:'translate3d(0,0,0)'},
+   {transform:`translate3d(${x2-x1}px,${y2-y1}px,0)`}
+ ],{duration,easing:'linear',fill:'forwards'});
  try{await anim.finished}catch(e){}
  dot.style.left=x2+'px';
  dot.style.top=y2+'px';
  dot.style.transform='translate3d(0,0,0)';
  players[playerIndex].pos=to;
- playSfx('step');
- await sleep(performanceLiteMode?8:18);
+ if(to%2===0)playSfx('step');
+ await sleep(4);
  return dot;
 }
 async function movePlayer(steps){
@@ -651,7 +645,7 @@ async function movePlayer(steps){
  drawBoard();
  addLog(`🎲 <b>${p.name}</b> avance de ${steps} case(s) de <b>${spaces[initial].name}</b> vers <b>${spaces[p.pos].name}</b>.`);
  animateLanding(p.pos);
- await sleep(performanceLiteMode?90:160);
+ await sleep(70);
  resolveSpace();
 }
 function resolveSpace(){const p=players[current],s=spaces[p.pos];
