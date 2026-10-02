@@ -5361,14 +5361,14 @@ body{
 }
 
 /* EVENTS CINEMATIQUES */
-#modal.event-positive .modal-box,
-#modal.event-negative .modal-box,
-#modal.event-neutral .modal-box{
+#modal.event-positive .box,
+#modal.event-negative .box,
+#modal.event-neutral .box{
   animation:eventModalInV039 .52s cubic-bezier(.18,.86,.28,1.12)
 }
-#modal.event-positive .modal-box{box-shadow:0 24px 80px rgba(22,163,74,.25)!important}
-#modal.event-negative .modal-box{box-shadow:0 24px 80px rgba(220,38,38,.23)!important}
-#modal.event-neutral .modal-box{box-shadow:0 24px 80px rgba(2,132,199,.22)!important}
+#modal.event-positive .box{box-shadow:0 24px 80px rgba(22,163,74,.25)!important}
+#modal.event-negative .box{box-shadow:0 24px 80px rgba(220,38,38,.23)!important}
+#modal.event-neutral .box{box-shadow:0 24px 80px rgba(2,132,199,.22)!important}
 .event-result{
   position:relative;
   overflow:hidden
@@ -5846,6 +5846,86 @@ body{
   .wonder-crane-light,.wonder-step.current{
     animation-duration:.01ms!important;
     animation-iteration-count:1!important
+  }
+}
+
+
+
+/* === V0.41 DEBUG & STABILITY OVERRIDES === */
+
+/* V0.39 utilisait .modal-box alors que le DOM réel utilise .box.
+   Les règles ont été corrigées ci-dessus ; ce bloc garantit le rendu final. */
+#modal.event-positive .box,
+#modal.event-negative .box,
+#modal.event-neutral .box{
+  animation:eventModalInV039 .52s cubic-bezier(.18,.86,.28,1.12)!important
+}
+#modal.event-positive .box{box-shadow:0 24px 80px rgba(22,163,74,.25)!important}
+#modal.event-negative .box{box-shadow:0 24px 80px rgba(220,38,38,.23)!important}
+#modal.event-neutral .box{box-shadow:0 24px 80px rgba(2,132,199,.22)!important}
+
+/* éviter que d'anciennes règles de pion rond interfèrent avec les SVG */
+.moving-pawn{
+  border-radius:0!important;
+  border:0!important;
+  background:transparent!important;
+  box-shadow:none!important
+}
+.moving-pawn::before,
+.moving-pawn::after{
+  display:none!important;
+  content:none!important
+}
+
+/* centre toujours droit et lisible, quelles que soient les anciennes couches CSS */
+.center-face{
+  position:absolute!important;
+  left:50%!important;
+  top:49%!important;
+  inset:auto!important;
+  transform:translate(-50%,-50%)!important;
+  transform-origin:center!important
+}
+.center-face.turn-swap{
+  animation:centerTurnSwapV039 .72s cubic-bezier(.18,.86,.26,1)!important
+}
+
+/* les overlays ne doivent jamais rester cliquables ou capturer le focus après disparition */
+.cinematic-overlay{
+  pointer-events:none!important
+}
+.cinematic-overlay[aria-hidden="true"]{
+  visibility:hidden!important;
+  opacity:0!important
+}
+
+/* garde-fous layout pour la grosse zone Merveille */
+.wonder-site.live{
+  max-width:72%!important
+}
+.wonder-live-card,
+.wonder-live-copy{
+  min-width:0!important
+}
+.wonder-live-title,
+.wonder-live-sub{
+  overflow-wrap:anywhere!important
+}
+
+/* boutons désactivés : aucun hover parasite */
+.actions button:disabled,
+.actions button:disabled:hover{
+  transform:none!important;
+  cursor:not-allowed!important
+}
+
+@media(max-width:1250px){
+  .center-face{
+    top:49%!important;
+  }
+  .wonder-site.live{
+    width:330px!important;
+    max-width:70%!important
   }
 }
 
