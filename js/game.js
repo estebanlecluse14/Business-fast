@@ -239,6 +239,8 @@ function refreshDevStats(){
 }
 const board=document.getElementById('board'), playerBox=document.getElementById('players'), logBox=document.getElementById('log'), status=document.getElementById('status');
 const rollBtn=document.getElementById('rollBtn'),buyBtn=document.getElementById('buyBtn'),buildBtn=document.getElementById('buildBtn'),endBtn=document.getElementById('endBtn'),wonderBtn=document.getElementById('wonderBtn');
+const turnPhase=document.getElementById('turnPhase'),turnGuide=document.getElementById('turnGuide'),turnGuideMain=document.getElementById('turnGuideMain'),turnGuideDetail=document.getElementById('turnGuideDetail');
+const rollHint=document.getElementById('rollHint'),buyLabel=document.getElementById('buyLabel'),buyHint=document.getElementById('buyHint'),buildLabel=document.getElementById('buildLabel'),buildHint=document.getElementById('buildHint'),wonderHint=document.getElementById('wonderHint'),endHint=document.getElementById('endHint');
 
 
 function ownedWonderDistrict(playerIndex){
@@ -463,7 +465,7 @@ function renderWonderSite(){
 function renderPlayers(){
  playerBox.innerHTML=players.map((p,i)=>`<div class="player ${i===current&&p.active?'active':''}">${pawnVisual(i,p.name,'panel-pawn')}<div class="pmeta"><div class="pname">${p.name}${!p.active?' 💀':''}</div><div class="pmoney">${moneyFmt(p.money)} · ${p.props.length} biens · ${p.beaches} plage(s)</div>${p.wonderMode&&p.active?`<div class="wonder-progress">🏛️ ${p.wonderLine} · ${p.wonderTurnsLeft} tour(s) · ${p.wonderMode==='communist'?'collective':'accélérée'}</div>`:''}</div></div>`).join('');
  const activeWonder=players.find(p=>p.active&&p.wonderMode&&p.wonderTurnsLeft>0);
- document.getElementById('turnText').innerHTML=gameOver?'Partie terminée':`Tour de ${players[current]?.name||''}${communistWonderActive()?'<div class="global-rent-alert">☭ Construction collective : tous les loyers -65 %</div>':activeWonder?`<div class="wonder-banner">🏛️ ${activeWonder.name} construit une Merveille · ${activeWonder.wonderTurnsLeft} tour(s)</div>`:''}`;
+ document.getElementById('turnText').innerHTML=gameOver?'Partie terminée':`<span class="turn-player-name">${players[current]?.name||''}</span><small class="turn-round">Tour de table ${roundNumber}</small>${communistWonderActive()?'<div class="global-rent-alert">☭ Construction collective : tous les loyers -65 %</div>':activeWonder?`<div class="wonder-banner">🏛️ ${activeWonder.name} · Merveille dans ${activeWonder.wonderTurnsLeft} tour(s)</div>`:''}`;
  document.getElementById('centerTokens').innerHTML=players.filter(p=>p.active).map(p=>pawnVisual(players.indexOf(p),p.name,'center-pawn')).join('');
  renderWonderSite();
 }
@@ -576,7 +578,93 @@ function upgradeProperty(spaceId){
 }
 document.getElementById('modalOk').onclick=closeModal;
 function refresh(){drawBoard();renderPlayers();updateActions();refreshDevStats();renderWonderSite();}
-function updateActions(){if(gameOver||animating||pendingDebt){[rollBtn,buyBtn,buildBtn,endBtn,wonderBtn].forEach(b=>b.disabled=true);return} const p=players[current],s=spaces[p.pos]; rollBtn.disabled=rolled; buyBtn.disabled=!rolled||!['property','beach'].includes(s.type)||s.owner!==null||p.money<purchasePrice(s); buildBtn.disabled=!rolled||s.type!=='property'||s.owner!==current||s.level>=3||p.money<upgradeCosts[s.level+1]; endBtn.disabled=!rolled; wonderBtn.disabled=!canLaunchWonder(current)||pendingRentDecision;}
+function setActionState(btn,enabled,reason=''){
+ btn.disabled=!enabled;
+ btn.title=enabled?'':reason;
+ btn.classList.toggle('recommended',false);
+}
+function setTurnGuide(phase,main,detail,kind='neutral'){
+ if(turnPhase)turnPhase.textContent=phase;
+ if(turnGuideMain)turnGuideMain.textContent=main;
+ if(turnGuideDetail)turnGuideDetail.textContent=detail;
+ if(turnGuide){
+   turnGuide.classList.remove('guide-roll','guide-buy','guide-build','guide-wonder','guide-end','guide-wait','guide-danger');
+   turnGuide.classList.add('guide-'+kind);
+ }
+}
+function updateActions(){
+ const all=[rollBtn,buyBtn,buildBtn,endBtn,wonderBtn];
+ all.forEach(b=>b.classList.remove('recommended'));
+ if(!players[current]){
+   all.forEach(b=>b.disabled=true);
+   setTurnGuide('EN ATTENTE','Partie non lancée','Choisis les joueurs puis lance la partie.','wait');
+   return;
+ }
+ const p=players[current],s=spaces[p.pos];
+ const isProperty=['property','beach'].includes(s.type);
+ const price=isProperty?purchasePrice(s):0;
+ const nextCost=s.type==='property'&&s.level<3?upgradeCosts[s.level+1]:0;
+ const district=ownedWonderDistrict(current);
+
+ if(buyLabel)buyLabel.textContent=isProperty&&s.owner===null?`Acheter · ${shortMoneyFmt(price)}`:'Acheter';
+ if(buildLabel)buildLabel.textContent=s.type==='property'&&s.owner===current&&s.level<3?`Améliorer · ${shortMoneyFmt(nextCost)}`:'Améliorer';
+ if(rollHint)rollHint.textContent=rolled?'Déjà lancé':'Commencer le tour';
+
+ if(gameOver){
+   all.forEach(b=>b.disabled=true);
+   setTurnGuide('TERMINÉ','Partie terminée','Consulte le résultat ou recommence une partie.','wait');
+   return;
+ }
+ if(pendingDebt){
+   all.forEach(b=>b.disabled=true);
+   setTurnGuide('DETTE','Résous la dette','Vends des biens ou règle la somme demandée avant de continuer.','danger');
+   return;
+ }
+ if(pendingRentDecision){
+   all.forEach(b=>b.disabled=true);
+   setTurnGuide('LOYER','Choisis dans la fenêtre','Paie le loyer ou rachète la propriété pour poursuivre.','danger');
+   return;
+ }
+ if(animating){
+   all.forEach(b=>b.disabled=true);
+   setTurnGuide('DÉPLACEMENT','Déplacement en cours','Le pion rejoint sa nouvelle case.','wait');
+   return;
+ }
+
+ const canBuy=rolled&&isProperty&&s.owner===null&&p.money>=price;
+ const canBuild=rolled&&s.type==='property'&&s.owner===current&&s.level<3&&p.money>=nextCost;
+ const canWonder=canLaunchWonder(current);
+ const canEnd=rolled;
+
+ setActionState(rollBtn,!rolled,rolled?'Les dés ont déjà été lancés ce tour.':'');
+ setActionState(buyBtn,canBuy,!rolled?'Lance les dés d’abord.':!isProperty?'Cette case ne peut pas être achetée.':s.owner!==null?'Cette propriété appartient déjà à un joueur.':p.money<price?`Il manque ${moneyFmt(price-p.money)}.`:'');
+ setActionState(buildBtn,canBuild,!rolled?'Lance les dés d’abord.':s.type!=='property'?'Seules les propriétés classiques peuvent être améliorées.':s.owner!==current?'Tu dois posséder cette propriété.':s.level>=3?'Niveau maximum atteint.':p.money<nextCost?`Il manque ${moneyFmt(nextCost-p.money)}.`:'');
+ setActionState(wonderBtn,canWonder, p.wonderMode?'Une Merveille est déjà en construction.':district?'Merveille déjà engagée ou indisponible.':'Contrôle les 3 propriétés d’un même quartier.');
+ setActionState(endBtn,canEnd,!rolled?'Lance les dés avant de terminer le tour.':'');
+
+ if(buyHint)buyHint.textContent=canBuy?`${s.name} · ${moneyFmt(price)}`:(!rolled?'Après le lancer':isProperty&&s.owner===null&&p.money<price?'Fonds insuffisants':s.owner!==null?'Déjà possédée':'Indisponible ici');
+ if(buildHint)buildHint.textContent=canBuild?`${s.name} → niveau ${s.level+1}`:(!rolled?'Après le lancer':s.type==='property'&&s.owner===current&&s.level>=3?'Niveau maximum':s.type==='property'&&s.owner===current&&p.money<nextCost?'Fonds insuffisants':'Ta propriété requise');
+ if(wonderHint)wonderHint.textContent=canWonder?`${district?.name||'Quartier complet'} prêt`:p.wonderMode?`${p.wonderTurnsLeft} tour(s) restant(s)`:'Quartier complet requis';
+ if(endHint)endHint.textContent=canEnd?'Passer au joueur suivant':'Lance d’abord les dés';
+
+ if(!rolled){
+   rollBtn.classList.add('recommended');
+   setTurnGuide('À JOUER','Lance les dés',`${p.name}, commence ton tour.`,'roll');
+ }else if(canBuy){
+   buyBtn.classList.add('recommended');
+   setTurnGuide('DÉCISION','Acheter '+s.name,`${moneyFmt(price)} · loyer ${moneyFmt(currentRent(s))}. Tu peux aussi passer.`,'buy');
+ }else if(canBuild){
+   buildBtn.classList.add('recommended');
+   setTurnGuide('OPTION','Améliorer '+s.name,`Niveau ${s.level} → ${s.level+1} pour ${moneyFmt(nextCost)}. Optionnel.`,'build');
+ }else if(canWonder){
+   wonderBtn.classList.add('recommended');
+   setTurnGuide('MERVEILLE','Projet disponible',`${district?.name||'Quartier complet'} est complet. Tu peux lancer une Merveille.`,'wonder');
+ }else{
+   endBtn.classList.add('recommended');
+   const location=s?.name||'la case actuelle';
+   setTurnGuide('FIN DE TOUR','Termine ton tour',`Aucune action prioritaire sur ${location}. Passe au joueur suivant.`,'end');
+ }
+}
 function passStart(p,steps){if(p.pos+steps>=36){p.money+=30000;stat('moneyInjected',30000);addLog(`💰 <b>${p.name}</b> passe par DÉPART : +${moneyFmt(30000)}`);showCinematic('start','PASSAGE DÉPART','+30 000 €',`${p.name} reçoit son bonus de tour.`,1450);pulsePlayerCard(players.indexOf(p),'positive')}}
 function sleep(ms){return new Promise(r=>setTimeout(r,ms))}
 async function animateDice(finalRoll){
@@ -1359,8 +1447,8 @@ endBtn.onclick=()=>{if(!rolled||gameOver||pendingRentDecision||pendingDebt)retur
  if(advanceWonderForPlayer(previous))return;
  do{current=(current+1)%players.length}while(!players[current].active);
  if(current<=previous){roundNumber++;recoverZonePressure();}
- document.getElementById('dice').dataset.face='1';status.textContent='Lance les dés.';addLog(`➡️ Tour de <b>${players[current].name}</b> · tour de table ${roundNumber}.`);refresh();animateTurnChange(current)};
-function startGame(){resetTransientUI();pendingRentDecision=false;pendingDebt=null;debtQueue=[];zonePressure={};roundNumber=1;resetDevStats();ensureAudio();playSfx('start');startAmbient();const n=+document.getElementById('playerCount').value;winMode=document.getElementById('winMode').value;players=[];for(let i=0;i<n;i++){players.push({name:(document.getElementById('p'+(i+1)).value||`Joueur ${i+1}`).trim(),money:200000,pos:0,props:[],beaches:0,active:true,fiscalRollsLeft:0,worksInstallmentsLeft:0,wonderMode:null,wonderTurnsLeft:0,wonderLine:null,wonderSkipCountdown:false})}spaces.forEach(s=>{s.owner=null;s.level=0;s.rent=rents[s.id];s.baseRent=rents[s.id]});current=0;rolled=false;gameOver=false;logBox.innerHTML='';document.getElementById('startScreen').classList.remove('active');document.getElementById('gameScreen').classList.add('active');addLog(`🚀 Partie lancée avec ${n} joueurs. Chacun commence avec ${moneyFmt(200000)}.`);refresh();setTimeout(()=>animateTurnChange(0),120)}
+ document.getElementById('dice').dataset.face='1';status.textContent=`${players[current].name}, à toi de jouer.`;addLog(`➡️ Tour de <b>${players[current].name}</b> · tour de table ${roundNumber}.`);refresh();animateTurnChange(current)};
+function startGame(){resetTransientUI();pendingRentDecision=false;pendingDebt=null;debtQueue=[];zonePressure={};roundNumber=1;resetDevStats();ensureAudio();playSfx('start');startAmbient();const n=+document.getElementById('playerCount').value;winMode=document.getElementById('winMode').value;players=[];for(let i=0;i<n;i++){players.push({name:(document.getElementById('p'+(i+1)).value||`Joueur ${i+1}`).trim(),money:200000,pos:0,props:[],beaches:0,active:true,fiscalRollsLeft:0,worksInstallmentsLeft:0,wonderMode:null,wonderTurnsLeft:0,wonderLine:null,wonderSkipCountdown:false})}spaces.forEach(s=>{s.owner=null;s.level=0;s.rent=rents[s.id];s.baseRent=rents[s.id]});current=0;rolled=false;gameOver=false;logBox.innerHTML='';document.getElementById('startScreen').classList.remove('active');document.getElementById('gameScreen').classList.add('active');addLog(`🚀 Partie lancée avec ${n} joueurs. Chacun commence avec ${moneyFmt(200000)}.`);status.textContent=`${players[0].name}, à toi de jouer.`;refresh();setTimeout(()=>animateTurnChange(0),120)}
 document.getElementById('startBtn').onclick=startGame;
 document.getElementById('restartBtn').onclick=()=>{if(confirm('Recommencer la partie ?')){playSfx('close');stopAmbient();resetTransientUI();pendingRentDecision=false;pendingDebt=null;debtQueue=[];animating=false;rolled=false;document.getElementById('gameScreen').classList.remove('active');document.getElementById('startScreen').classList.add('active')}};
 
@@ -1374,7 +1462,7 @@ document.getElementById('devToggle').onclick=()=>{
 };
 document.getElementById('devCash').onclick=()=>{
  if(!players[current]||gameOver)return;players[current].money+=50000;stat('moneyInjected',50000);
- addLog(`🧪 DEV : +${moneyFmt(30000)} à <b>${players[current].name}</b>.`);refresh();
+ addLog(`🧪 DEV : +${moneyFmt(50000)} à <b>${players[current].name}</b>.`);refresh();
 };
 document.getElementById('devDebt').onclick=()=>{
  if(!players[current]||gameOver||pendingDebt)return;
