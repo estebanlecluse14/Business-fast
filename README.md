@@ -14,6 +14,9 @@ Prototype web du jeu de plateau **Business Fast**.
 - Effets de profondeur et de survol améliorés.
 - Cases spéciales avec assets SVG dédiés (Départ, Banque, Prison, Événement, Mondial).
 - Centre enrichi : routes, pont, parc, skyline et zone Merveille plus visuelle.
+- Bâtiments évolutifs visibles directement sur les propriétés (niveaux 1, 2 et 3).
+- Vrais pions joueurs SVG sur le plateau et dans l’interface.
+- Effets d’achat et de construction renforcés.
 
 ## Structure
 - `index.html` — structure de l'interface
