@@ -68,16 +68,23 @@
     </div>
   </div>
   <div class="center-face">
-    <div class="brand-pill">BUSINESS CITY</div>
-    <div class="dice-dock"><div id="dice" class="dice">🎲</div></div>
+    <div class="city-emblem"><span class="emblem-top">BUSINESS</span><span class="emblem-main">CITY</span></div>
+    <div class="turn-chip">TOUR EN COURS</div>
+    <div class="dice-dock">
+      <div id="dice" class="dice premium-die" data-face="1" aria-label="Dé">
+        <span class="pip p1"></span><span class="pip p2"></span><span class="pip p3"></span>
+        <span class="pip p4"></span><span class="pip p5"></span><span class="pip p6"></span>
+        <span class="pip p7"></span><span class="pip p8"></span><span class="pip p9"></span>
+      </div>
+    </div>
     <p id="turnText">Tour</p>
     <div id="centerTokens" class="tokens"></div>
   </div>
 </div></div></div>
   <aside class="sidebar">
     <div class="panel player-panel"><div class="players-panel-title">JOUEURS</div><div id="players"></div></div>
-    <div class="panel"><h3>🎮 Actions</h3><div class="actions"><button id="rollBtn" class="roll">🎲 Lancer</button><button id="buyBtn" class="buy" disabled>🏙️ Acheter</button><button id="buildBtn" class="build" disabled>🏠 Améliorer</button><button id="endBtn" class="end" disabled>➡️ Fin du tour</button><button id="wonderBtn" class="wonder-action" disabled>🏛️ Construire une Merveille</button></div><div id="status" style="margin-top:12px;color:#cbd5e1;font-size:13px">Lance les dés.</div></div>
-    <div class="panel"><div class="legend"><span class="pill">🏖️ Plage</span><span class="pill">⚡ Événement</span><span class="pill">🌍 Mondial</span><span class="pill">🏦 Banque</span><span class="pill">🚔 Prison</span><span class="pill">🏠 Maisons visibles</span></div><button id="journalBtn" class="secondary" style="width:100%">📜 Ouvrir le journal</button><button id="settingsBtn" class="settings-btn">⚙️ Paramètres audio</button><div style="margin-top:10px"><button id="devToggle" class="secondary" style="width:100%">🧪 Mode développeur</button></div><div style="margin-top:10px"><button id="restartBtn" class="secondary danger" style="width:100%">Recommencer</button></div></div>
+    <div class="panel action-panel"><div class="panel-kicker">COMMANDES</div><h3>Tour de jeu</h3><div class="actions"><button id="rollBtn" class="roll"><span class="action-icon">◆</span><span>Lancer les dés</span></button><button id="buyBtn" class="buy" disabled><span class="action-icon">€</span><span>Acheter</span></button><button id="buildBtn" class="build" disabled><span class="action-icon">▲</span><span>Améliorer</span></button><button id="wonderBtn" class="wonder-action" disabled><span class="action-icon">★</span><span>Construire une Merveille</span></button><button id="endBtn" class="end" disabled><span class="action-icon">→</span><span>Fin du tour</span></button></div><div id="status" class="turn-status">Lance les dés.</div></div>
+    <div class="panel utility-panel"><div class="panel-kicker">OUTILS</div><div class="legend"><span class="pill">Plage</span><span class="pill">Événement</span><span class="pill">Mondial</span><span class="pill">Banque</span><span class="pill">Prison</span><span class="pill">Bâtiments</span></div><button id="journalBtn" class="secondary" style="width:100%">📜 Ouvrir le journal</button><button id="settingsBtn" class="settings-btn">⚙️ Paramètres audio</button><div style="margin-top:10px"><button id="devToggle" class="secondary" style="width:100%">🧪 Mode développeur</button></div><div style="margin-top:10px"><button id="restartBtn" class="secondary danger" style="width:100%">Recommencer</button></div></div>
     <div id="devPanel" class="panel dev-panel" style="display:none">
       <div class="dev-head"><h3>🧪 Mode développeur</h3><span id="devState" class="dev-chip">LIVE</span></div>
       <div id="devStats" class="dev-stats"></div>
