@@ -467,7 +467,13 @@ function renderPlayers(){
 }
 
 function addLog(msg){const d=document.createElement('div'); d.innerHTML=msg; logBox.prepend(d)}
+function resetModalTone(){
+ const modalEl=document.getElementById('modal');
+ if(!modalEl)return;
+ modalEl.classList.remove('event-positive','event-negative','event-neutral');
+}
 function modal(title,html){
+ resetModalTone();
  document.getElementById('modalTitle').textContent=title;
  document.getElementById('modalBody').innerHTML=html;
  const row=document.querySelector('#modal .row');
@@ -479,7 +485,8 @@ function modal(title,html){
 }
 function closeModal(){
  if(pendingRentDecision)return;
- document.getElementById('modal').classList.remove('open');
+ const modalEl=document.getElementById('modal');
+ modalEl.classList.remove('open','event-positive','event-negative','event-neutral');
  playSfx('close');
 }
 function showEventResult({title,icon='✨',description='',effect='',tone='neutral',afterClose=null}){
@@ -498,7 +505,7 @@ function showEventResult({title,icon='✨',description='',effect='',tone='neutra
  setTimeout(()=>eventModal.classList.remove('event-positive','event-negative','event-neutral'),900);
  const btn=document.getElementById('modalOk');
  btn.textContent='Continuer';
- if(afterClose)btn.onclick=()=>{document.getElementById('modal').classList.remove('open');playSfx('close');afterClose();};
+ if(afterClose)btn.onclick=()=>{const modalEl=document.getElementById('modal');modalEl.classList.remove('open','event-positive','event-negative','event-neutral');playSfx('close');afterClose();};
  playSfx(tone==='positive'?'money':tone==='negative'?'bad':'open');
 }
 
@@ -769,7 +776,7 @@ function queueDebt(playerIndex,amount,creditorIndex=null,reason='Dette',onResolv
  if(!pendingDebt)processNextDebt();
 }
 function processNextDebt(){
- if(pendingDebt||!debtQueue.length)return;
+ if(gameOver||pendingDebt||!debtQueue.length)return;
  pendingDebt=debtQueue.shift();
  openLiquidationModal();
 }
@@ -888,7 +895,7 @@ function finalizeBankruptcy(playerIndex){
  playSfx('bad');
  refresh();checkWin();
  if(callback)callback(false);
- processNextDebt();
+ if(!gameOver)processNextDebt();
 }
 function requestPayment(playerIndex,amount,creditorIndex=null,reason='Dette'){
  const p=players[playerIndex];
@@ -1213,6 +1220,16 @@ function runDevSimulation(count){
  },20);
 }
 
+function resetTransientUI(){
+ const modalEl=document.getElementById('modal');
+ if(modalEl)modalEl.classList.remove('open','event-positive','event-negative','event-neutral');
+ ['journalModal','updatesModal','settingsModal'].forEach(id=>{
+   const el=document.getElementById(id);
+   if(el){el.classList.remove('open');el.setAttribute('aria-hidden','true');}
+ });
+ const cine=document.getElementById('cinematicOverlay');
+ if(cine){cine.classList.remove('show');cine.setAttribute('aria-hidden','true');}
+}
 function showCinematic(kind,kicker,title,sub='',duration=1750){
  const el=document.getElementById('cinematicOverlay');if(!el)return;
  const iconMap={
@@ -1314,9 +1331,9 @@ endBtn.onclick=()=>{if(!rolled||gameOver||pendingRentDecision||pendingDebt)retur
  do{current=(current+1)%players.length}while(!players[current].active);
  if(current<=previous){roundNumber++;recoverZonePressure();}
  document.getElementById('dice').dataset.face='1';status.textContent='Lance les dés.';addLog(`➡️ Tour de <b>${players[current].name}</b> · tour de table ${roundNumber}.`);refresh();animateTurnChange(current)};
-function startGame(){pendingRentDecision=false;pendingDebt=null;debtQueue=[];zonePressure={};roundNumber=1;resetDevStats();ensureAudio();playSfx('start');startAmbient();const n=+document.getElementById('playerCount').value;winMode=document.getElementById('winMode').value;players=[];for(let i=0;i<n;i++){players.push({name:(document.getElementById('p'+(i+1)).value||`Joueur ${i+1}`).trim(),money:200000,pos:0,props:[],beaches:0,active:true,fiscalRollsLeft:0,worksInstallmentsLeft:0,wonderMode:null,wonderTurnsLeft:0,wonderLine:null,wonderSkipCountdown:false})}spaces.forEach(s=>{s.owner=null;s.level=0;s.rent=rents[s.id];s.baseRent=rents[s.id]});current=0;rolled=false;gameOver=false;logBox.innerHTML='';document.getElementById('startScreen').classList.remove('active');document.getElementById('gameScreen').classList.add('active');addLog(`🚀 Partie lancée avec ${n} joueurs. Chacun commence avec ${moneyFmt(200000)}.`);refresh();setTimeout(()=>animateTurnChange(0),120)}
+function startGame(){resetTransientUI();pendingRentDecision=false;pendingDebt=null;debtQueue=[];zonePressure={};roundNumber=1;resetDevStats();ensureAudio();playSfx('start');startAmbient();const n=+document.getElementById('playerCount').value;winMode=document.getElementById('winMode').value;players=[];for(let i=0;i<n;i++){players.push({name:(document.getElementById('p'+(i+1)).value||`Joueur ${i+1}`).trim(),money:200000,pos:0,props:[],beaches:0,active:true,fiscalRollsLeft:0,worksInstallmentsLeft:0,wonderMode:null,wonderTurnsLeft:0,wonderLine:null,wonderSkipCountdown:false})}spaces.forEach(s=>{s.owner=null;s.level=0;s.rent=rents[s.id];s.baseRent=rents[s.id]});current=0;rolled=false;gameOver=false;logBox.innerHTML='';document.getElementById('startScreen').classList.remove('active');document.getElementById('gameScreen').classList.add('active');addLog(`🚀 Partie lancée avec ${n} joueurs. Chacun commence avec ${moneyFmt(200000)}.`);refresh();setTimeout(()=>animateTurnChange(0),120)}
 document.getElementById('startBtn').onclick=startGame;
-document.getElementById('restartBtn').onclick=()=>{if(confirm('Recommencer la partie ?')){playSfx('close');document.getElementById('gameScreen').classList.remove('active');document.getElementById('startScreen').classList.add('active')}};
+document.getElementById('restartBtn').onclick=()=>{if(confirm('Recommencer la partie ?')){playSfx('close');stopAmbient();resetTransientUI();pendingRentDecision=false;pendingDebt=null;debtQueue=[];animating=false;rolled=false;document.getElementById('gameScreen').classList.remove('active');document.getElementById('startScreen').classList.add('active')}};
 
 
 const devPanel=document.getElementById('devPanel');
