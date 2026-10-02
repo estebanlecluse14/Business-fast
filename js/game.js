@@ -44,7 +44,7 @@ const shortMoneyFmt = n => {
   return `${sign}${Math.round(abs)}€`;
 };
 const colors=['#22c55e','#3b82f6','#ef4444','#eab308'];
-const diceFaces=['','⚀','⚁','⚂','⚃','⚄','⚅'];
+const diceFaces=[0,1,2,3,4,5,6];
 
 /* --- Moteur audio synthétique, sans fichier externe --- */
 let audioCtx=null,musicGain=null,sfxGain=null,musicTimer=null,musicStep=0;
@@ -559,11 +559,11 @@ async function animateDice(finalRoll){
  const reduced=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
  const duration=reduced?180:760, start=performance.now();
  while(performance.now()-start<duration){
-   dice.textContent=diceFaces[1+Math.floor(Math.random()*6)];
+   dice.dataset.face=String(1+Math.floor(Math.random()*6));
    playSfx('dice');
    await sleep(reduced?90:75);
  }
- dice.textContent=diceFaces[finalRoll];
+ dice.dataset.face=String(finalRoll);
  dice.classList.remove('rolling');
  if(!reduced) await sleep(180);
 }
@@ -572,7 +572,7 @@ async function animateTokenStep(playerIndex,from,to){
  const fromEl=board.querySelector(`.space[data-space-id="${from}"]`);
  const toEl=board.querySelector(`.space[data-space-id="${to}"]`);
  if(!fromEl||!toEl||reduced){players[playerIndex].pos=to;drawBoard();await sleep(reduced?30:0);return}
- const dot=document.createElement('div'); dot.className='moving-token'; dot.style.setProperty('--token-color', colors[playerIndex]);
+ const dot=document.createElement('img'); dot.className='moving-token moving-pawn'; dot.src='assets/pawns/'+pawnFiles[playerIndex%pawnFiles.length]; dot.alt='';
  const x1=fromEl.offsetLeft+fromEl.offsetWidth/2-15, y1=fromEl.offsetTop+fromEl.offsetHeight/2-15;
  const x2=toEl.offsetLeft+toEl.offsetWidth/2-15, y2=toEl.offsetTop+toEl.offsetHeight/2-15;
  dot.style.left=x1+'px';dot.style.top=y1+'px';board.appendChild(dot);
@@ -1226,7 +1226,7 @@ endBtn.onclick=()=>{if(!rolled||gameOver||pendingRentDecision||pendingDebt)retur
  if(advanceWonderForPlayer(previous))return;
  do{current=(current+1)%players.length}while(!players[current].active);
  if(current<=previous){roundNumber++;recoverZonePressure();}
- document.getElementById('dice').textContent='🎲';status.textContent='Lance les dés.';addLog(`➡️ Tour de <b>${players[current].name}</b> · tour de table ${roundNumber}.`);refresh()};
+ document.getElementById('dice').dataset.face='1';status.textContent='Lance les dés.';addLog(`➡️ Tour de <b>${players[current].name}</b> · tour de table ${roundNumber}.`);refresh()};
 function startGame(){pendingRentDecision=false;pendingDebt=null;debtQueue=[];zonePressure={};roundNumber=1;resetDevStats();ensureAudio();playSfx('start');startAmbient();const n=+document.getElementById('playerCount').value;winMode=document.getElementById('winMode').value;players=[];for(let i=0;i<n;i++){players.push({name:(document.getElementById('p'+(i+1)).value||`Joueur ${i+1}`).trim(),money:200000,pos:0,props:[],beaches:0,active:true,fiscalRollsLeft:0,worksInstallmentsLeft:0,wonderMode:null,wonderTurnsLeft:0,wonderLine:null,wonderSkipCountdown:false})}spaces.forEach(s=>{s.owner=null;s.level=0;s.rent=rents[s.id];s.baseRent=rents[s.id]});current=0;rolled=false;gameOver=false;logBox.innerHTML='';document.getElementById('startScreen').classList.remove('active');document.getElementById('gameScreen').classList.add('active');addLog(`🚀 Partie lancée avec ${n} joueurs. Chacun commence avec ${moneyFmt(200000)}.`);refresh()}
 document.getElementById('startBtn').onclick=startGame;
 document.getElementById('restartBtn').onclick=()=>{if(confirm('Recommencer la partie ?')){playSfx('close');document.getElementById('gameScreen').classList.remove('active');document.getElementById('startScreen').classList.add('active')}};
