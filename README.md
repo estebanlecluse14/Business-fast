@@ -3,14 +3,15 @@
 Prototype web du jeu de plateau **Business Fast**.
 
 ## Version actuelle
-**V0.32**
+**V0.38**
 
-### Nouveautés V0.32
-- Plateau compacté pour tenir beaucoup mieux dans un seul écran.
-- Cases Plage rendues nettes, sans effet flou.
-- Fleuve central retravaillé.
-- Panneau des joueurs déplacé à gauche et modernisé.
-- Loyers conservés arrondis par paliers de **5 000 €**.
+### Nouveautés V0.38
+- Cases gauche/droite fortement élargies pour améliorer la lisibilité.
+- Plateau global agrandi et moins carré.
+- Centre légèrement resserré.
+- Noms de villes et informations économiques plus confortables.
+- Coins renforcés visuellement.
+- Effets de profondeur et de survol améliorés.
 
 ## Structure
 - `index.html` — structure de l'interface
