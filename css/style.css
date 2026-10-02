@@ -6276,3 +6276,187 @@ body{
   transition:none!important
 }
 
+
+
+/* === V0.44 UX DES TOURS === */
+.turn-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-bottom:9px
+}
+.turn-head h3{margin:0!important}
+.turn-phase{
+  flex:0 0 auto;
+  padding:5px 8px;
+  border-radius:999px;
+  background:#e8eef2;
+  border:1px solid #d8e2e8;
+  color:#4b6070;
+  font-size:8px;
+  line-height:1;
+  font-weight:1000;
+  letter-spacing:.11em
+}
+.turn-guide{
+  margin-bottom:10px;
+  padding:10px 11px;
+  border-radius:13px;
+  background:#f4f7f9;
+  border:1px solid #dbe5ea;
+  border-left:4px solid #64748b
+}
+.turn-guide-label{
+  font-size:7px;
+  line-height:1;
+  color:#71808b;
+  font-weight:1000;
+  letter-spacing:.13em
+}
+.turn-guide-main{
+  margin-top:5px;
+  color:#172332;
+  font-size:14px;
+  line-height:1.1;
+  font-weight:1000
+}
+.turn-guide-detail{
+  margin-top:4px;
+  color:#657684;
+  font-size:9px;
+  line-height:1.3;
+  font-weight:700
+}
+.turn-guide.guide-roll{border-left-color:#0284c7;background:#f0f9ff}
+.turn-guide.guide-buy{border-left-color:#16a34a;background:#f0fdf4}
+.turn-guide.guide-build{border-left-color:#d97706;background:#fffbeb}
+.turn-guide.guide-wonder{border-left-color:#7c3aed;background:#f5f3ff}
+.turn-guide.guide-end{border-left-color:#475569;background:#f8fafc}
+.turn-guide.guide-danger{border-left-color:#dc2626;background:#fff1f2}
+.turn-guide.guide-wait{border-left-color:#94a3b8;background:#f8fafc}
+
+.actions button{
+  position:relative!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:flex-start!important;
+  gap:9px!important;
+  min-height:47px!important;
+  text-align:left!important
+}
+.action-copy{
+  display:flex;
+  min-width:0;
+  flex:1;
+  flex-direction:column;
+  gap:2px
+}
+.action-copy b{
+  display:block;
+  font-size:11px;
+  line-height:1.05;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap
+}
+.action-copy small{
+  display:block;
+  color:inherit;
+  opacity:.66;
+  font-size:7px;
+  line-height:1.05;
+  font-weight:800;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap
+}
+.actions button.recommended:not(:disabled){
+  outline:2px solid rgba(2,132,199,.28)!important;
+  outline-offset:2px!important;
+  border-color:#7dd3fc!important;
+  background:#f0f9ff!important;
+  color:#075985!important
+}
+.actions button.buy.recommended:not(:disabled){
+  outline-color:rgba(22,163,74,.25)!important;
+  border-color:#86efac!important;
+  background:#f0fdf4!important;
+  color:#166534!important
+}
+.actions button.build.recommended:not(:disabled){
+  outline-color:rgba(217,119,6,.24)!important;
+  border-color:#fcd34d!important;
+  background:#fffbeb!important;
+  color:#92400e!important
+}
+.actions button.wonder-action.recommended:not(:disabled){
+  outline-color:rgba(124,58,237,.24)!important;
+  border-color:#c4b5fd!important;
+  background:#f5f3ff!important;
+  color:#5b21b6!important
+}
+.actions button.end.recommended:not(:disabled){
+  outline-color:rgba(71,85,105,.22)!important;
+  border-color:#cbd5e1!important;
+  background:#f8fafc!important;
+  color:#334155!important
+}
+.actions button:disabled .action-copy small{
+  opacity:.45
+}
+.turn-status{
+  margin-top:10px!important;
+  min-height:34px;
+  display:flex;
+  align-items:center;
+  padding:8px 10px!important;
+  border-radius:11px!important;
+  background:#f8fafc!important;
+  border:1px solid #e2e8f0!important;
+  color:#536474!important;
+  font-size:9px!important;
+  font-weight:800!important
+}
+.player.active{
+  position:relative;
+  border-color:#38bdf8!important;
+  box-shadow:0 0 0 2px rgba(56,189,248,.16)!important
+}
+.player.active::after{
+  content:'À TOI';
+  position:absolute;
+  right:8px;
+  top:7px;
+  padding:3px 6px;
+  border-radius:999px;
+  background:#e0f2fe;
+  color:#0369a1;
+  font-size:6px;
+  line-height:1;
+  font-weight:1000;
+  letter-spacing:.1em
+}
+.turn-player-name{
+  display:block;
+  font-size:22px;
+  font-weight:1000;
+  line-height:1;
+  color:#fff
+}
+.turn-round{
+  display:block;
+  margin-top:4px;
+  color:rgba(255,255,255,.72);
+  font-size:8px;
+  line-height:1;
+  font-weight:900;
+  letter-spacing:.08em;
+  text-transform:uppercase
+}
+
+@media(max-width:1250px){
+  .turn-guide{padding:9px}
+  .actions button{min-height:43px!important}
+}
+
