@@ -4139,3 +4139,360 @@ body{
   }
 }
 
+
+
+/* === V0.38 PASS 2 : cases spéciales premium + centre enrichi === */
+
+/* ---------------- CASES SPÉCIALES ---------------- */
+.space.start,
+.space.bank,
+.space.jail,
+.space.event,
+.space.global{
+  overflow:visible!important;
+  padding:0!important;
+  border:0!important;
+  background:#edf2f5!important;
+  border-radius:16px!important;
+  box-shadow:
+    0 7px 0 rgba(118,88,48,.18),
+    0 12px 19px rgba(66,45,17,.12),
+    inset 0 1px 0 rgba(255,255,255,.94)!important
+}
+.space.start::before,.space.start::after,
+.space.bank::before,.space.bank::after,
+.space.jail::before,.space.jail::after,
+.space.event::before,.space.event::after,
+.space.global::before,.space.global::after,
+.space.start .tile-face::before,.space.start .tile-face::after,
+.space.bank .tile-face::before,.space.bank .tile-face::after,
+.space.jail .tile-face::before,.space.jail .tile-face::after,
+.space.event .tile-face::before,.space.event .tile-face::after,
+.space.global .tile-face::before,.space.global .tile-face::after{
+  display:none!important;
+  content:none!important
+}
+.special-layout{
+  position:absolute!important;
+  inset:0!important;
+  padding:0!important;
+  display:grid!important;
+  grid-template-rows:minmax(58px,1fr) auto!important;
+  border-radius:16px!important;
+  overflow:hidden!important;
+  background:#eef3f5!important
+}
+.special-art-wrap{
+  position:relative;
+  min-height:0;
+  overflow:hidden;
+  background:#e8eef2
+}
+.special-art{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+  transform:scale(1.045);
+  filter:saturate(1.08) contrast(1.035)
+}
+.special-gloss{
+  position:absolute;inset:0;
+  background:linear-gradient(145deg,rgba(255,255,255,.42),transparent 38%),
+             linear-gradient(180deg,transparent 58%,rgba(15,23,42,.08));
+  pointer-events:none
+}
+.special-copy{
+  position:relative;
+  display:grid;
+  grid-template-columns:auto 1fr;
+  grid-template-areas:
+    "kick name"
+    "effect effect";
+  align-items:center;
+  gap:2px 5px;
+  padding:6px 7px 7px;
+  min-height:42px;
+  background:linear-gradient(180deg,rgba(255,255,255,.98),#e8eef2);
+  border-top:1px solid rgba(15,23,42,.08)
+}
+.special-kicker{
+  grid-area:kick;
+  align-self:center;
+  font-size:5.5px;
+  font-weight:1000;
+  letter-spacing:.13em;
+  color:#7b8794
+}
+.special-name{
+  grid-area:name;
+  min-width:0;
+  font-size:9px;
+  line-height:1.02;
+  font-weight:1000;
+  color:#172033;
+  white-space:normal;
+  overflow:visible
+}
+.special-effect{
+  grid-area:effect;
+  font-size:7px;
+  line-height:1.1;
+  font-weight:800;
+  color:#526171
+}
+.space.start .special-copy{background:linear-gradient(180deg,#fff9db,#f7e6a3)}
+.space.bank .special-copy{background:linear-gradient(180deg,#f8f7ff,#e6e4ff)}
+.space.jail .special-copy{background:linear-gradient(180deg,#f8fafc,#e2e8f0)}
+.space.event .special-copy{background:linear-gradient(180deg,#fff8e9,#ffe2ad)}
+.space.global .special-copy{background:linear-gradient(180deg,#eef7ff,#dbeafe)}
+
+.space.start .special-name,.space.start .special-effect{color:#83520a}
+.space.bank .special-name,.space.bank .special-effect{color:#4338ca}
+.space.jail .special-name,.space.jail .special-effect{color:#475569}
+.space.event .special-name,.space.event .special-effect{color:#b9480c}
+.space.global .special-name,.space.global .special-effect{color:#1d4ed8}
+
+/* latérales : asset + infos horizontales */
+.space.side-left .special-layout,
+.space.side-right .special-layout{
+  grid-template-columns:60% 40%!important;
+  grid-template-rows:1fr!important
+}
+.space.side-left .special-art-wrap,
+.space.side-right .special-art-wrap{
+  height:100%!important
+}
+.space.side-left .special-copy,
+.space.side-right .special-copy{
+  height:100%!important;
+  min-height:0!important;
+  grid-template-columns:1fr!important;
+  grid-template-areas:"kick" "name" "effect"!important;
+  align-content:center!important;
+  padding:5px!important;
+  border-top:0!important;
+  border-left:1px solid rgba(15,23,42,.08)!important
+}
+.space.side-left .special-name,
+.space.side-right .special-name{font-size:8px!important}
+.space.side-left .special-effect,
+.space.side-right .special-effect{font-size:6px!important}
+
+/* coins : plus spectaculaires */
+.space.corner .special-layout{
+  grid-template-rows:minmax(74px,1.35fr) auto!important
+}
+.space.corner .special-name{font-size:10px!important}
+.space.corner .special-effect{font-size:7.5px!important}
+
+/* ---------------- CENTRE DU PLATEAU ---------------- */
+.center{
+  background:
+    radial-gradient(circle at 72% 20%,rgba(255,255,255,.12),transparent 24%),
+    linear-gradient(180deg,#c8e97b 0%,#aad65c 100%)!important
+}
+.center::before{
+  content:'';
+  position:absolute;
+  inset:0;
+  z-index:0;
+  pointer-events:none;
+  background:
+    radial-gradient(circle at 16% 18%,rgba(78,136,59,.13) 0 2px,transparent 3px),
+    radial-gradient(circle at 24% 72%,rgba(78,136,59,.12) 0 2px,transparent 3px),
+    radial-gradient(circle at 76% 62%,rgba(78,136,59,.10) 0 2px,transparent 3px);
+  background-size:24px 24px,31px 31px,38px 38px
+}
+
+/* routes stylisées */
+.center-road{
+  position:absolute;
+  z-index:1;
+  height:18px;
+  border-radius:999px;
+  background:linear-gradient(180deg,#d7d0b6,#beb59c);
+  box-shadow:
+    inset 0 2px 0 rgba(255,255,255,.45),
+    inset 0 -2px 0 rgba(111,101,80,.12),
+    0 3px 8px rgba(83,73,54,.08)
+}
+.center-road::after{
+  content:'';
+  position:absolute;
+  left:7px;right:7px;top:50%;
+  height:2px;
+  transform:translateY(-50%);
+  background:repeating-linear-gradient(90deg,rgba(255,255,255,.88) 0 8px,transparent 8px 16px)
+}
+.road-a{
+  width:37%;
+  left:13%;
+  bottom:28%;
+  transform:rotate(8deg)
+}
+.road-b{
+  width:31%;
+  right:12%;
+  top:31%;
+  transform:rotate(-24deg)
+}
+
+/* pont au-dessus du fleuve */
+.center-bridge{
+  position:absolute;
+  z-index:4;
+  left:34%;
+  top:16%;
+  width:68px;
+  height:28px;
+  transform:rotate(-9deg);
+  border-radius:8px;
+  background:linear-gradient(180deg,#e9e0c7,#bda97d);
+  box-shadow:0 5px 10px rgba(64,62,47,.16),inset 0 2px 0 rgba(255,255,255,.5)
+}
+.center-bridge::before,.center-bridge::after{
+  content:'';
+  position:absolute;
+  top:3px;bottom:3px;
+  width:5px;
+  background:#8d7c58;
+  border-radius:3px
+}
+.center-bridge::before{left:8px}.center-bridge::after{right:8px}
+.center-bridge span{
+  position:absolute;
+  top:5px;bottom:5px;
+  width:2px;
+  background:rgba(121,102,66,.45)
+}
+.center-bridge span:nth-child(1){left:24px}
+.center-bridge span:nth-child(2){left:33px}
+.center-bridge span:nth-child(3){left:42px}
+
+/* parc central */
+.center-park{
+  position:absolute;
+  z-index:2;
+  left:12%;
+  bottom:10%;
+  width:126px;
+  height:82px;
+  border-radius:46% 54% 49% 51%;
+  background:
+    radial-gradient(circle at 30% 30%,#7fc765 0 11px,transparent 12px),
+    radial-gradient(circle at 73% 34%,#6fbc5a 0 13px,transparent 14px),
+    radial-gradient(circle at 60% 74%,#77c261 0 12px,transparent 13px),
+    linear-gradient(180deg,#9bd66e,#7ec45d);
+  box-shadow:inset 0 0 0 3px rgba(255,255,255,.15),0 5px 12px rgba(74,110,47,.10)
+}
+.park-path{
+  position:absolute;
+  left:12px;right:12px;top:50%;
+  height:10px;
+  transform:translateY(-50%) rotate(-8deg);
+  border-radius:999px;
+  background:#e5d8ad
+}
+.park-fountain{
+  position:absolute;
+  left:50%;top:50%;
+  width:25px;height:25px;
+  transform:translate(-50%,-50%);
+  border-radius:50%;
+  background:radial-gradient(circle,#e8fbff 0 24%,#71cbe5 25% 52%,#d8c18e 53% 68%,transparent 69%);
+  box-shadow:0 3px 7px rgba(46,118,144,.14)
+}
+
+/* skyline de business city */
+.center-skyline{
+  position:absolute;
+  z-index:2;
+  right:10%;
+  bottom:17%;
+  width:124px;
+  height:82px;
+  display:flex;
+  gap:5px;
+  align-items:flex-end;
+  justify-content:center;
+  filter:drop-shadow(0 5px 6px rgba(45,67,76,.13))
+}
+.center-skyline .cs{
+  display:block;
+  width:22px;
+  border-radius:4px 4px 1px 1px;
+  background:linear-gradient(90deg,#d3e0e5,#f7fbfc 48%,#9cb5c0);
+  border:1px solid rgba(78,100,111,.13);
+  position:relative
+}
+.center-skyline .cs::after{
+  content:'';
+  position:absolute;
+  inset:6px 4px;
+  background:repeating-linear-gradient(180deg,rgba(72,156,194,.38) 0 2px,transparent 2px 6px)
+}
+.center-skyline .c1{height:49px}
+.center-skyline .c2{height:70px}
+.center-skyline .c3{height:59px}
+.center-skyline .c4{height:40px}
+
+/* plaza renforcée */
+.center-plaza{
+  z-index:2!important;
+  box-shadow:
+    inset 0 0 0 4px rgba(255,255,255,.18),
+    0 6px 12px rgba(93,91,63,.09)!important
+}
+
+/* fleuve : plus intégré avec berges naturelles */
+.center-river{
+  z-index:3!important
+}
+.center-river .river-bank{
+  stroke:#8ac5a5!important;
+  stroke-width:68!important;
+  opacity:.30!important
+}
+.center-river .river-water{
+  stroke-width:47!important
+}
+.center-river .river-shine{
+  stroke-width:6!important;
+  opacity:.9!important
+}
+
+/* zone Merveille = chantier plus visuel */
+.wonder-site{
+  z-index:5!important;
+  background:
+    repeating-linear-gradient(135deg,rgba(255,255,255,.10) 0 9px,rgba(255,255,255,.02) 9px 18px),
+    rgba(53,80,62,.22)!important;
+  border:2px dashed rgba(255,255,255,.78)!important;
+  box-shadow:0 8px 18px rgba(50,70,46,.12),inset 0 0 0 1px rgba(255,255,255,.10)!important
+}
+.wonder-site::before{
+  content:'';
+  position:absolute;
+  inset:10px;
+  border-radius:14px;
+  background:
+    linear-gradient(90deg,transparent 48%,rgba(255,255,255,.13) 49% 51%,transparent 52%),
+    linear-gradient(transparent 48%,rgba(255,255,255,.13) 49% 51%,transparent 52%);
+  background-size:24px 24px;
+  opacity:.45;
+  pointer-events:none
+}
+.wonder-site-title,.wonder-site-inner{position:relative;z-index:2}
+
+/* le cœur central reste prioritaire */
+.center-face{z-index:8!important}
+
+@media(max-width:1450px){
+  .center-park{transform:scale(.88);transform-origin:left bottom}
+  .center-skyline{transform:scale(.88);transform-origin:right bottom}
+  .center-bridge{transform:rotate(-9deg) scale(.9)}
+}
+
