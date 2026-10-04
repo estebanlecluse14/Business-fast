@@ -3,14 +3,14 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Business Fast V0.45</title>
+<title>Business Fast V0.46</title>
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 <section id="startScreen" class="screen active">
   <div class="start-wrap">
     <h1 class="logo">BUSINESS <span>FAST</span></h1>
-    <div class="subtitle">V0.45 — modales & décisions</div>
+    <div class="subtitle">V0.46 — centre du plateau & Merveille</div>
     <div class="card">
       <div class="setup-grid">
         <div class="field"><label>Nombre de joueurs</label><select id="playerCount"><option>2</option><option>3</option><option selected>4</option></select></div>
@@ -62,23 +62,30 @@
   <div class="center-forest forest-c"><span class="tree t1"></span><span class="tree t2"></span><span class="tree t3"></span></div>
   <div class="center-hills"></div>
   <div class="wonder-site" id="wonderSite">
-    <div class="wonder-site-title">Zone de construction de la Merveille</div>
+    <div class="wonder-site-title"><span>MERVEILLE</span><small id="wonderSiteState">EMPLACEMENT DISPONIBLE</small></div>
     <div id="wonderSiteInner" class="wonder-site-inner">
       <div class="wonder-placeholder">Aucune Merveille en chantier pour le moment.</div>
     </div>
   </div>
   <div class="center-face">
-    <div class="city-emblem"><span class="emblem-top">BUSINESS</span><span class="emblem-main">CITY</span></div>
-    <div class="turn-chip">TOUR EN COURS</div>
-    <div class="dice-dock">
-      <div id="dice" class="dice premium-die" data-face="1" aria-label="Dé">
-        <span class="pip p1"></span><span class="pip p2"></span><span class="pip p3"></span>
-        <span class="pip p4"></span><span class="pip p5"></span><span class="pip p6"></span>
-        <span class="pip p7"></span><span class="pip p8"></span><span class="pip p9"></span>
+    <div class="center-hud">
+      <div class="city-emblem"><span class="emblem-top">BUSINESS</span><span class="emblem-main">CITY</span></div>
+      <div class="center-turn-panel">
+        <div class="turn-chip">TOUR EN COURS</div>
+        <p id="turnText">Tour</p>
+      </div>
+      <div class="dice-dock">
+        <div id="dice" class="dice premium-die" data-face="1" aria-label="Dé">
+          <span class="pip p1"></span><span class="pip p2"></span><span class="pip p3"></span>
+          <span class="pip p4"></span><span class="pip p5"></span><span class="pip p6"></span>
+          <span class="pip p7"></span><span class="pip p8"></span><span class="pip p9"></span>
+        </div>
       </div>
     </div>
-    <p id="turnText">Tour</p>
-    <div id="centerTokens" class="tokens"></div>
+    <div class="center-player-strip">
+      <span class="center-player-label">JOUEURS ACTIFS</span>
+      <div id="centerTokens" class="tokens"></div>
+    </div>
   </div>
 </div></div></div>
   <aside class="sidebar">
@@ -156,6 +163,9 @@
     </div>
     <div class="updates-list">
       <article class="update-item current">
+        <div class="update-version">V0.46</div><div class="update-copy"><div class="update-title">Centre du plateau & Merveille <span class="update-tag minor">Polish</span></div><p>Refonte du cœur de BUSINESS CITY : informations de tour regroupées, dé mieux intégré, zone Merveille plus compacte et intelligente, états disponible/en chantier clairement distingués, et suppression d’un double rendu inutile du chantier.</p></div>
+      </article>
+      <article class="update-item">
         <div class="update-version">V0.45</div><div class="update-copy"><div class="update-title">Modales & décisions <span class="update-tag minor">UX</span></div><p>Uniformisation des fenêtres importantes : achat/propriété, loyer, travaux, taxes, dette et Merveille utilisent désormais la même structure de décision, avec coût, conséquence, trésorerie et action principale clairement séparés.</p></div>
       </article>
       <article class="update-item">
