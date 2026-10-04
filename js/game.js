@@ -437,29 +437,60 @@ function drawBoard(){
 
 function renderWonderSite(){
  const slot=document.getElementById('wonderSiteInner');
- if(!slot)return;
  const site=document.getElementById('wonderSite');
+ const state=document.getElementById('wonderSiteState');
+ if(!slot||!site)return;
+
  const activeWonder=players.find(p=>p.active&&p.wonderMode&&p.wonderTurnsLeft>0);
+ const readyPlayer=players[current]?.active&&canLaunchWonder(current)?players[current]:null;
+ const readyDistrict=readyPlayer?ownedWonderDistrict(current):null;
+
+ site.classList.remove('live','ready','idle','stage-1','stage-2','stage-3');
+
  if(!activeWonder){
-   slot.innerHTML=`<div class="wonder-empty-visual"><div class="wonder-blueprint"><span></span><span></span><span></span></div><div class="wonder-placeholder"><b>EMPLACEMENT MERVEILLE</b><small>Complétez un quartier de 3 propriétés pour lancer le chantier.</small></div></div>`;
-   site.classList.remove('live','stage-1','stage-2','stage-3');
+   if(readyPlayer&&readyDistrict){
+     site.classList.add('ready');
+     if(state)state.textContent='PROJET DISPONIBLE';
+     slot.innerHTML=`<div class="wonder-ready-card">
+       <div class="wonder-ready-mark">★</div>
+       <div class="wonder-ready-copy">
+         <b>${readyDistrict.emoji} ${readyDistrict.name} complet</b>
+         <small>${readyPlayer.name} peut lancer une Merveille maintenant.</small>
+       </div>
+       <div class="wonder-ready-cta">OUVRIR</div>
+     </div>`;
+     slot.onclick=()=>{if(canLaunchWonder(current))openWonderModal()};
+   }else{
+     site.classList.add('idle');
+     if(state)state.textContent='EMPLACEMENT DISPONIBLE';
+     slot.innerHTML=`<div class="wonder-empty-visual">
+       <div class="wonder-blueprint"><span></span><span></span><span></span></div>
+       <div class="wonder-placeholder"><b>AUCUN CHANTIER</b><small>Contrôle les 3 propriétés d’un quartier.</small></div>
+     </div>`;
+     slot.onclick=null;
+   }
    return;
  }
+
  site.classList.add('live');
+ slot.onclick=null;
  const totalTurns=activeWonder.wonderMode==='communist'?8:5;
  const done=Math.max(0,totalTurns-activeWonder.wonderTurnsLeft);
  const ratio=done/totalTurns;
  const stage=ratio<.34?1:ratio<.72?2:3;
- site.classList.remove('stage-1','stage-2','stage-3');
  site.classList.add('stage-'+stage);
+ if(state)state.textContent=`CHANTIER · ÉTAPE ${stage}/3`;
+
  const art=`assets/wonder/stage${stage}.svg`;
+ const percent=Math.round((done/totalTurns)*100);
  const bars=Array.from({length:totalTurns},(_,i)=>`<span class="wonder-step ${i<done?'done':''} ${i===done?'current':''}"></span>`).join('');
+
  slot.innerHTML=`<div class="wonder-live-card ${activeWonder.wonderMode}">
-   <div class="wonder-art-shell"><img class="wonder-stage-art" src="${art}" alt="" loading="eager"><div class="wonder-crane-light"></div></div>
+   <div class="wonder-art-shell"><img class="wonder-stage-art" src="${art}" alt="" loading="eager"></div>
    <div class="wonder-live-copy">
-     <div class="wonder-live-kicker">CHANTIER · ÉTAPE ${stage}/3</div>
-     <div class="wonder-live-title">${activeWonder.name} construit sa Merveille</div>
-     <div class="wonder-live-sub">${activeWonder.wonderLine} · ${activeWonder.wonderMode==='communist'?'collective':'accélérée'} · ${activeWonder.wonderTurnsLeft} tour(s)</div>
+     <div class="wonder-live-title">${activeWonder.name}</div>
+     <div class="wonder-live-sub">${activeWonder.wonderLine} · ${activeWonder.wonderMode==='communist'?'collective':'accélérée'}</div>
+     <div class="wonder-progress-meta"><span>${percent} %</span><strong>${activeWonder.wonderTurnsLeft} tour(s)</strong></div>
      <div class="wonder-progress-bar">${bars}</div>
    </div>
  </div>`;
@@ -468,7 +499,10 @@ function renderPlayers(){
  playerBox.innerHTML=players.map((p,i)=>`<div class="player ${i===current&&p.active?'active':''}">${pawnVisual(i,p.name,'panel-pawn')}<div class="pmeta"><div class="pname">${p.name}${!p.active?' 💀':''}</div><div class="pmoney">${moneyFmt(p.money)} · ${p.props.length} biens · ${p.beaches} plage(s)</div>${p.wonderMode&&p.active?`<div class="wonder-progress">🏛️ ${p.wonderLine} · ${p.wonderTurnsLeft} tour(s) · ${p.wonderMode==='communist'?'collective':'accélérée'}</div>`:''}</div></div>`).join('');
  const activeWonder=players.find(p=>p.active&&p.wonderMode&&p.wonderTurnsLeft>0);
  document.getElementById('turnText').innerHTML=gameOver?'Partie terminée':`<span class="turn-player-name">${players[current]?.name||''}</span><small class="turn-round">Tour de table ${roundNumber}</small>${communistWonderActive()?'<div class="global-rent-alert">☭ Construction collective : tous les loyers -65 %</div>':activeWonder?`<div class="wonder-banner">🏛️ ${activeWonder.name} · Merveille dans ${activeWonder.wonderTurnsLeft} tour(s)</div>`:''}`;
- document.getElementById('centerTokens').innerHTML=players.filter(p=>p.active).map(p=>pawnVisual(players.indexOf(p),p.name,'center-pawn')).join('');
+ document.getElementById('centerTokens').innerHTML=players.filter(p=>p.active).map(p=>{
+   const i=players.indexOf(p);
+   return `<span class="center-token ${i===current?'current':''}">${pawnVisual(i,p.name,'center-pawn')}<small>${p.name}</small></span>`;
+ }).join('');
  renderWonderSite();
 }
 
@@ -581,7 +615,7 @@ function upgradeProperty(spaceId){
  playSfx('build');
 }
 document.getElementById('modalOk').onclick=closeModal;
-function refresh(){drawBoard();renderPlayers();updateActions();refreshDevStats();renderWonderSite();}
+function refresh(){drawBoard();renderPlayers();updateActions();refreshDevStats();}
 function setActionState(btn,enabled,reason=''){
  btn.disabled=!enabled;
  btn.title=enabled?'':reason;
@@ -602,7 +636,7 @@ function updateActions(){
  if(!players[current]){
    all.forEach(b=>b.disabled=true);
    setTurnGuide('EN ATTENTE','Partie non lancée','Choisis les joueurs puis lance la partie.','wait');
-   return;
+   renderWonderSite();return;
  }
  const p=players[current],s=spaces[p.pos];
  const isProperty=['property','beach'].includes(s.type);
@@ -617,22 +651,22 @@ function updateActions(){
  if(gameOver){
    all.forEach(b=>b.disabled=true);
    setTurnGuide('TERMINÉ','Partie terminée','Consulte le résultat ou recommence une partie.','wait');
-   return;
+   renderWonderSite();return;
  }
  if(pendingDebt){
    all.forEach(b=>b.disabled=true);
    setTurnGuide('DETTE','Résous la dette','Vends des biens ou règle la somme demandée avant de continuer.','danger');
-   return;
+   renderWonderSite();return;
  }
  if(pendingRentDecision){
    all.forEach(b=>b.disabled=true);
    setTurnGuide('LOYER','Choisis dans la fenêtre','Paie le loyer ou rachète la propriété pour poursuivre.','danger');
-   return;
+   renderWonderSite();return;
  }
  if(animating){
    all.forEach(b=>b.disabled=true);
    setTurnGuide('DÉPLACEMENT','Déplacement en cours','Le pion rejoint sa nouvelle case.','wait');
-   return;
+   renderWonderSite();return;
  }
 
  const canBuy=rolled&&isProperty&&s.owner===null&&p.money>=price;
@@ -668,6 +702,7 @@ function updateActions(){
    const location=s?.name||'la case actuelle';
    setTurnGuide('FIN DE TOUR','Termine ton tour',`Aucune action prioritaire sur ${location}. Passe au joueur suivant.`,'end');
  }
+ renderWonderSite();
 }
 function passStart(p,steps){if(p.pos+steps>=36){p.money+=30000;stat('moneyInjected',30000);addLog(`💰 <b>${p.name}</b> passe par DÉPART : +${moneyFmt(30000)}`);showCinematic('start','PASSAGE DÉPART','+30 000 €',`${p.name} reçoit son bonus de tour.`,1450);pulsePlayerCard(players.indexOf(p),'positive')}}
 function sleep(ms){return new Promise(r=>setTimeout(r,ms))}
