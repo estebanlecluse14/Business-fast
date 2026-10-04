@@ -6460,3 +6460,207 @@ body{
   .actions button{min-height:43px!important}
 }
 
+
+
+/* === V0.45 MODALES & DÉCISIONS === */
+#modal.visual-alpha-modal .box{
+  width:min(590px,95vw)!important;
+  padding:20px!important
+}
+#modal.modal-wonder .box,
+#modal.modal-danger .box{
+  width:min(680px,95vw)!important
+}
+#modal.modal-property .box{
+  width:min(620px,95vw)!important
+}
+#modal.visual-alpha-modal h2{
+  margin-bottom:12px!important
+}
+.decision-shell{
+  display:grid;
+  gap:12px
+}
+.decision-hero{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:12px;
+  border:1px solid #dce7ec;
+  border-radius:15px;
+  background:#f7fafb
+}
+.decision-hero.danger{
+  background:#fff7f7;
+  border-color:#fecaca
+}
+.decision-hero.wonder{
+  background:#faf7ff;
+  border-color:#ddd6fe
+}
+.decision-icon{
+  width:44px;
+  height:44px;
+  flex:0 0 44px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:12px;
+  background:#e0f2fe;
+  color:#0369a1;
+  font-size:20px;
+  font-weight:1000
+}
+.decision-hero.danger .decision-icon{
+  background:#fee2e2;
+  color:#b91c1c
+}
+.decision-hero.wonder .decision-icon{
+  background:#ede9fe;
+  color:#6d28d9
+}
+.decision-kicker,
+.modal-eyebrow{
+  color:#71808c;
+  font-size:7px;
+  line-height:1;
+  font-weight:1000;
+  letter-spacing:.13em
+}
+.decision-title{
+  margin-top:4px;
+  color:#172332;
+  font-size:18px;
+  line-height:1;
+  font-weight:1000
+}
+.decision-sub{
+  margin-top:4px;
+  color:#667784;
+  font-size:9px;
+  line-height:1.25;
+  font-weight:700
+}
+.decision-balance{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:9px 11px;
+  border-radius:11px;
+  background:#eef3f6;
+  color:#5c6d79;
+  font-size:9px;
+  font-weight:900
+}
+.decision-balance strong{
+  color:#172332;
+  font-size:14px
+}
+.decision-grid{
+  display:grid;
+  gap:10px
+}
+.decision-grid.two{
+  grid-template-columns:repeat(2,minmax(0,1fr))
+}
+.decision-card{
+  position:relative;
+  min-width:0;
+  padding:12px;
+  border:1px solid #dce5ea;
+  border-radius:14px;
+  background:#fff
+}
+.decision-card.recommended{
+  border-color:#93c5fd;
+  background:#f4faff
+}
+.decision-card.locked{
+  opacity:.58;
+  background:#f8fafc
+}
+.decision-card-tag{
+  color:#71808c;
+  font-size:7px;
+  line-height:1;
+  font-weight:1000;
+  letter-spacing:.11em
+}
+.decision-card b{
+  display:block;
+  margin-top:7px;
+  color:#263644;
+  font-size:11px
+}
+.decision-card > strong{
+  display:block;
+  margin-top:3px;
+  color:#111827;
+  font-size:20px;
+  line-height:1
+}
+.decision-card small{
+  display:block;
+  margin-top:7px;
+  color:#657681;
+  font-size:8px;
+  line-height:1.35;
+  font-weight:700
+}
+.decision-card button{
+  width:100%;
+  margin-top:10px;
+  min-height:37px;
+  border-radius:10px!important
+}
+.decision-warning{
+  margin-top:7px;
+  color:#b91c1c;
+  font-size:8px;
+  font-weight:900
+}
+#modal.modal-decision .row,
+#modal.modal-wonder .row,
+#modal.modal-danger .row{
+  gap:8px!important
+}
+#modal.modal-decision .row button,
+#modal.modal-wonder .row button,
+#modal.modal-danger .row button{
+  min-width:0;
+  flex:1
+}
+.property-modal-hero{
+  padding:11px!important
+}
+.property-modal-hero .modal-eyebrow{
+  margin-bottom:4px
+}
+.property-stats{
+  grid-template-columns:repeat(2,minmax(0,1fr))!important
+}
+.property-stat{
+  padding:10px!important
+}
+.property-stat .k{
+  font-size:7px!important
+}
+.property-stat .v{
+  margin-top:3px!important;
+  font-size:14px!important
+}
+.liquidation .debt-head{
+  border-radius:14px!important
+}
+.liquidation-assets{
+  max-height:250px;
+  overflow:auto
+}
+
+@media(max-width:700px){
+  .decision-grid.two{grid-template-columns:1fr}
+  #modal.visual-alpha-modal .box{padding:15px!important}
+  .decision-title{font-size:16px}
+}
+
