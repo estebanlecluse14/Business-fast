@@ -258,29 +258,31 @@ function openWonderModal(){
  const p=players[current],district=ownedWonderDistrict(current);
  if(!p||!district||p.wonderMode||gameOver)return;
  const list=district.ids.map(id=>spaces[id].name).join(', ');
- const body=`<div class="wonder-choice">
-   <div class="wonder-intro">
-     <b>🏛️ Quartier complet !</b>
-     <div class="wonder-line">${district.emoji} ${district.name}</div>
-     <div style="margin-top:5px;font-size:12px">Vous contrôlez les 3 propriétés du quartier : ${list}.</div>
+ const body=`<div class="decision-shell wonder-decision">
+   <div class="decision-hero wonder">
+     <div class="decision-icon">★</div>
+     <div><div class="decision-kicker">QUARTIER COMPLET</div><div class="decision-title">${district.emoji} ${district.name}</div><div class="decision-sub">${list}</div></div>
    </div>
-   <div class="wonder-options">
-     <div class="wonder-option">
-       <h3>💎 Construction accélérée</h3>
-       <p>Payez <b>${moneyFmt(400000)}</b>. La Merveille sera terminée après <b>5 de vos tours complets</b>.</p>
-       <div class="big">5 tours</div>
-       <button id="wonderFast" class="wonder-capitalist" ${p.money<400000?'disabled':''}>Payer 400 000 €</button>
-       ${p.money<400000?`<div style="font-size:10px;color:#991b1b;margin-top:6px">Trésorerie insuffisante.</div>`:''}
+   <div class="decision-balance"><span>Trésorerie de ${p.name}</span><strong>${moneyFmt(p.money)}</strong></div>
+   <div class="decision-grid two">
+     <div class="decision-card ${p.money>=400000?'recommended':'locked'}">
+       <div class="decision-card-tag">ACCÉLÉRÉE</div>
+       <b>Construction privée</b>
+       <strong>400 000 €</strong>
+       <small>Victoire après 5 de tes tours complets.</small>
+       <button id="wonderFast" class="wonder-capitalist" ${p.money<400000?'disabled':''}>Choisir · 5 tours</button>
+       ${p.money<400000?`<div class="decision-warning">Il manque ${moneyFmt(400000-p.money)}.</div>`:''}
      </div>
-     <div class="wonder-option">
-       <h3>☭ Construction collective</h3>
-       <p>Aucun paiement initial. Pendant la construction, <b>tous les loyers de la partie baissent de 65 %</b>. Victoire après <b>8 de vos tours complets</b>.</p>
-       <div class="big">8 tours · loyers -65 %</div>
-       <button id="wonderCollective" class="wonder-communist">Lancer le projet</button>
+     <div class="decision-card">
+       <div class="decision-card-tag">COLLECTIVE</div>
+       <b>Construction gratuite</b>
+       <strong>0 €</strong>
+       <small>8 tours · tous les loyers de la partie baissent de 65 %.</small>
+       <button id="wonderCollective" class="wonder-communist">Choisir · 8 tours</button>
      </div>
    </div>
  </div>`;
- modal('🏛️ Construire une Merveille',body);
+ modal('Construire une Merveille',body,'wonder');
  const row=document.querySelector('#modal .row');row.innerHTML='<button id="wonderCancel" class="secondary">Annuler</button>';
  document.getElementById('wonderCancel').onclick=closeModal;
  const fast=document.getElementById('wonderFast');
@@ -476,7 +478,7 @@ function resetModalTone(){
  if(!modalEl)return;
  modalEl.classList.remove('event-positive','event-negative','event-neutral');
 }
-function modal(title,html){
+function modal(title,html,variant='default'){
  resetModalTone();
  document.getElementById('modalTitle').textContent=title;
  document.getElementById('modalBody').innerHTML=html;
@@ -484,13 +486,15 @@ function modal(title,html){
  row.innerHTML='<button id="modalOk" class="primary">Fermer</button>';
  document.getElementById('modalOk').onclick=closeModal;
  const modalEl=document.getElementById('modal');
+ modalEl.classList.remove('modal-decision','modal-property','modal-danger','modal-wonder','modal-event');
+ if(variant&&variant!=='default')modalEl.classList.add('modal-'+variant);
  modalEl.classList.add('open','visual-alpha-modal');
  playSfx('open');
 }
 function closeModal(){
  if(pendingRentDecision)return;
  const modalEl=document.getElementById('modal');
- modalEl.classList.remove('open','event-positive','event-negative','event-neutral');
+ modalEl.classList.remove('open','event-positive','event-negative','event-neutral','modal-decision','modal-property','modal-danger','modal-wonder','modal-event');
  playSfx('close');
 }
 function showEventResult({title,icon='✨',description='',effect='',tone='neutral',afterClose=null}){
@@ -502,7 +506,7 @@ function showEventResult({title,icon='✨',description='',effect='',tone='neutra
    <div class="event-effect">${effect}</div>
    <div class="balance">${players[current]?`${players[current].name} · ${moneyFmt(players[current].money)}`:''}</div>
   </div>`;
- modal(title,body);
+ modal(title,body,'event');
  const eventModal=document.getElementById('modal');
  eventModal.classList.remove('event-positive','event-negative','event-neutral');
  eventModal.classList.add('event-'+tone);
@@ -530,9 +534,9 @@ function openPropertyModal(spaceId){
  const dots=[1,2,3].map(n=>`<span class="level-dot ${s.level>=n?'on':''}"></span>`).join('');
  const body=`
   <div class="property-card">
-   <div class="hero">
+   <div class="hero property-modal-hero">
     <div class="hero-icon">${s.type==='beach'?'🏖️':'🏙️'}</div>
-    <div><div class="hero-title">${s.name}</div><div class="hero-sub">${s.theme?.emoji||''} ${s.theme?.label||''} · Propriétaire : ${ownerName}</div></div>
+    <div><div class="modal-eyebrow">${s.owner===null?'À VENDRE':s.owner===current?'TON BIEN':'BIEN ADVERSE'}</div><div class="hero-title">${s.name}</div><div class="hero-sub">${s.theme?.emoji||''} ${s.theme?.label||''} · Propriétaire : ${ownerName}</div></div>
    </div>
    <div class="level-track">${dots}</div>
    <div class="property-stats">
@@ -548,7 +552,7 @@ function openPropertyModal(spaceId){
      s.level>=3?`<div class="upgrade-box locked"><b>Niveau maximum atteint</b><div class="upgrade-note">Valeur finale ${moneyFmt(valueNow)} · loyer ${moneyFmt(rentNow)}.</div></div>`:
      `<div class="upgrade-box ${canUpgrade?'':'locked'}"><b>Passer au niveau ${nextLevel}</b><div class="upgrade-note">Coût ${moneyFmt(cost)} · valeur ${moneyFmt(nextParcelValue(s))} · nouveau loyer ${moneyFmt(rentNext)}.</div></div>`}
   </div>`;
- modal(`🏢 ${s.name}`,body);
+ modal(`🏢 ${s.name}`,body,'property');
  const row=document.querySelector('#modal .row');
  if(canUpgrade){
    const btn=document.createElement('button');
@@ -784,20 +788,30 @@ function showRentChoice(spaceId){
  const rent=currentRent(s),buy=buyoutPrice(s);
  pendingRentDecision=true;
  status.textContent=`${s.name} appartient à ${owner.name} : payer ou racheter ?`;
+ const canBuyout=visitor.money>=buy;
  const body=`
-  <div class="rent-choice">
-   <div class="players">
-    <div class="person"><b>🎲 ${visitor.name}</b><small>${moneyFmt(visitor.money)} disponibles</small></div>
-    <div class="arrow">➡️</div>
-    <div class="person"><b>🏠 ${owner.name}</b><small>Propriétaire de ${s.name}</small></div>
+  <div class="decision-shell">
+   <div class="decision-hero">
+    <div class="decision-icon">€</div>
+    <div><div class="decision-kicker">PROPRIÉTÉ ADVERSE</div><div class="decision-title">${s.name}</div><div class="decision-sub">Propriétaire : ${owner.name}</div></div>
    </div>
-   <div class="summary">Loyer demandé<strong>${moneyFmt(rent)}</strong></div>
-   <div class="options">
-    <div class="option"><b>💸 Payer le loyer</b><small>${moneyFmt(rent)} seront versés à ${owner.name}.</small></div>
-    <div class="option"><b>🤝 Racheter la parcelle</b><small>Prix : ${moneyFmt(buy)}. Tu récupères aussi le niveau ${s.level}.</small></div>
+   <div class="decision-balance"><span>Ta trésorerie</span><strong>${moneyFmt(visitor.money)}</strong></div>
+   <div class="decision-grid two">
+    <div class="decision-card recommended">
+      <div class="decision-card-tag">OPTION SÛRE</div>
+      <b>Payer le loyer</b>
+      <strong>${moneyFmt(rent)}</strong>
+      <small>${moneyFmt(rent)} seront versés à ${owner.name}.</small>
+    </div>
+    <div class="decision-card ${canBuyout?'':'locked'}">
+      <div class="decision-card-tag">RACHAT</div>
+      <b>Devenir propriétaire</b>
+      <strong>${moneyFmt(buy)}</strong>
+      <small>Niveau ${s.level} conservé${canBuyout?'.':` · il manque ${moneyFmt(buy-visitor.money)}.`}</small>
+    </div>
    </div>
   </div>`;
- modal(`💰 ${s.name} — que veux-tu faire ?`,body);
+ modal(`Décision · ${s.name}`,body,'decision');
  const row=document.querySelector('#modal .row');
  row.innerHTML='';
  const pay=document.createElement('button');
@@ -934,7 +948,7 @@ function openLiquidationModal(){
    <div class="liquidation-assets">${assets}</div>
  </div>`;
 
- modal('🚨 Liquidation d’urgence',body);
+ modal('Liquidation d’urgence',body,'danger');
  playSfx('bad');
  const row=document.querySelector('#modal .row');
  row.innerHTML='';
@@ -1077,7 +1091,7 @@ function showWorksChoice(p,idx){
    <div class="event-effect">${moneyFmt(20000)} au total</div>
    <div class="balance">${p.name} · ${moneyFmt(p.money)}</div>
  </div>`;
- modal('⚡ Travaux imprévus',body);
+ modal('Travaux imprévus',`<div class="decision-shell"><div class="decision-hero danger"><div class="decision-icon">🚧</div><div><div class="decision-kicker">ÉVÉNEMENT</div><div class="decision-title">Travaux imprévus</div><div class="decision-sub">Choisis comment absorber la dépense.</div></div></div><div class="decision-balance"><span>Trésorerie</span><strong>${moneyFmt(p.money)}</strong></div><div class="decision-grid two"><div class="decision-card"><div class="decision-card-tag">ÉTALER</div><b>4 prélèvements</b><strong>4 × 5 000 €</strong><small>Prélevés sur les 4 prochains lancers.</small></div><div class="decision-card recommended"><div class="decision-card-tag">IMMÉDIAT</div><b>Payer maintenant</b><strong>20 000 €</strong><small>Règle le dossier immédiatement.</small></div></div></div>`,'decision');
  const row=document.querySelector('#modal .row');
  row.innerHTML='';
  const spread=document.createElement('button');
@@ -1128,7 +1142,7 @@ function processScheduledCharges(playerIndex,onContinue){
    <div class="event-effect">Total : -${moneyFmt(total)}</div>
    <div class="balance">${p.name} · ${moneyFmt(p.money)}</div>
  </div>`;
- modal('📅 Charge différée',body);
+ modal('Charge différée',body,'danger');
  const btn=document.getElementById('modalOk');
  btn.textContent='Payer et lancer les dés';
  btn.onclick=()=>{
@@ -1150,7 +1164,7 @@ function applyPropertyTax(p,idx){
    <div class="event-effect">À payer : -${moneyFmt(tax)}</div>
    <div class="balance">${p.name} · trésorerie ${moneyFmt(p.money)}</div>
  </div>`;
- modal('⚡ Taxe foncière',body);
+ modal('Taxe foncière',body,'danger');
  const btn=document.getElementById('modalOk');
  btn.textContent='Régler la taxe';
  btn.onclick=()=>{
@@ -1192,7 +1206,7 @@ function eventCard(p){const cards=[
      <div class="event-effect">Débit immédiat : -${moneyFmt(30000)}</div>
      <div class="balance">${p.name} · ${moneyFmt(p.money)}</div>
    </div>`;
-   modal('⚡ Contrôle fiscal',body);
+   modal('Contrôle fiscal',body,'danger');
    const btn=document.getElementById('modalOk');
    btn.textContent='Régler 30 000 €';
    btn.onclick=()=>{
