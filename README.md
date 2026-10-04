@@ -3,26 +3,29 @@
 Prototype web du jeu de plateau **Business Fast**.
 
 ## Version actuelle
-**V0.45 — Modales & décisions**
+**V0.46 — Centre du plateau & Merveille**
 
-### Nouveautés V0.45
-- Uniformisation des fenêtres de décision importantes.
-- Nouvelle structure commune : contexte, trésorerie, coût, conséquence et choix.
-- Loyer / rachat entièrement repensé pour comparer les deux options immédiatement.
-- Fenêtre Merveille clarifiée entre construction accélérée et collective.
-- Travaux imprévus présentés comme deux stratégies distinctes.
-- Taxe, charges différées et liquidation utilisent désormais un style danger cohérent.
-- Fiches propriété mieux hiérarchisées : statut du bien, valeur, loyer, prix et niveau.
-- Fenêtres plus compactes et plus lisibles, sans animation lourde supplémentaire.
+### Nouveautés V0.46
+- Refonte complète du cœur de **BUSINESS CITY**.
+- Logo, joueur actif, numéro du tour et dé regroupés dans un HUD central compact.
+- Dé réduit et mieux intégré pour libérer de l'espace.
+- Bandeau des joueurs actifs ajouté au centre.
+- Zone Merveille transformée en dock d'information compact.
+- Trois états Merveille clairement distingués : emplacement vide, projet disponible, chantier en cours.
+- Quand un quartier est complet, le centre affiche directement **Projet disponible** et permet d'ouvrir la Merveille.
+- Progression du chantier affichée en pourcentage, étape et tours restants.
+- Décor central légèrement atténué pour mieux faire ressortir les informations.
+- Suppression d'un double appel de rendu de la Merveille dans `refresh()`.
+- Aucun nouvel effet lourd ni animation continue.
 - Aucun changement de règles ni d'économie.
 
 ### Objectif
-La V0.45 doit permettre de comprendre une décision en quelques secondes : **combien ça coûte, ce que ça change, si le joueur peut se le permettre et quel bouton correspond à son choix**.
+La V0.46 transforme le centre du plateau en zone réellement utile au gameplay : **voir qui joue, où en est le tour et suivre la Merveille sans chevauchement ni surcharge visuelle**.
 
 ## Structure
 - `index.html` — structure de l'interface
-- `css/style.css` — direction artistique, UX et modales
-- `js/game.js` — règles, gameplay, décisions, événements et animations
+- `css/style.css` — direction artistique, UX et centre du plateau
+- `js/game.js` — règles, gameplay, décisions et état de la Merveille
 - `assets/` — illustrations SVG des quartiers, cases spéciales, pions, bâtiments et Merveille
 
 Projet en développement.
