@@ -49,7 +49,7 @@ const performanceLiteMode=true;
 document.documentElement.classList.add('performance-lite','crisp-render');
 
 /* --- Moteur audio synthétique, sans fichier externe --- */
-let audioCtx=null,musicGain=null,sfxGain=null,musicTimer=null,musicStep=0;
+let audioCtx=null,musicGain=null,sfxGain=null,musicTimer=null,musicStep=0,lobbyMusicTimer=null,lobbyMusicStep=0;
 let audioSettings={music:true,sfx:true,musicVolume:.28,sfxVolume:.55};
 try{const saved=JSON.parse(localStorage.getItem('businessFastAudio')||'null');if(saved)audioSettings={...audioSettings,...saved}}catch(e){}
 function saveAudioSettings(){try{localStorage.setItem('businessFastAudio',JSON.stringify(audioSettings))}catch(e){}}
@@ -105,14 +105,158 @@ function playAmbientChord(){
   o.connect(g);g.connect(musicGain);o.start(now);o.stop(now+3.2);
  });
 }
-function startAmbient(){if(!audioSettings.music||musicTimer)return;ensureAudio();playAmbientChord();musicTimer=setInterval(playAmbientChord,3200)}
+function startAmbient(){if(!audioSettings.music||musicTimer)return;stopLobbyMusic();ensureAudio();playAmbientChord();musicTimer=setInterval(playAmbientChord,3200)}
 function stopAmbient(){if(musicTimer){clearInterval(musicTimer);musicTimer=null}}
-function applyAudioSettings(){updateAudioGains();if(audioSettings.music)startAmbient();else stopAmbient();saveAudioSettings();syncAudioUI()}
+const lobbySequence=[
+ [261.63,329.63,392.00],[293.66,369.99,440.00],[329.63,392.00,493.88],[293.66,349.23,440.00]
+];
+function playLobbyPhrase(){
+ if(!audioSettings.music||!ensureAudio())return;
+ const chord=lobbySequence[lobbyMusicStep++%lobbySequence.length];
+ chord.forEach((f,i)=>tone(f,.72,i===0?'sine':'triangle',i===0?.032:.018,i*.07,musicGain));
+ tone(chord[0]/2,.95,'sine',.018,0,musicGain);
+}
+function startLobbyMusic(){
+ if(!audioSettings.music||lobbyMusicTimer||!document.getElementById('startScreen')?.classList.contains('active'))return;
+ ensureAudio();stopAmbient();playLobbyPhrase();lobbyMusicTimer=setInterval(playLobbyPhrase,1850);
+}
+function stopLobbyMusic(){if(lobbyMusicTimer){clearInterval(lobbyMusicTimer);lobbyMusicTimer=null}}
+
+function applyAudioSettings(){
+ updateAudioGains();
+ if(audioSettings.music){
+   if(document.getElementById('startScreen')?.classList.contains('active'))startLobbyMusic();
+   else startAmbient();
+ }else{
+   stopAmbient();stopLobbyMusic();
+ }
+ saveAudioSettings();syncAudioUI()
+}
 function syncAudioUI(){
  const mt=document.getElementById('musicToggle'),st=document.getElementById('sfxToggle'),mv=document.getElementById('musicVolume'),sv=document.getElementById('sfxVolume');
  if(mt){mt.textContent=audioSettings.music?'Activée':'Désactivée';mt.classList.toggle('on',audioSettings.music)}
  if(st){st.textContent=audioSettings.sfx?'Activés':'Désactivés';st.classList.toggle('on',audioSettings.sfx)}
  if(mv)mv.value=Math.round(audioSettings.musicVolume*100);if(sv)sv.value=Math.round(audioSettings.sfxVolume*100);
+}
+
+const AI_NAMES=[
+ 'Oliver','Noah','Liam','Ethan','Mason','Logan','Lucas','Henry','Jack','Leo',
+ 'Emma','Olivia','Ava','Sophia','Mia','Amelia','Chloe','Grace','Lily','Ruby'
+];
+const AI_RESERVE=55000;
+let aiBusy=false,aiTimer=null;
+function randomAiName(used=[]){
+ const pool=AI_NAMES.filter(n=>!used.includes(n));
+ return pool.length?pool[Math.floor(Math.random()*pool.length)]:`AI ${used.length+1}`;
+}
+function isAIPlayer(index=current){return !!players[index]?.isAI}
+function aiDelay(ms=520){return new Promise(r=>setTimeout(r,ms))}
+function aiDistrictNeed(playerIndex,s){
+ if(!s?.district)return 0;
+ const d=wonderDistricts.find(x=>x.name===s.district);
+ if(!d)return 0;
+ return d.ids.filter(id=>spaces[id].owner===playerIndex).length;
+}
+function aiShouldBuy(playerIndex,s){
+ const p=players[playerIndex],price=purchasePrice(s);
+ if(!p||!s||s.owner!==null||!['property','beach'].includes(s.type)||p.money<price)return false;
+ const reserve=s.type==='beach'?35000:AI_RESERVE;
+ const districtScore=aiDistrictNeed(playerIndex,s);
+ if(districtScore>=2)return p.money-price>=25000;
+ if(s.type==='beach'&&p.beaches>=2)return p.money-price>=20000;
+ const yieldScore=price?currentRent(s)/price:0;
+ return p.money-price>=reserve && (yieldScore>=.15 || districtScore>=1 || s.type==='beach');
+}
+function aiShouldBuild(playerIndex,s){
+ const p=players[playerIndex];
+ if(!p||!s||s.type!=='property'||s.owner!==playerIndex||s.level>=3)return false;
+ const cost=upgradeCosts[s.level+1]||Infinity;
+ if(p.money<cost)return false;
+ const districtScore=aiDistrictNeed(playerIndex,s);
+ const reserve=districtScore>=3?40000:AI_RESERVE;
+ return p.money-cost>=reserve;
+}
+function aiShouldBuyout(playerIndex,s){
+ const p=players[playerIndex],price=buyoutPrice(s);
+ if(!p||p.money<price)return false;
+ const districtScore=aiDistrictNeed(playerIndex,s);
+ return districtScore>=2 && p.money-price>=35000;
+}
+function aiHandleOpenModal(){
+ if(!isAIPlayer()||gameOver)return false;
+ const modalEl=document.getElementById('modal');
+ if(!modalEl?.classList.contains('open'))return false;
+ const p=players[current],s=spaces[p.pos];
+ if(pendingRentDecision){
+   if(aiShouldBuyout(current,s)){
+     const b=modalEl.querySelector('.buyout:not(:disabled)');if(b){b.click();return true}
+   }
+   const pay=modalEl.querySelector('.pay-rent');if(pay){pay.click();return true}
+ }
+ if(pendingDebt){
+   const saleButtons=[...modalEl.querySelectorAll('[data-sell-id]')];
+   if(saleButtons.length){
+     saleButtons.sort((a,b)=>parcelValue(spaces[+b.dataset.sellId])-parcelValue(spaces[+a.dataset.sellId]));
+     saleButtons[0].click();return true;
+   }
+   const bankrupt=modalEl.querySelector('.danger');if(bankrupt){bankrupt.click();return true}
+ }
+ const fast=modalEl.querySelector('#wonderFast:not(:disabled)');
+ const collective=modalEl.querySelector('#wonderCollective');
+ if(fast||collective){
+   if(fast && p.money>=500000){fast.click();return true}
+   if(collective){collective.click();return true}
+ }
+ const spread=[...modalEl.querySelectorAll('button')].find(b=>b.textContent.includes('Échelonner'));
+ const payNow=[...modalEl.querySelectorAll('button')].find(b=>b.textContent.includes('Payer 20'));
+ if(spread||payNow){
+   if(payNow&&p.money-20000>=AI_RESERVE)payNow.click(); else spread?.click();
+   return true;
+ }
+ const ok=modalEl.querySelector('#modalOk');
+ if(ok&&!ok.disabled){ok.click();return true}
+ return false;
+}
+async function runAITurn(){
+ if(aiBusy||gameOver||!isAIPlayer())return;
+ aiBusy=true;
+ const aiIndex=current;
+ try{
+   await aiDelay(650);
+   if(current!==aiIndex||gameOver)return;
+   if(aiHandleOpenModal()){await aiDelay(500);return}
+   if(!rolled){
+     addLog(`🤖 <b>${players[current].name}</b> analyse le plateau et lance les dés.`);
+     rollBtn.click();return;
+   }
+   const p=players[current],s=spaces[p.pos];
+   if(canLaunchWonder(current)){
+     addLog(`🤖 <b>${p.name}</b> sécurise un quartier complet et prépare une Merveille.`);
+     openWonderModal();return;
+   }
+   if(aiShouldBuy(current,s)&&!buyBtn.disabled){
+     addLog(`🤖 <b>${p.name}</b> juge ${s.name} rentable et l'achète.`);
+     buyBtn.click();await aiDelay(380);
+   }
+   if(aiShouldBuild(current,s)&&!buildBtn.disabled){
+     addLog(`🤖 <b>${p.name}</b> renforce ${s.name} pour augmenter son loyer.`);
+     buildBtn.click();await aiDelay(380);
+     if(document.getElementById('modal')?.classList.contains('open'))closeModal();
+   }
+   await aiDelay(430);
+   repairTurnState();
+   if(current===aiIndex&&!endBtn.disabled){
+     addLog(`🤖 <b>${p.name}</b> termine son tour.`);
+     endBtn.click();
+   }
+ }finally{
+   aiBusy=false;
+ }
+}
+function scheduleAI(){
+ if(aiTimer){clearTimeout(aiTimer);aiTimer=null}
+ if(gameOver||!isAIPlayer())return;
+ aiTimer=setTimeout(()=>{aiTimer=null;runAITurn();},420);
 }
 
 const names=[
@@ -496,7 +640,7 @@ function renderWonderSite(){
  </div>`;
 }
 function renderPlayers(){
- playerBox.innerHTML=players.map((p,i)=>`<div class="player ${i===current&&p.active?'active':''}">${pawnVisual(i,p.name,'panel-pawn')}<div class="pmeta"><div class="pname">${p.name}${!p.active?' 💀':''}</div><div class="pmoney">${moneyFmt(p.money)} · ${p.props.length} biens · ${p.beaches} plage(s)</div>${p.wonderMode&&p.active?`<div class="wonder-progress">🏛️ ${p.wonderLine} · ${p.wonderTurnsLeft} tour(s) · ${p.wonderMode==='communist'?'collective':'accélérée'}</div>`:''}</div></div>`).join('');
+ playerBox.innerHTML=players.map((p,i)=>`<div class="player ${i===current&&p.active?'active':''}">${pawnVisual(i,p.name,'panel-pawn')}<div class="pmeta"><div class="pname">${p.name}${p.isAI?' <span class="ai-player-badge">IA</span>':''}${!p.active?' 💀':''}</div><div class="pmoney">${moneyFmt(p.money)} · ${p.props.length} biens · ${p.beaches} plage(s)</div>${p.wonderMode&&p.active?`<div class="wonder-progress">🏛️ ${p.wonderLine} · ${p.wonderTurnsLeft} tour(s) · ${p.wonderMode==='communist'?'collective':'accélérée'}</div>`:''}</div></div>`).join('');
  const activeWonder=players.find(p=>p.active&&p.wonderMode&&p.wonderTurnsLeft>0);
  document.getElementById('turnText').innerHTML=gameOver?'Partie terminée':`<span class="turn-player-name">${players[current]?.name||''}</span><small class="turn-round">Tour de table ${roundNumber}</small>${communistWonderActive()?'<div class="global-rent-alert">☭ Construction collective : tous les loyers -65 %</div>':activeWonder?`<div class="wonder-banner">🏛️ ${activeWonder.name} · Merveille dans ${activeWonder.wonderTurnsLeft} tour(s)</div>`:''}`;
  const centerTokens=document.getElementById('centerTokens');
@@ -631,6 +775,7 @@ function refresh(){
  renderPlayers();
  updateActions();
  refreshDevStats();
+ scheduleAI();
 }
 function repairTurnState(){
  const modalOpen=document.getElementById('modal')?.classList.contains('open');
@@ -1546,9 +1691,33 @@ endBtn.onclick=()=>{if(animating&&!document.getElementById('modal')?.classList.c
  do{current=(current+1)%players.length}while(!players[current].active);
  if(current<=previous){roundNumber++;recoverZonePressure();}
  document.getElementById('dice').dataset.face='1';status.textContent=`${players[current].name}, à toi de jouer.`;addLog(`➡️ Tour de <b>${players[current].name}</b> · tour de table ${roundNumber}.`);refresh();animateTurnChange(current)};
-function startGame(){resetTransientUI();pendingRentDecision=false;pendingDebt=null;debtQueue=[];zonePressure={};roundNumber=1;resetDevStats();ensureAudio();playSfx('start');startAmbient();const n=+document.getElementById('playerCount').value;winMode=document.getElementById('winMode').value;players=[];for(let i=0;i<n;i++){players.push({name:(document.getElementById('p'+(i+1)).value||`Joueur ${i+1}`).trim(),money:200000,pos:0,props:[],beaches:0,active:true,fiscalRollsLeft:0,worksInstallmentsLeft:0,wonderMode:null,wonderTurnsLeft:0,wonderLine:null,wonderSkipCountdown:false})}spaces.forEach(s=>{s.owner=null;s.level=0;s.rent=rents[s.id];s.baseRent=rents[s.id]});current=0;rolled=false;gameOver=false;logBox.innerHTML='';document.getElementById('startScreen').classList.remove('active');document.getElementById('gameScreen').classList.add('active');addLog(`🚀 Partie lancée avec ${n} joueurs. Chacun commence avec ${moneyFmt(200000)}.`);status.textContent=`${players[0].name}, à toi de jouer.`;refresh();setTimeout(()=>animateTurnChange(0),120)}
-document.getElementById('startBtn').onclick=startGame;
-document.getElementById('restartBtn').onclick=()=>{if(confirm('Recommencer la partie ?')){playSfx('close');stopAmbient();resetTransientUI();pendingRentDecision=false;pendingDebt=null;debtQueue=[];animating=false;rolled=false;lastRoll=0;const resetDie=document.getElementById('dice');if(resetDie){resetDie.classList.remove('rolling');resetDie.dataset.face='1';}if(typeof setDevMode==='function')setDevMode(false);document.getElementById('gameScreen').classList.remove('active');document.getElementById('startScreen').classList.add('active')}};
+function startGame(){
+ resetTransientUI();pendingRentDecision=false;pendingDebt=null;debtQueue=[];zonePressure={};roundNumber=1;resetDevStats();
+ ensureAudio();stopLobbyMusic();playSfx('start');startAmbient();
+ const n=+document.getElementById('playerCount').value;winMode=document.getElementById('winMode').value;
+ players=[];
+ const usedNames=[];
+ for(let i=0;i<n;i++){
+   const typeBtn=document.querySelector(`[data-player-type="${i+1}"]`);
+   const isAI=typeBtn?.dataset.mode==='ai';
+   const input=document.getElementById('p'+(i+1));
+   let playerName=(input?.value||'').trim();
+   if(isAI){
+     if(!playerName||/^Joueur \d+$/i.test(playerName))playerName=randomAiName(usedNames);
+   }else if(!playerName){
+     playerName=`Joueur ${i+1}`;
+   }
+   usedNames.push(playerName);
+   players.push({name:playerName,isAI,aiDifficulty:isAI?'hard':null,money:200000,pos:0,props:[],beaches:0,active:true,fiscalRollsLeft:0,worksInstallmentsLeft:0,wonderMode:null,wonderTurnsLeft:0,wonderLine:null,wonderSkipCountdown:false});
+ }
+ spaces.forEach(s=>{s.owner=null;s.level=0;s.rent=rents[s.id];s.baseRent=rents[s.id]});
+ current=0;rolled=false;gameOver=false;logBox.innerHTML='';
+ document.getElementById('startScreen').classList.remove('active');document.getElementById('gameScreen').classList.add('active');
+ const aiCount=players.filter(p=>p.isAI).length;
+ addLog(`🚀 Partie lancée avec ${n} joueurs · ${aiCount} IA difficile(s). Chacun commence avec ${moneyFmt(200000)}.`);
+ status.textContent=`${players[0].name}, à toi de jouer.`;refresh();setTimeout(()=>animateTurnChange(0),120);
+}document.getElementById('startBtn').onclick=startGame;
+document.getElementById('restartBtn').onclick=()=>{if(confirm('Recommencer la partie ?')){playSfx('close');stopAmbient();resetTransientUI();pendingRentDecision=false;pendingDebt=null;debtQueue=[];animating=false;rolled=false;lastRoll=0;const resetDie=document.getElementById('dice');if(resetDie){resetDie.classList.remove('rolling');resetDie.dataset.face='1';}if(typeof setDevMode==='function')setDevMode(false);document.getElementById('gameScreen').classList.remove('active');document.getElementById('startScreen').classList.add('active');stopAmbient();setTimeout(startLobbyMusic,120)}};
 
 
 const devPanel=document.getElementById('devPanel');
@@ -1613,6 +1782,51 @@ document.getElementById('devFinishWonder').onclick=()=>{
 document.getElementById('devGlobal').onclick=()=>{if(players[current]&&!pendingDebt&&!pendingRentDecision&&!gameOver)globalEvent()};
 document.getElementById('sim100').onclick=()=>runDevSimulation(100);
 document.getElementById('sim1000').onclick=()=>runDevSimulation(1000);
+
+const playerCountSelect=document.getElementById('playerCount');
+const lobbyPlayerSummary=document.getElementById('lobbyPlayerSummary');
+const lobbyAiSummary=document.getElementById('lobbyAiSummary');
+function refreshLobbySetup(){
+ const count=+playerCountSelect.value;
+ document.querySelectorAll('[data-player-slot]').forEach(slot=>{
+   const idx=+slot.dataset.playerSlot;
+   slot.classList.toggle('slot-hidden',idx>count);
+ });
+ const active=[...document.querySelectorAll('[data-player-type]')].filter(b=>+b.dataset.playerType<=count);
+ const aiCount=active.filter(b=>b.dataset.mode==='ai').length;
+ if(lobbyPlayerSummary)lobbyPlayerSummary.textContent=`${count} joueur${count>1?'s':''}`;
+ if(lobbyAiSummary)lobbyAiSummary.textContent=`${aiCount} IA · ${count-aiCount} humain${count-aiCount>1?'s':''}`;
+}
+document.querySelectorAll('[data-player-type]').forEach(btn=>{
+ btn.dataset.mode='human';
+ btn.onclick=()=>{
+   ensureAudio();startLobbyMusic();playSfx('click');
+   const idx=+btn.dataset.playerType;
+   const input=document.getElementById('p'+idx);
+   const toAI=btn.dataset.mode!=='ai';
+   btn.dataset.mode=toAI?'ai':'human';
+   btn.classList.toggle('ai',toAI);btn.classList.toggle('human',!toAI);
+   btn.setAttribute('aria-pressed',toAI?'true':'false');
+   btn.querySelector('.type-icon').textContent=toAI?'🤖':'👤';
+   btn.querySelector('.type-copy b').textContent=toAI?'IA difficile':'Humain';
+   btn.querySelector('.type-copy small').textContent=toAI?'Stratégique':'Contrôle manuel';
+   if(toAI){
+     const used=[...document.querySelectorAll('[data-player-type][data-mode="ai"]')].map(b=>document.getElementById('p'+b.dataset.playerType)?.value).filter(Boolean);
+     input.value=randomAiName(used.filter(n=>n!==input.value));
+     input.readOnly=true;
+     input.closest('.player-slot')?.classList.add('is-ai');
+   }else{
+     input.readOnly=false;
+     if(AI_NAMES.includes(input.value))input.value=`Joueur ${idx}`;
+     input.closest('.player-slot')?.classList.remove('is-ai');
+   }
+   refreshLobbySetup();
+ };
+});
+playerCountSelect.addEventListener('change',refreshLobbySetup);
+document.getElementById('startScreen')?.addEventListener('pointerdown',()=>{ensureAudio();startLobbyMusic()},{once:true});
+document.getElementById('startScreen')?.addEventListener('keydown',()=>{ensureAudio();startLobbyMusic()},{once:true});
+refreshLobbySetup();
 
 const settingsModal=document.getElementById('settingsModal');
 document.getElementById('settingsBtn').onclick=()=>{ensureAudio();syncAudioUI();settingsModal.classList.add('open');settingsModal.setAttribute('aria-hidden','false');playSfx('open')};
