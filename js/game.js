@@ -699,7 +699,7 @@ function renderWonderSite(){
  </div>`;
 }
 function renderPlayers(){
- playerBox.innerHTML=players.map((p,i)=>`<div class="player ${i===current&&p.active?'active':''}">${pawnVisual(i,p.name,'panel-pawn')}<div class="pmeta"><div class="pname">${p.name}${p.isAI?' <span class="ai-player-badge">IA</span>':''}${!p.active?' 💀':''}</div><div class="pmoney">${moneyFmt(p.money)} · ${p.props.length} biens · ${p.beaches} plage(s)</div>${p.wonderMode&&p.active?`<div class="wonder-progress">🏛️ ${p.wonderLine} · ${p.wonderTurnsLeft} tour(s) · ${p.wonderMode==='communist'?'collective':'accélérée'}</div>`:''}</div></div>`).join('');
+ playerBox.innerHTML=players.map((p,i)=>`<div class="player ${i===current&&p.active?'active':''}">${pawnVisual(i,p.name,'panel-pawn')}<div class="pmeta"><div class="pname">${p.name}${p.isAI?' <span class="ai-player-badge">IA</span>':''}${!p.active?' 💀':''}</div><div class="pmoney">${moneyFmt(p.money)} · ${p.props.length} biens · ${p.beaches} plage(s)</div>${p.jailed&&p.active?`<div class="jail-player-status">PRISON · ${p.jailTurnsLeft} tour(s)</div>`:''}${p.wonderMode&&p.active?`<div class="wonder-progress">🏛️ ${p.wonderLine} · ${p.wonderTurnsLeft} tour(s) · ${p.wonderMode==='communist'?'collective':'accélérée'}</div>`:''}</div></div>`).join('');
  const activeWonder=players.find(p=>p.active&&p.wonderMode&&p.wonderTurnsLeft>0);
  document.getElementById('turnText').innerHTML=gameOver?'Partie terminée':`<span class="turn-player-name">${players[current]?.name||''}</span><small class="turn-round">Tour de table ${roundNumber}</small>${communistWonderActive()?'<div class="global-rent-alert">☭ Construction collective : tous les loyers -65 %</div>':activeWonder?`<div class="wonder-banner">🏛️ ${activeWonder.name} · Merveille dans ${activeWonder.wonderTurnsLeft} tour(s)</div>`:''}`;
  const centerTokens=document.getElementById('centerTokens');
@@ -1127,14 +1127,20 @@ function maybeOpenJailTurn(){
  const p=players[current];if(!p?.jailed)return;
  if(document.getElementById('modal')?.classList.contains('open'))return;
  if(document.getElementById('jailEscapeOverlay')?.classList.contains('open'))return;
- setTimeout(()=>openJailDecision(current,{fromArrival:false}),120);
+ setTimeout(()=>{
+   const p2=players[current];
+   if(!p2?.jailed||gameOver||pendingDebt||pendingRentDecision||animating)return;
+   if(document.getElementById('modal')?.classList.contains('open'))return;
+   if(document.getElementById('jailEscapeOverlay')?.classList.contains('open'))return;
+   openJailDecision(current,{fromArrival:false});
+ },120);
 }
 function simulateAIEscape(playerIndex,fromArrival){
  const p=players[playerIndex];if(!p)return;
  const success=Math.random()<0.74;
  showCinematic(success?'start':'bankrupt',success?'ÉVASION RÉUSSIE':'ÉVASION ÉCHOUÉE',p.name,success?'La lame tient jusqu’au dernier barreau.':'La lame casse sous la chaleur.',1200);
  if(success){stat('jailEscapes');p.hasEscapedJail=true;releaseFromJail(playerIndex,'évasion réussie',!fromArrival);if(fromArrival)repairTurnState()}
- else{stat('jailBladeBreaks');addLog('Évasion : la lame de <b>'+p.name+'</b> casse. Il reste en prison.');if(fromArrival)forceEndJailTurn();else refresh()}
+ else{stat('jailBladeBreaks');addLog('Évasion : la lame de <b>'+p.name+'</b> casse. Il reste en prison.');forceEndJailTurn()}
 }
 function startJailEscapeGame(playerIndex,fromArrival){
  const overlay=document.getElementById('jailEscapeOverlay');if(!overlay)return;
@@ -1150,7 +1156,7 @@ function finishJailEscape(success){
  jailGameState.finished=true;jailHold=false;const state={...jailGameState},p=players[state.playerIndex],overlay=document.getElementById('jailEscapeOverlay');
  if(success){stat('jailEscapes');p.hasEscapedJail=true;overlay?.classList.add('escaped');document.getElementById('jailEscapeStatus').textContent='Évasion réussie. Les 4 barreaux sont coupés.';addLog('Évasion réussie : <b>'+p.name+'</b> quitte la prison.');playSfx('start')}
  else{stat('jailBladeBreaks');overlay?.classList.add('blade-broken');document.getElementById('jailEscapeStatus').textContent='SURCHAUFFE — la lame vient de casser.';addLog('Évasion ratée : la lame de <b>'+p.name+'</b> casse. Les 100 000 € sont perdus.');playSfx('bad')}
- setTimeout(()=>{closeJailEscapeGame();if(success){releaseFromJail(state.playerIndex,'évasion réussie',!state.fromArrival);if(state.fromArrival)repairTurnState()}else{if(state.fromArrival)forceEndJailTurn();else refresh()}},1100);
+ setTimeout(()=>{closeJailEscapeGame();if(success){releaseFromJail(state.playerIndex,'évasion réussie',!state.fromArrival);if(state.fromArrival)repairTurnState()}else{forceEndJailTurn()}},1100);
 }
 function jailEscapeTick(ts){
  if(!jailGameState||jailGameState.finished)return;
