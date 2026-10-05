@@ -3,14 +3,14 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Business Fast V0.46.1</title>
+<title>Business Fast V0.46.2</title>
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 <section id="startScreen" class="screen active">
   <div class="start-wrap">
     <h1 class="logo">BUSINESS <span>FAST</span></h1>
-    <div class="subtitle">V0.46.1 — correctifs de partie</div>
+    <div class="subtitle">V0.46.2 — mode développeur réparé</div>
     <div class="card">
       <div class="setup-grid">
         <div class="field"><label>Nombre de joueurs</label><select id="playerCount"><option>2</option><option>3</option><option selected>4</option></select></div>
@@ -110,8 +110,10 @@
     </div>
     <div class="panel utility-panel"><div class="panel-kicker">OUTILS</div><div class="legend"><span class="pill">Plage</span><span class="pill">Événement</span><span class="pill">Mondial</span><span class="pill">Banque</span><span class="pill">Prison</span><span class="pill">Bâtiments</span></div><button id="journalBtn" class="secondary" style="width:100%">📜 Ouvrir le journal</button><button id="settingsBtn" class="settings-btn">⚙️ Paramètres audio</button><div style="margin-top:10px"><button id="devToggle" class="secondary" style="width:100%">🧪 Mode développeur</button></div><div style="margin-top:10px"><button id="restartBtn" class="secondary danger" style="width:100%">Recommencer</button></div></div>
     <div id="devPanel" class="panel dev-panel" style="display:none">
-      <div class="dev-head"><h3>🧪 Mode développeur</h3><span id="devState" class="dev-chip">LIVE</span></div>
+      <div class="dev-head"><h3>🧪 Mode développeur</h3><div class="dev-head-actions"><span id="devState" class="dev-chip">LIVE</span><button id="devClose" class="dev-close" type="button" aria-label="Fermer le mode développeur">✕</button></div></div>
+      <div class="dev-section-label">STATISTIQUES LIVE</div>
       <div id="devStats" class="dev-stats"></div>
+      <div class="dev-section-label dev-tools-label">OUTILS DE TEST</div>
       <div class="dev-actions">
         <button id="devCash" type="button">+50k joueur</button>
         <button id="devDebt" type="button">Dette test 250k</button>
@@ -164,6 +166,9 @@
     </div>
     <div class="updates-list">
       <article class="update-item current">
+        <div class="update-version">V0.46.2</div><div class="update-copy"><div class="update-title">Mode développeur réparé <span class="update-tag minor">Hotfix</span></div><p>Le panneau développeur devient une vraie console scrollable : bouton de fermeture permanent, statistiques séparées des outils de test et accès complet aux actions et simulations.</p></div>
+      </article>
+      <article class="update-item">
         <div class="update-version">V0.46.1</div><div class="update-copy"><div class="update-title">Correctifs de partie <span class="update-tag minor">Hotfix</span></div><p>Correction des faces du dé, sécurisation de la fin de tour après les événements et repositionnement permanent du panneau des joueurs à gauche sur ordinateur.</p></div>
       </article>
       <article class="update-item">
