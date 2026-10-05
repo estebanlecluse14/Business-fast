@@ -7051,3 +7051,45 @@ body{
 }
 html.phaser-ready .phaser-mount{opacity:1}
 
+
+
+/* === V0.46.1 HOTFIX : dé, fin de tour après événement, joueurs à gauche === */
+
+/* Grille 3x3 du dé : les numéros p1..p9 correspondent à nouveau aux vraies positions.
+   V0.46 avait déplacé p5 hors du centre, ce qui affichait de mauvaises faces. */
+.premium-die .p1{left:11px!important;top:11px!important;right:auto!important;bottom:auto!important}
+.premium-die .p2{left:50%!important;top:11px!important;right:auto!important;bottom:auto!important;transform:translateX(-50%)!important}
+.premium-die .p3{right:11px!important;top:11px!important;left:auto!important;bottom:auto!important}
+.premium-die .p4{left:11px!important;top:50%!important;right:auto!important;bottom:auto!important;transform:translateY(-50%)!important}
+.premium-die .p5{left:50%!important;top:50%!important;right:auto!important;bottom:auto!important;transform:translate(-50%,-50%)!important}
+.premium-die .p6{right:11px!important;top:50%!important;left:auto!important;bottom:auto!important;transform:translateY(-50%)!important}
+.premium-die .p7{left:11px!important;bottom:11px!important;right:auto!important;top:auto!important}
+.premium-die .p8{left:50%!important;bottom:11px!important;right:auto!important;top:auto!important;transform:translateX(-50%)!important}
+.premium-die .p9{right:11px!important;bottom:11px!important;left:auto!important;top:auto!important}
+
+/* L'écran joueurs reste à gauche sur desktop, séparé des commandes à droite. */
+@media(min-width:1181px){
+  .sidebar .player-panel{
+    position:fixed!important;
+    left:14px!important;
+    right:auto!important;
+    top:14px!important;
+    width:214px!important;
+    max-height:calc(100vh - 28px)!important;
+    z-index:45!important;
+    overflow:auto!important;
+  }
+  .sidebar{
+    position:fixed!important;
+    right:14px!important;
+    left:auto!important;
+    top:14px!important;
+    width:264px!important;
+    max-height:calc(100vh - 28px)!important;
+    z-index:40!important;
+  }
+  .board-wrap{
+    padding-left:242px!important;
+    padding-right:300px!important;
+  }
+}
