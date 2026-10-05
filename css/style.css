@@ -8059,3 +8059,62 @@ html.phaser-ready .phaser-mount{opacity:1}
 @media(max-width:720px){
   .initiative-players{grid-template-columns:1fr}
 }
+
+
+/* === V0.47.3 ÉVÉNEMENTS & PATRIMOINE === */
+.patrimony-btn{
+  width:100%;margin-top:8px;padding:10px 12px;border:1px solid rgba(125,211,252,.20);border-radius:11px;
+  background:linear-gradient(135deg,#153049,#1d4b66);color:#fff;font-size:9px;font-weight:1000;letter-spacing:.07em;cursor:pointer
+}
+.patrimony-btn span{display:block;margin-top:2px;color:#9ed9f4;font-size:7px;font-weight:800;letter-spacing:.02em}
+.patrimony-modal{
+  position:fixed;inset:0;z-index:410;display:none;align-items:center;justify-content:center;padding:20px;
+  background:rgba(4,12,22,.68);backdrop-filter:blur(7px)
+}
+.patrimony-modal.open{display:flex}
+.patrimony-box{
+  width:min(700px,95vw);max-height:86vh;overflow:auto;border-radius:22px;
+  background:linear-gradient(180deg,#f8fbfd,#eaf1f5);border:1px solid #d3e0e7;box-shadow:0 28px 80px rgba(0,0,0,.32)
+}
+.patrimony-head{display:flex;justify-content:space-between;gap:20px;align-items:flex-start;padding:18px 20px;background:#13283a;color:#fff}
+.patrimony-kicker{font-size:7px;font-weight:1000;letter-spacing:.18em;color:#7dd3fc}.patrimony-head h2{margin:4px 0 2px;font-size:22px}.patrimony-head p{margin:0;color:#9db0c1;font-size:9px}
+.patrimony-close{width:34px;height:34px;border:0;border-radius:10px;background:rgba(255,255,255,.10);color:#fff;font-weight:1000;cursor:pointer}
+.patrimony-list{display:grid;gap:8px;padding:14px}
+.patrimony-row{
+  display:grid;grid-template-columns:34px 34px minmax(0,1fr) auto;align-items:center;gap:10px;padding:10px 11px;border-radius:13px;
+  background:#fff;border:1px solid #dbe5ea;box-shadow:0 5px 14px rgba(15,23,42,.06)
+}
+.patrimony-row:first-child{border-color:#e7bf56;background:linear-gradient(90deg,#fff9df,#fff)}
+.patrimony-row.inactive{opacity:.48}.patrimony-rank{width:28px;height:28px;display:flex;align-items:center;justify-content:center;border-radius:9px;background:#e8eef2;color:#334155;font-size:10px;font-weight:1000}
+.patrimony-row:first-child .patrimony-rank{background:#f5c84b;color:#4d3900}
+.patrimony-pawn{width:28px!important;height:35px!important;object-fit:contain}.patrimony-copy b{display:block;color:#172332;font-size:11px}.patrimony-copy b span{padding:2px 4px;border-radius:5px;background:#ede9fe;color:#6d28d9;font-size:6px}.patrimony-copy small{display:block;margin-top:2px;color:#70808d;font-size:7px}
+.patrimony-values{text-align:right}.patrimony-values small{display:block;color:#738492;font-size:7px}.patrimony-values strong{display:block;margin-top:3px;color:#0f3a50;font-size:13px}
+
+/* Catastrophes visuelles sans emoji */
+.disaster-fx{position:fixed;inset:0;z-index:390;pointer-events:none;opacity:0;visibility:hidden;overflow:hidden;transition:opacity .16s ease}
+.disaster-fx.show{opacity:1;visibility:visible}
+.disaster-fx .flood-sheet,.disaster-fx .quake-cracks{display:none;position:absolute;inset:0}
+.disaster-fx.flood{background:linear-gradient(180deg,rgba(49,170,224,.04),rgba(6,95,152,.25))}
+.disaster-fx.flood .flood-sheet{display:block}
+.flood-sheet i{position:absolute;left:-12%;width:124%;height:150px;border-radius:48% 52% 0 0;background:rgba(73,190,236,.36);border-top:3px solid rgba(211,245,255,.62)}
+.flood-sheet i:nth-child(1){bottom:-45px;animation:floodWave 2.8s ease-in-out infinite}
+.flood-sheet i:nth-child(2){bottom:32px;opacity:.58;animation:floodWave 3.5s ease-in-out infinite reverse}
+.flood-sheet i:nth-child(3){bottom:92px;opacity:.30;animation:floodWave 4.2s ease-in-out infinite}
+@keyframes floodWave{0%,100%{transform:translateX(-2%) rotate(-1deg)}50%{transform:translateX(5%) rotate(1deg)}}
+.disaster-fx.quake{background:rgba(70,46,31,.10);animation:quakeScreen .095s linear 10}
+.disaster-fx.quake .quake-cracks{display:block}
+.quake-cracks i{position:absolute;height:5px;background:rgba(46,34,27,.72);transform-origin:left center;box-shadow:0 0 0 1px rgba(255,255,255,.10)}
+.quake-cracks i:nth-child(1){width:28vw;left:12%;top:36%;transform:rotate(19deg)}
+.quake-cracks i:nth-child(2){width:22vw;right:10%;top:31%;transform:rotate(-26deg)}
+.quake-cracks i:nth-child(3){width:19vw;left:40%;bottom:28%;transform:rotate(31deg)}
+.quake-cracks i:nth-child(4){width:15vw;right:35%;bottom:18%;transform:rotate(-14deg)}
+.quake-cracks i::after{content:'';position:absolute;width:45%;height:4px;left:42%;top:0;background:inherit;transform-origin:left center;transform:rotate(47deg)}
+@keyframes quakeScreen{0%{transform:translate(0)}25%{transform:translate(-4px,3px)}50%{transform:translate(5px,-3px)}75%{transform:translate(-3px,-2px)}100%{transform:translate(0)}}
+.disaster-label{position:absolute;left:50%;top:14%;transform:translateX(-50%);min-width:300px;padding:12px 18px;border-radius:15px;background:rgba(9,24,36,.91);border:1px solid rgba(255,255,255,.16);text-align:center;box-shadow:0 16px 35px rgba(0,0,0,.25)}
+.disaster-label span{display:block;color:#fff;font-size:18px;font-weight:1000;letter-spacing:.08em}.disaster-label small{display:block;margin-top:4px;color:#c2d2de;font-size:9px;font-weight:800}
+.disaster-fx.flood .disaster-label{border-color:rgba(125,211,252,.38)}.disaster-fx.quake .disaster-label{border-color:rgba(216,180,142,.40)}
+.disaster-visual.quake-mini{position:relative;height:92px;margin-bottom:11px;border-radius:14px;overflow:hidden;background:linear-gradient(155deg,#ddd0bf,#bba58c)}
+.quake-mini::before{content:'';position:absolute;inset:0;background:linear-gradient(20deg,transparent 47%,rgba(72,55,42,.32) 48%,rgba(72,55,42,.32) 49%,transparent 50%)}
+.quake-mini span{position:absolute;height:4px;background:#665140;border-radius:4px}.quake-mini span:nth-child(1){width:42%;left:7%;top:37%;transform:rotate(15deg)}.quake-mini span:nth-child(2){width:34%;right:8%;top:51%;transform:rotate(-23deg)}.quake-mini span:nth-child(3){width:28%;left:38%;bottom:19%;transform:rotate(31deg)}
+.space.quake-damaged{box-shadow:inset 0 0 0 3px rgba(104,72,48,.42)!important}
+.space.quake-damaged::after{background:repeating-linear-gradient(135deg,transparent 0 18px,rgba(78,57,43,.10) 19px 22px)!important}
