@@ -7350,3 +7350,299 @@ html.phaser-ready .phaser-mount{opacity:1}
 .dev-panel{
   pointer-events:auto!important;
 }
+
+
+/* === V0.46.5 CASES PLEINES, MERVEILLE LISIBLE & FIN DE TOUR === */
+
+/* HAUT/BAS : la carte devient un vrai visuel plein cadre.
+   L'asset occupe toute la tuile et les informations se posent par-dessus. */
+.space.side-top.property,
+.space.side-top.beach,
+.space.side-bottom.property,
+.space.side-bottom.beach{
+  overflow:visible!important;
+  background:color-mix(in srgb,var(--theme-color) 14%,#edf3f5)!important;
+}
+.space.side-top .property-layout,
+.space.side-bottom .property-layout{
+  position:absolute!important;
+  inset:0!important;
+  display:block!important;
+  width:100%!important;
+  height:100%!important;
+  padding:0!important;
+  border-radius:12px!important;
+  overflow:visible!important;
+  background:transparent!important;
+}
+.space.side-top .case-visual,
+.space.side-bottom .case-visual{
+  position:absolute!important;
+  inset:0!important;
+  width:100%!important;
+  height:100%!important;
+  border-radius:12px!important;
+  overflow:hidden!important;
+  background:color-mix(in srgb,var(--theme-color) 16%,#e9f1f4)!important;
+}
+.space.side-top .case-art,
+.space.side-bottom .case-art{
+  position:absolute!important;
+  inset:0!important;
+  width:100%!important;
+  height:100%!important;
+  object-fit:cover!important;
+  object-position:center!important;
+  transform:scale(1.12)!important;
+  opacity:.98!important;
+}
+.space.side-top .case-art-gloss,
+.space.side-bottom .case-art-gloss{
+  position:absolute!important;
+  inset:0!important;
+  z-index:3!important;
+  background:
+    linear-gradient(180deg,rgba(255,255,255,.13),transparent 38%),
+    linear-gradient(0deg,rgba(238,244,247,.97) 0%,rgba(238,244,247,.86) 34%,rgba(238,244,247,.18) 60%,transparent 77%)!important;
+  opacity:1!important;
+}
+
+/* Bande propriétaire intégrée en haut. */
+.space.side-top .case-owner-band,
+.space.side-bottom .case-owner-band{
+  position:absolute!important;
+  left:5px!important;
+  right:5px!important;
+  top:5px!important;
+  bottom:auto!important;
+  z-index:12!important;
+  height:17px!important;
+  min-height:17px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:4px!important;
+  padding:2px 5px!important;
+  border-radius:7px!important;
+  background:rgba(255,255,255,.88)!important;
+  border:1px solid rgba(15,23,42,.08)!important;
+  color:#24313b!important;
+  font-size:6px!important;
+  line-height:1!important;
+  font-weight:1000!important;
+  letter-spacing:.07em!important;
+  writing-mode:horizontal-tb!important;
+  transform:none!important;
+}
+.space.side-top .case-owner-band .owner-swatch,
+.space.side-bottom .case-owner-band .owner-swatch{
+  width:7px!important;height:7px!important;flex:0 0 7px!important
+}
+
+/* Prix/loyer intégré en bas, au-dessus du nom de ville. */
+.space.side-top .case-economy,
+.space.side-bottom .case-economy{
+  position:absolute!important;
+  left:5px!important;
+  right:5px!important;
+  bottom:23px!important;
+  z-index:11!important;
+  height:auto!important;
+  min-height:44px!important;
+  padding:5px 6px!important;
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:center!important;
+  justify-content:center!important;
+  border-radius:9px!important;
+  background:rgba(247,250,252,.88)!important;
+  border:1px solid rgba(15,23,42,.07)!important;
+  box-shadow:0 2px 8px rgba(15,23,42,.08)!important;
+}
+.space.side-top .case-economy-label,
+.space.side-bottom .case-economy-label{
+  font-size:6px!important;
+  line-height:1!important;
+  letter-spacing:.12em!important;
+  color:#61717c!important
+}
+.space.side-top .case-economy-value,
+.space.side-bottom .case-economy-value{
+  margin-top:2px!important;
+  font-size:14px!important;
+  line-height:1!important;
+  color:#24313b!important
+}
+.space.side-top .case-economy-sub,
+.space.side-bottom .case-economy-sub{
+  display:block!important;
+  margin-top:2px!important;
+  font-size:5.5px!important;
+  line-height:1!important;
+  color:#7a8993!important
+}
+
+/* Ville en pied de case : toute la largeur, aucune zone morte. */
+.space.side-top .case-city,
+.space.side-bottom .case-city{
+  position:absolute!important;
+  left:0!important;
+  right:0!important;
+  bottom:0!important;
+  z-index:13!important;
+  min-height:20px!important;
+  height:20px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  padding:2px 4px!important;
+  border-radius:0 0 12px 12px!important;
+  background:color-mix(in srgb,var(--theme-color) 17%,#f8fafc)!important;
+  border-top:1px solid rgba(15,23,42,.07)!important;
+  color:#172332!important;
+  font-size:7.5px!important;
+  line-height:1!important;
+  font-weight:1000!important;
+  overflow:hidden!important;
+}
+
+/* Pion au-dessus de la carte, sans rogner l'illustration. */
+.space.side-top .case-pawn-slot,
+.space.side-bottom .case-pawn-slot{
+  position:absolute!important;
+  left:50%!important;
+  top:-20px!important;
+  z-index:80!important;
+  transform:translateX(-50%)!important;
+}
+
+/* CASES SPÉCIALES HAUT/BAS : asset plein cadre + infos en overlay. */
+.space.side-top.start .special-layout,
+.space.side-top.bank .special-layout,
+.space.side-top.jail .special-layout,
+.space.side-top.event .special-layout,
+.space.side-top.global .special-layout,
+.space.side-bottom.start .special-layout,
+.space.side-bottom.bank .special-layout,
+.space.side-bottom.jail .special-layout,
+.space.side-bottom.event .special-layout,
+.space.side-bottom.global .special-layout{
+  position:absolute!important;
+  inset:0!important;
+  display:block!important;
+  padding:0!important;
+  border-radius:12px!important;
+  overflow:hidden!important;
+  background:#f8fafc!important;
+}
+.space.side-top .special-art-wrap,
+.space.side-bottom .special-art-wrap{
+  position:absolute!important;
+  inset:0!important;
+  width:100%!important;
+  height:100%!important;
+  overflow:hidden!important
+}
+.space.side-top .special-art,
+.space.side-bottom .special-art{
+  width:100%!important;
+  height:100%!important;
+  object-fit:cover!important;
+  object-position:center!important;
+  transform:scale(1.07)!important
+}
+.space.side-top .special-gloss,
+.space.side-bottom .special-gloss{
+  position:absolute!important;
+  inset:0!important;
+  background:linear-gradient(0deg,rgba(248,250,252,.98) 0%,rgba(248,250,252,.78) 29%,rgba(248,250,252,.10) 58%,transparent 76%)!important
+}
+.space.side-top .special-copy,
+.space.side-bottom .special-copy{
+  position:absolute!important;
+  left:5px!important;
+  right:5px!important;
+  bottom:5px!important;
+  z-index:10!important;
+  display:grid!important;
+  gap:1px!important;
+  padding:5px!important;
+  border-radius:8px!important;
+  background:rgba(255,255,255,.86)!important;
+  border:1px solid rgba(15,23,42,.07)!important;
+  text-align:center!important
+}
+.space.side-top .special-kicker,
+.space.side-bottom .special-kicker{font-size:5px!important}
+.space.side-top .special-name,
+.space.side-bottom .special-name{font-size:8px!important;line-height:1!important}
+.space.side-top .special-effect,
+.space.side-bottom .special-effect{font-size:5.5px!important;line-height:1.05!important}
+
+/* MERVEILLE : on peut enfin lire le chantier sans zoomer. */
+.wonder-site,
+.wonder-site.live{
+  width:min(520px,78%)!important;
+  min-height:96px!important;
+  padding:10px!important;
+}
+.wonder-site-title{
+  margin:0 2px 8px!important
+}
+.wonder-site-title>span{
+  font-size:10px!important;
+  line-height:1!important;
+  font-weight:1000!important;
+  letter-spacing:.13em!important
+}
+.wonder-site-title>small{
+  font-size:7px!important;
+  line-height:1!important;
+  font-weight:1000!important;
+  color:rgba(255,255,255,.78)!important
+}
+.wonder-live-card{
+  min-height:60px!important;
+  grid-template-columns:88px 1fr!important;
+  gap:11px!important
+}
+.wonder-art-shell{height:60px!important}
+.wonder-live-title{
+  font-size:13px!important;
+  line-height:1.05!important;
+  font-weight:1000!important
+}
+.wonder-live-sub{
+  margin-top:4px!important;
+  font-size:8px!important;
+  line-height:1.2!important;
+  font-weight:800!important;
+  color:rgba(255,255,255,.82)!important
+}
+.wonder-progress-meta{
+  margin-top:7px!important;
+  font-size:8px!important
+}
+.wonder-step{height:6px!important}
+.wonder-placeholder b{font-size:11px!important;font-weight:1000!important}
+.wonder-placeholder small{font-size:8px!important;line-height:1.25!important}
+.wonder-ready-copy b{font-size:11px!important}
+.wonder-ready-copy small{font-size:8px!important}
+.wonder-ready-cta{font-size:8px!important;padding:7px 9px!important}
+
+/* FIN DE TOUR : lorsqu'elle est disponible, elle ne doit jamais ressembler à un bouton désactivé. */
+.action-panel .actions .end:not(:disabled),
+.action-panel .actions .end.turn-ready{
+  opacity:1!important;
+  background:linear-gradient(180deg,#dff7e8,#bcebd0)!important;
+  border:1px solid #69c992!important;
+  color:#111827!important;
+  box-shadow:0 4px 0 #73b891!important;
+}
+.action-panel .actions .end:not(:disabled) .action-icon,
+.action-panel .actions .end:not(:disabled) .action-copy,
+.action-panel .actions .end:not(:disabled) .action-copy b,
+.action-panel .actions .end:not(:disabled) .action-copy small{
+  color:#111827!important;
+  opacity:1!important
+}
