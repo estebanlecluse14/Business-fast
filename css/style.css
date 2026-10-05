@@ -8149,3 +8149,28 @@ html.phaser-ready .phaser-mount{opacity:1}
 .jail-saw-button{width:100%;margin-top:12px;padding:15px;border:1px solid #fbbf24;border-radius:13px;background:linear-gradient(180deg,#f59e0b,#d97706);color:#271503;font-size:11px;font-weight:1000;cursor:pointer}.jail-escape-status{margin-top:9px;min-height:18px;text-align:center;color:#aab9c4;font-size:9px;font-weight:800}
 .jail-escape-overlay.blade-broken .jail-game-stage{box-shadow:inset 0 0 0 3px rgba(239,68,68,.42)}.jail-escape-overlay.blade-broken .jail-escape-status{color:#fca5a5}.jail-escape-overlay.escaped .jail-game-stage{box-shadow:inset 0 0 0 3px rgba(34,197,94,.38)}.jail-escape-overlay.escaped .jail-escape-status{color:#86efac}
 @media(max-width:700px){.jail-options,#modal.modal-jail .row,.jail-game-hud{grid-template-columns:1fr}.jail-game-stage{height:230px}.jail-bars{left:8%;right:8%}}
+
+/* === V0.49 AÉROPORT === */
+#modal.modal-airport .box{width:min(790px,96vw)!important}
+.airport-decision{display:grid;gap:11px}
+.airport-hero{display:flex;align-items:center;gap:14px;padding:13px;border-radius:16px;background:linear-gradient(135deg,#effaff,#f8fcff);border:1px solid #bae6fd}
+.airport-terminal{position:relative;width:92px;height:62px;flex:0 0 92px;border-radius:11px;overflow:hidden;background:linear-gradient(180deg,#dff5ff 0 38%,#91b8cb 39% 43%,#526a78 44% 100%)}
+.airport-terminal:before{content:'';position:absolute;left:9px;right:9px;bottom:9px;height:23px;background:repeating-linear-gradient(90deg,#bfe9fa 0 12px,#183a4b 12px 17px);border:2px solid #27495a}
+.airport-terminal:after{content:'';position:absolute;width:54px;height:8px;right:-8px;top:14px;border-radius:60% 8px 8px 60%;background:#f8fafc;box-shadow:-14px 5px 0 -2px #dbeafe;transform:rotate(-7deg)}
+.airport-board{padding:10px;border-radius:14px;background:#10212d;border:1px solid #2d5368}
+.airport-board-head{display:flex;justify-content:space-between;align-items:center;padding:2px 3px 9px;color:#8cd8f5;font-size:7px;font-weight:1000;letter-spacing:.11em}.airport-board-head strong{color:#fff;font-size:10px}
+.airport-destinations{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+.airport-destination{min-width:0;padding:10px;text-align:left;border:1px solid #315267;border-radius:11px;background:#162c3a;color:#fff;cursor:pointer}
+.airport-destination:hover:not(:disabled){background:#1d4053;border-color:#67c8ef}.airport-destination:disabled{opacity:.35;cursor:not-allowed}
+.airport-destination .airport-zone{display:block;color:#78c9e9;font-size:6px;font-weight:1000;letter-spacing:.12em}.airport-destination b{display:block;margin-top:4px;font-size:11px}.airport-destination small{display:block;margin-top:4px;color:#a8bac5;font-size:6.8px;line-height:1.3}
+.airport-standby-card{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:11px 12px;border-radius:14px;background:#f6f3ff;border:1px solid #c4b5fd}
+.airport-standby-card span{display:block;color:#7c3aed;font-size:6px;font-weight:1000;letter-spacing:.12em}.airport-standby-card b{display:block;margin-top:3px;color:#2e2550;font-size:11px}.airport-standby-card small{display:block;margin-top:3px;color:#6b6483;font-size:7px}
+#airportStandbyBtn{border:0;border-radius:10px;padding:10px 13px;background:#7c3aed;color:#fff;font-size:8px;font-weight:1000;cursor:pointer}
+.airport-arrival{display:grid;gap:10px;text-align:center}.airport-arrival-sky{position:relative;height:150px;border-radius:16px;overflow:hidden;background:linear-gradient(180deg,#8ed8f6,#e5f7ff 64%,#8ea0a8 65% 70%,#333e44 71%)}
+.airport-plane-mark{position:absolute;left:18%;top:31%;font-size:42px;color:white;transform:rotate(-15deg);text-shadow:0 4px 12px rgba(0,0,0,.18)}
+.airport-runway{position:absolute;left:20%;right:20%;bottom:-22px;height:74px;background:#27343a;clip-path:polygon(34% 0,66% 0,100% 100%,0 100%)}.airport-runway:after{content:'';position:absolute;left:49%;top:7px;width:3%;height:62px;background:repeating-linear-gradient(180deg,#fff 0 10px,transparent 10px 19px)}
+@media(max-width:700px){.airport-destinations{grid-template-columns:1fr 1fr}.airport-hero{align-items:flex-start}.airport-terminal{width:72px;flex-basis:72px}.airport-standby-card{align-items:flex-start;flex-direction:column}}
+
+/* Airport gets its own cool transport palette on the board */
+.space.airport{--theme-color:#0ea5e9!important}
+.space.airport .special-layout{background:linear-gradient(180deg,#eaf8ff,#c8ebfa)!important}
