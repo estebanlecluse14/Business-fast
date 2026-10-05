@@ -530,6 +530,7 @@ function closeModal(){
  const modalEl=document.getElementById('modal');
  modalEl.classList.remove('open','event-positive','event-negative','event-neutral','modal-decision','modal-property','modal-danger','modal-wonder','modal-event');
  playSfx('close');
+ requestAnimationFrame(()=>refresh());
 }
 function showEventResult({title,icon='✨',description='',effect='',tone='neutral',afterClose=null}){
  const body=`
@@ -547,7 +548,14 @@ function showEventResult({title,icon='✨',description='',effect='',tone='neutra
  setTimeout(()=>eventModal.classList.remove('event-positive','event-negative','event-neutral'),900);
  const btn=document.getElementById('modalOk');
  btn.textContent='Continuer';
- if(afterClose)btn.onclick=()=>{const modalEl=document.getElementById('modal');modalEl.classList.remove('open','event-positive','event-negative','event-neutral');playSfx('close');afterClose();};
+ btn.onclick=()=>{
+   eventModal.classList.remove('open','event-positive','event-negative','event-neutral','modal-event');
+   playSfx('close');
+   if(afterClose)afterClose();
+   // Un événement est résolu après le déplacement. On recalcule toujours les
+   // actions ici pour éviter que "Fin du tour" reste bloqué dans l'état animation.
+   requestAnimationFrame(()=>refresh());
+ };
  playSfx(tone==='positive'?'money':tone==='negative'?'bad':'open');
 }
 
