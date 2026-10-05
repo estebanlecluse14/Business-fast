@@ -7093,3 +7093,72 @@ html.phaser-ready .phaser-mount{opacity:1}
     padding-right:300px!important;
   }
 }
+
+
+/* === V0.46.2 HOTFIX : console développeur complète === */
+.sidebar .dev-panel{
+  overflow:auto!important;
+  overscroll-behavior:contain;
+  scrollbar-gutter:stable;
+}
+.dev-head{
+  position:sticky;
+  top:-12px;
+  z-index:5;
+  margin:-12px -12px 0;
+  padding:12px;
+  background:linear-gradient(180deg,rgba(38,31,58,.99),rgba(26,28,43,.98));
+  border-bottom:1px solid rgba(196,181,253,.20);
+}
+.dev-head-actions{display:flex;align-items:center;gap:7px}
+.dev-close{
+  width:30px;height:30px;display:flex;align-items:center;justify-content:center;
+  border:1px solid rgba(255,255,255,.14);border-radius:9px;
+  background:rgba(255,255,255,.08);color:#fff;font-size:14px;font-weight:1000;cursor:pointer
+}
+.dev-close:hover{background:rgba(255,255,255,.15)}
+.dev-section-label{
+  margin-top:12px;color:#c4b5fd;font-size:8px;font-weight:1000;
+  letter-spacing:.13em
+}
+.dev-tools-label{margin-top:15px}
+.sidebar .dev-panel .dev-stats{
+  grid-template-columns:repeat(2,minmax(0,1fr))!important
+}
+.sidebar .dev-panel .dev-actions{
+  display:grid!important;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:7px!important
+}
+.sidebar .dev-panel .dev-actions button{
+  display:block!important;
+  visibility:visible!important;
+  opacity:1!important;
+  min-height:42px!important
+}
+.sidebar .dev-panel .dev-sim{
+  display:block!important;
+  visibility:visible!important
+}
+@media(min-width:1181px){
+  .sidebar .dev-panel{
+    position:fixed!important;
+    top:14px!important;
+    right:292px!important;
+    left:auto!important;
+    width:360px!important;
+    max-height:calc(100vh - 28px)!important;
+    z-index:70!important;
+    padding:12px!important;
+    background:linear-gradient(180deg,rgba(31,27,48,.985),rgba(20,24,35,.985))!important;
+    box-shadow:0 22px 55px rgba(15,23,42,.28)!important;
+  }
+}
+@media(max-width:1180px){
+  .sidebar .dev-panel{
+    position:static!important;
+    width:auto!important;
+    max-height:70vh!important;
+    grid-column:1/-1!important
+  }
+}
