@@ -3,14 +3,14 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Business Fast V0.47.2</title>
+<title>Business Fast V0.47.3</title>
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 <section id="startScreen" class="screen active">
   <div class="start-backdrop" aria-hidden="true"><span class="orb o1"></span><span class="orb o2"></span><span class="orb o3"></span></div>
   <div class="start-wrap lobby-v047">
-    <div class="lobby-badge">V0.47.2 · INITIATIVE</div>
+    <div class="lobby-badge">V0.47.3 · ÉVÉNEMENTS</div>
     <h1 class="logo lobby-logo">BUSINESS <span>FAST</span></h1>
     <div class="subtitle">Crée ta table, ajoute des rivaux IA et lance la partie.</div>
 
@@ -183,7 +183,7 @@
       </div>
       <div id="status" class="turn-status">Lance les dés.</div>
     </div>
-    <div class="panel utility-panel"><div class="panel-kicker">OUTILS</div><div class="legend"><span class="pill">Plage</span><span class="pill">Événement</span><span class="pill">Mondial</span><span class="pill">Banque</span><span class="pill">Prison</span><span class="pill">Bâtiments</span></div><button id="journalBtn" class="secondary" style="width:100%">📜 Ouvrir le journal</button><button id="settingsBtn" class="settings-btn">⚙️ Paramètres audio</button><div style="margin-top:10px"><button id="devToggle" class="secondary" style="width:100%">🧪 Mode développeur</button></div><div style="margin-top:10px"><button id="restartBtn" class="secondary danger" style="width:100%">Recommencer</button></div></div>
+    <div class="panel utility-panel"><div class="panel-kicker">OUTILS</div><div class="legend"><span class="pill">Plage</span><span class="pill">Événement</span><span class="pill">Mondial</span><span class="pill">Banque</span><span class="pill">Prison</span><span class="pill">Bâtiments</span></div><button id="journalBtn" class="secondary" style="width:100%">📜 Ouvrir le journal</button><button id="patrimonyBtn" class="patrimony-btn" type="button">PATRIMOINE <span>Classement</span></button><button id="settingsBtn" class="settings-btn">⚙️ Paramètres audio</button><div style="margin-top:10px"><button id="devToggle" class="secondary" style="width:100%">🧪 Mode développeur</button></div><div style="margin-top:10px"><button id="restartBtn" class="secondary danger" style="width:100%">Recommencer</button></div></div>
     <div id="devPanel" class="panel dev-panel" style="display:none">
       <div class="dev-head"><h3>🧪 Mode développeur</h3><div class="dev-head-actions"><span id="devState" class="dev-chip">LIVE</span><button id="devClose" class="dev-close" type="button" aria-label="Fermer le mode développeur">✕</button></div></div>
       <div class="dev-section-label">STATISTIQUES LIVE</div>
@@ -234,6 +234,23 @@
   </div>
 </div>
 
+
+<div id="patrimonyModal" class="patrimony-modal" aria-hidden="true">
+  <div class="patrimony-box" role="dialog" aria-modal="true" aria-labelledby="patrimonyTitle">
+    <div class="patrimony-head">
+      <div><div class="patrimony-kicker">BUSINESS FAST</div><h2 id="patrimonyTitle">Classement patrimoine</h2><p>Trésorerie + valeur actuelle des biens.</p></div>
+      <button id="patrimonyClose" class="patrimony-close" type="button" aria-label="Fermer">✕</button>
+    </div>
+    <div id="patrimonyList" class="patrimony-list"></div>
+  </div>
+</div>
+
+<div id="disasterFx" class="disaster-fx" aria-hidden="true">
+  <div class="flood-sheet"><i></i><i></i><i></i></div>
+  <div class="quake-cracks"><i></i><i></i><i></i><i></i></div>
+  <div class="disaster-label"><span id="disasterFxTitle"></span><small id="disasterFxSub"></small></div>
+</div>
+
 <div id="journalModal" class="journal-modal" aria-hidden="true">
   <div class="journal-box" role="dialog" aria-modal="true" aria-labelledby="journalTitle">
     <div class="journal-head">
@@ -260,6 +277,9 @@
     </div>
     <div class="updates-list">
       <article class="update-item current">
+        <div class="update-version">V0.47.3</div><div class="update-copy"><div class="update-title">Événements & patrimoine <span class="update-tag minor">Gameplay</span></div><p>Ajout de Double chance, Grande inondation, Surconsommation, Loto et Séisme. Inondation et séisme ont désormais des effets visuels dédiés sans emoji. Nouveau classement Patrimoine accessible en partie.</p></div>
+      </article>
+      <article class="update-item">
         <div class="update-version">V0.47.2</div><div class="update-copy"><div class="update-title">Initiative & HUD <span class="update-tag minor">Gameplay/UX</span></div><p>Le plateau est recentré, les actions passent en bas à droite, le mode développeur est accessible en haut à droite et chaque partie commence par un lancer de dés pour déterminer le premier joueur.</p></div>
       </article>
       <article class="update-item">
