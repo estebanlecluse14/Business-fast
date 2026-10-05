@@ -3,14 +3,14 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Business Fast V0.47.3</title>
+<title>Business Fast V0.47.4</title>
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 <section id="startScreen" class="screen active">
   <div class="start-backdrop" aria-hidden="true"><span class="orb o1"></span><span class="orb o2"></span><span class="orb o3"></span></div>
   <div class="start-wrap lobby-v047">
-    <div class="lobby-badge">V0.47.3 · ÉVÉNEMENTS</div>
+    <div class="lobby-badge">V0.47.4 · SIMULATION & DEBUG</div>
     <h1 class="logo lobby-logo">BUSINESS <span>FAST</span></h1>
     <div class="subtitle">Crée ta table, ajoute des rivaux IA et lance la partie.</div>
 
@@ -204,7 +204,7 @@
         <div class="dev-sim-title">🤖 Simulations rapides</div>
         <div class="dev-actions">
           <button id="sim100" type="button">100 parties</button>
-          <button id="sim1000" type="button">1 000 parties</button>
+          <button id="sim1000" type="button">1 000 parties</button><button id="simDebug" type="button">Audit 5 000</button>
         </div>
         <div id="simResult" class="sim-result">Les simulations utilisent des bots simplifiés pour repérer les tendances d'équilibrage.</div>
       </div>
@@ -275,8 +275,10 @@
       </div>
       <button id="updatesClose" class="updates-close" type="button" aria-label="Fermer">✕</button>
     </div>
-    <div class="updates-list">
-      <article class="update-item current">
+    <div class="updates-list">      <article class="update-item current">
+        <div class="update-version">V0.47.4</div><div class="update-copy"><div class="update-title">Simulation & debug <span class="update-tag minor">QA</span></div><p>Le simulateur compare désormais l’équilibrage avant/après les nouveaux événements, mesure les types de victoire et la durée médiane, et un audit automatique contrôle les incohérences d’état sur 5 000 parties.</p></div>
+      </article>
+      <article class="update-item">
         <div class="update-version">V0.47.3</div><div class="update-copy"><div class="update-title">Événements & patrimoine <span class="update-tag minor">Gameplay</span></div><p>Ajout de Double chance, Grande inondation, Surconsommation, Loto et Séisme. Inondation et séisme ont désormais des effets visuels dédiés sans emoji. Nouveau classement Patrimoine accessible en partie.</p></div>
       </article>
       <article class="update-item">
