@@ -240,7 +240,7 @@ function refreshDevStats(){
 const board=document.getElementById('board'), playerBox=document.getElementById('players'), logBox=document.getElementById('log'), status=document.getElementById('status');
 const rollBtn=document.getElementById('rollBtn'),buyBtn=document.getElementById('buyBtn'),buildBtn=document.getElementById('buildBtn'),endBtn=document.getElementById('endBtn'),wonderBtn=document.getElementById('wonderBtn');
 const turnPhase=document.getElementById('turnPhase'),turnGuide=document.getElementById('turnGuide'),turnGuideMain=document.getElementById('turnGuideMain'),turnGuideDetail=document.getElementById('turnGuideDetail');
-const rollHint=document.getElementById('rollHint'),buyLabel=document.getElementById('buyLabel'),buyHint=document.getElementById('buyHint'),buildLabel=document.getElementById('buildLabel'),buildHint=document.getElementById('buildHint'),wonderHint=document.getElementById('wonderHint'),endHint=document.getElementById('endHint');
+const rollHint=document.getElementById('rollHint'),buyLabel=document.getElementById('buyLabel'),buyHint=document.getElementById('buyHint'),buyPrice=document.getElementById('buyPrice'),buildLabel=document.getElementById('buildLabel'),buildHint=document.getElementById('buildHint'),buildPrice=document.getElementById('buildPrice'),wonderHint=document.getElementById('wonderHint'),endHint=document.getElementById('endHint');
 
 
 function ownedWonderDistrict(playerIndex){
@@ -652,8 +652,17 @@ function updateActions(){
  const nextCost=s.type==='property'&&s.level<3?upgradeCosts[s.level+1]:0;
  const district=ownedWonderDistrict(current);
 
- if(buyLabel)buyLabel.textContent=isProperty&&s.owner===null?`Acheter · ${shortMoneyFmt(price)}`:'Acheter';
- if(buildLabel)buildLabel.textContent=s.type==='property'&&s.owner===current&&s.level<3?`Améliorer · ${shortMoneyFmt(nextCost)}`:'Améliorer';
+ if(buyLabel)buyLabel.textContent=isProperty&&s.owner===null?'Acheter':'Acheter';
+ if(buildLabel)buildLabel.textContent=s.type==='property'&&s.owner===current&&s.level<3?'Améliorer':'Améliorer';
+ if(buyPrice){
+   buyPrice.textContent=isProperty&&s.owner===null?moneyFmt(price):'—';
+   buyPrice.classList.toggle('visible',isProperty&&s.owner===null);
+ }
+ if(buildPrice){
+   const showBuildPrice=s.type==='property'&&s.owner===current&&s.level<3;
+   buildPrice.textContent=showBuildPrice?moneyFmt(nextCost):'—';
+   buildPrice.classList.toggle('visible',showBuildPrice);
+ }
  if(rollHint)rollHint.textContent=rolled?'Déjà lancé':'Commencer le tour';
 
  if(gameOver){
@@ -688,8 +697,8 @@ function updateActions(){
  setActionState(wonderBtn,canWonder, p.wonderMode?'Une Merveille est déjà en construction.':district?'Merveille déjà engagée ou indisponible.':'Contrôle les 3 propriétés d’un même quartier.');
  setActionState(endBtn,canEnd,!rolled?'Lance les dés avant de terminer le tour.':'');
 
- if(buyHint)buyHint.textContent=canBuy?`${s.name} · ${moneyFmt(price)}`:(!rolled?'Après le lancer':isProperty&&s.owner===null&&p.money<price?'Fonds insuffisants':s.owner!==null?'Déjà possédée':'Indisponible ici');
- if(buildHint)buildHint.textContent=canBuild?`${s.name} → niveau ${s.level+1}`:(!rolled?'Après le lancer':s.type==='property'&&s.owner===current&&s.level>=3?'Niveau maximum':s.type==='property'&&s.owner===current&&p.money<nextCost?'Fonds insuffisants':'Ta propriété requise');
+ if(buyHint)buyHint.textContent=canBuy?`${s.name} · solde après achat : ${moneyFmt(p.money-price)}`:(!rolled?'Disponible après le lancer':isProperty&&s.owner===null&&p.money<price?`Il manque ${moneyFmt(price-p.money)}`:s.owner!==null?'Déjà possédée':'Indisponible ici');
+ if(buildHint)buildHint.textContent=canBuild?`${s.name} → niveau ${s.level+1} · loyer ${moneyFmt(roundRentStep(s.baseRent*(rentMultipliers[s.level+1]||1)))}`:(!rolled?'Disponible après le lancer':s.type==='property'&&s.owner===current&&s.level>=3?'Niveau maximum':s.type==='property'&&s.owner===current&&p.money<nextCost?`Il manque ${moneyFmt(nextCost-p.money)}`:'Ta propriété requise');
  if(wonderHint)wonderHint.textContent=canWonder?`${district?.name||'Quartier complet'} prêt`:p.wonderMode?`${p.wonderTurnsLeft} tour(s) restant(s)`:'Quartier complet requis';
  if(endHint)endHint.textContent=canEnd?'Passer au joueur suivant':'Lance d’abord les dés';
 
