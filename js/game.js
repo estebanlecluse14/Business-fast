@@ -1518,7 +1518,7 @@ function earthquakeChoices(affected,index=0){
  const wait=document.createElement('button');wait.className='secondary quake-repair-auto';wait.textContent='Réparation automatique · 2 tours';
  const finish=()=>{document.getElementById('modal').classList.remove('open','modal-decision');playSfx('close');refresh();setTimeout(()=>earthquakeChoices(affected,index+1),180)};
  repair.onclick=()=>{if(owner.money<cost)return;owner.money-=cost;stat('moneyRemoved',cost);s.repairTurnsLeft=0;s.repairSkipCountdown=false;addLog(`Réparation : <b>${owner.name}</b> répare <b>${s.name}</b> pour ${moneyFmt(cost)}.`);finish()};
- wait.onclick=()=>{s.repairTurnsLeft=2;s.repairSkipCountdown=true;addLog(`Réparation : <b>${s.name}</b> sera réparée automatiquement dans 2 tours de ${owner.name}.`);finish()};
+ wait.onclick=()=>{s.repairTurnsLeft=2;s.repairSkipCountdown=(ownerIndex===current);addLog(`Réparation : <b>${s.name}</b> sera réparée automatiquement dans 2 tours de ${owner.name}.`);finish()};
  row.append(repair,wait);
  if(owner.isAI)setTimeout(()=>{if(owner.money-cost>=AI_RESERVE&&!repair.disabled)repair.click();else wait.click()},420);
 }
@@ -1537,7 +1537,7 @@ function triggerEarthquake(){
    showDisasterFx('quake','SÉISME','Aucune propriété n’a été touchée',1500);
    showEventResult({title:'Séisme',icon:'',description:'Le séisme traverse la ville, mais aucune propriété possédée n’est touchée.',effect:'Aucun dégât',tone:'neutral'});return;
  }
- affected.forEach(s=>{s.repairTurnsLeft=2;s.repairSkipCountdown=true});
+ affected.forEach(s=>{s.repairTurnsLeft=2;s.repairSkipCountdown=(s.owner===current)});
  showDisasterFx('quake','SÉISME',`${affected.length} propriété(s) endommagée(s)`,1900);
  addLog(`Séisme : ${affected.map(s=>`<b>${s.name}</b>`).join(', ')} endommagée(s).`);
  const names=affected.map(s=>s.name).join(' · ');
@@ -1655,16 +1655,39 @@ function globalEvent(){const events=[
  });
 }
 
-function simOneGame(){
- const P=4,ps=Array.from({length:P},()=>({money:200000,pos:0,active:true,props:[],beaches:0,fiscal:0,works:0,wonder:null,wonderLeft:0,wonderSkip:false}));
- const ss=spaces.map(s=>({type:s.type,price:s.price,baseRent:s.baseRent,owner:null,level:0}));
+
+function simOneGame(profile='current'){
+ const useNewEvents=profile==='current';
+ const P=4;
+ const ps=Array.from({length:P},()=>({money:200000,pos:0,active:true,props:[],beaches:0,fiscal:0,works:0,wonder:null,wonderLeft:0,wonderSkip:false,flood:0,floodSkip:false,doubleChance:false}));
+ const ss=spaces.map(s=>({type:s.type,price:s.price,baseRent:s.baseRent,owner:null,level:0,repair:0,repairSkip:false}));
  const simDistricts=[[1,23,29],[5,8,31],[3,19,33],[2,13,14],[10,16,30],[7,11,17],[24,26,27],[20,21,35]];
- let actions=0,purchases=0,rentsPaid=0,buyouts=0,liquidations=0,bankruptcies=0,upgrades=0,propertyTaxes=0,scheduledCharges=0,wondersStarted=0,wonderWins=0;
+ let actions=0,purchases=0,rentsPaid=0,buyouts=0,liquidations=0,bankruptcies=0,upgrades=0,propertyTaxes=0,scheduledCharges=0,wondersStarted=0,wonderWins=0,eventCount=0;
+ let winnerReason='timeout';
+ const bugs=[];
  const collective=()=>ps.some(p=>p.active&&p.wonder==='communist'&&p.wonderLeft>0);
- const simRent=s=>Math.round(s.baseRent*(rentMultipliers[s.level]||1)*(collective()?.35:1));
  const simValue=s=>{let v=s.price;for(let l=1;l<=s.level;l++)v+=upgradeCosts[l];return v};
  const patrimony=p=>p.money+p.props.reduce((sum,id)=>sum+simValue(ss[id]),0);
  const fullDistrict=pi=>simDistricts.some(ids=>ids.every(id=>ss[id].owner===pi));
+ const simRent=s=>{
+   const owner=s.owner!==null?ps[s.owner]:null;
+   if(owner?.flood>0)return 0;
+   return Math.round(s.baseRent*(rentMultipliers[s.level]||1)*(collective()?.35:1)*((s.repair||0)>0?.25:1));
+ };
+ function auditState(){
+   for(let i=0;i<ps.length;i++){
+     const p=ps[i];
+     if(!Number.isFinite(p.money)||p.money<0)bugs.push('cash');
+     if(p.beaches<0||p.beaches>4)bugs.push('beaches');
+     if(new Set(p.props).size!==p.props.length)bugs.push('duplicate-prop');
+     for(const sid of p.props)if(ss[sid]?.owner!==i)bugs.push('owner-link');
+   }
+   for(const s of ss){
+     if(s.level<0||s.level>3)bugs.push('level');
+     if(s.owner!==null&&(s.owner<0||s.owner>=P))bugs.push('owner-index');
+     if((s.repair||0)<0)bugs.push('repair');
+   }
+ }
  function liquidate(pi,need,creditor=null){
    const p=ps[pi];let sale=0;
    while(need>0&&p.props.length){
@@ -1673,25 +1696,63 @@ function simOneGame(){
      const sid=p.props.splice(bestIndex,1)[0],s=ss[sid];
      const proceeds=Math.round(simValue(s)*Math.max(.5,.9-sale*.1));sale++;liquidations++;
      if(s.type==='beach')p.beaches=Math.max(0,p.beaches-1);
-     s.owner=null;s.level=0;
+     s.owner=null;s.level=0;s.repair=0;s.repairSkip=false;
      const used=Math.min(proceeds,need);need-=used;
      if(creditor!==null&&ps[creditor]?.active)ps[creditor].money+=used;
      p.money+=proceeds-used;
    }
-   if(need>0){p.active=false;p.money=0;p.wonder=null;p.wonderLeft=0;bankruptcies++;p.props.forEach(sid=>{ss[sid].owner=null;ss[sid].level=0});p.props=[];p.beaches=0;return false}
+   if(need>0){
+     p.active=false;p.money=0;p.wonder=null;p.wonderLeft=0;bankruptcies++;
+     p.props.forEach(sid=>{ss[sid].owner=null;ss[sid].level=0;ss[sid].repair=0;ss[sid].repairSkip=false});
+     p.props=[];p.beaches=0;return false;
+   }
    return true;
  }
  function pay(pi,amt,creditor=null){
-   const p=ps[pi],cash=Math.min(p.money,amt);p.money-=cash;
+   const p=ps[pi];if(!p?.active)return false;
+   const cash=Math.min(p.money,amt);p.money-=cash;
    if(creditor!==null&&ps[creditor]?.active)ps[creditor].money+=cash;
-   const rem=amt-cash;if(rem>0)return liquidate(pi,rem,creditor);return true;
+   const rem=amt-cash;
+   return rem>0?liquidate(pi,rem,creditor):true;
+ }
+ function move(pi,steps){
+   const p=ps[pi];
+   if(p.pos+steps>=36)p.money+=30000;
+   p.pos=(p.pos+steps)%36;
+ }
+ function earthquake(currentPi){
+   const owned=ss.map((s,i)=>({s,i})).filter(x=>['property','beach'].includes(x.s.type)&&x.s.owner!==null&&ps[x.s.owner]?.active);
+   for(let i=owned.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[owned[i],owned[j]]=[owned[j],owned[i]]}
+   owned.slice(0,4).forEach(({s})=>{
+     const owner=ps[s.owner];
+     if(owner.money-30000>=AI_RESERVE){owner.money-=30000;s.repair=0;s.repairSkip=false}
+     else{s.repair=2;s.repairSkip=(s.owner===currentPi)}
+   });
+ }
+ function event(pi){
+   eventCount++;
+   const p=ps[pi],count=useNewEvents?11:6,r=Math.floor(Math.random()*count);
+   if(r===0)p.money+=40000;
+   else if(r===1){p.fiscal=2;pay(pi,30000,null)}
+   else if(r===2)p.money+=25000;
+   else if(r===3){if(p.money>=65000&&Math.random()<.35)pay(pi,20000,null);else p.works=4}
+   else if(r===4){propertyTaxes++;pay(pi,Math.round(patrimony(p)*.35),null)}
+   else if(r===5)move(pi,3);
+   else if(r===6)p.doubleChance=true;
+   else if(r===7){p.flood=1;p.floodSkip=true}
+   else if(r===8)pay(pi,Math.round(patrimony(p)*.15),null);
+   else if(r===9){const rewards=[10000,20000,40000,60000,100000,200000];p.money+=rewards[Math.floor(Math.random()*rewards.length)]}
+   else if(r===10)earthquake(pi);
  }
  for(let step=0;step<1200;step++){
    const pi=step%P,p=ps[pi];if(!p.active)continue;actions++;
 
+   if(p.flood>0){if(p.floodSkip)p.floodSkip=false;else p.flood=Math.max(0,p.flood-1)}
+   p.props.forEach(id=>{const s=ss[id];if(s.repair>0){if(s.repairSkip)s.repairSkip=false;else s.repair=Math.max(0,s.repair-1)}});
+
    if(p.wonder){
      if(p.wonderSkip)p.wonderSkip=false;
-     else if(--p.wonderLeft<=0){wonderWins++;break}
+     else if(--p.wonderLeft<=0){wonderWins++;winnerReason='wonder';break}
    }
    if(!p.wonder&&fullDistrict(pi)){
      if(p.money>=400000){p.money-=400000;p.wonder='fast';p.wonderLeft=5;p.wonderSkip=true;wondersStarted++}
@@ -1700,9 +1761,16 @@ function simOneGame(){
 
    if(p.fiscal>0){p.fiscal--;if(p.fiscal===0){scheduledCharges++;if(!pay(pi,5000,null))continue}}
    if(p.works>0){scheduledCharges++;p.works--;if(!pay(pi,5000,null))continue}
-   const roll=1+Math.floor(Math.random()*6);
-   if(p.pos+roll>=36)p.money+=30000;
-   p.pos=(p.pos+roll)%36;let s=ss[p.pos];
+
+   let roll=1+Math.floor(Math.random()*6);
+   if(useNewEvents&&p.doubleChance){
+     const second=1+Math.floor(Math.random()*6),first=roll;
+     p.doubleChance=false;roll=first+second;
+     if(first===second)roll+=1+Math.floor(Math.random()*6);
+   }
+   move(pi,roll);
+   const s=ss[p.pos];
+
    if(s.type==='property'||s.type==='beach'){
      if(s.owner===null){
        if(p.money>=s.price+45000){p.money-=s.price;s.owner=pi;p.props.push(p.pos);if(s.type==='beach')p.beaches++;purchases++}
@@ -1718,41 +1786,68 @@ function simOneGame(){
        const cost=upgradeCosts[s.level+1];
        if(p.money>=cost+70000&&Math.random()<.34){p.money-=cost;s.level++;upgrades++}
      }
-   }else if(s.type==='bank'){p.money+=25000}
-   else if(s.type==='jail'){pay(pi,20000,null)}
-   else if(s.type==='event'){
-     const r=Math.floor(Math.random()*6);
-     if(r===0)p.money+=40000;
-     else if(r===1){p.fiscal=2;pay(pi,30000,null)}
-     else if(r===2)p.money+=25000;
-     else if(r===3){if(p.money>=65000&&Math.random()<.35)pay(pi,20000,null);else p.works=4}
-     else if(r===4){propertyTaxes++;pay(pi,Math.round(patrimony(p)*.35),null)}
-     else{if(p.pos+3>=36)p.money+=30000;p.pos=(p.pos+3)%36}
-   }else if(s.type==='global'){
+   }else if(s.type==='bank')p.money+=25000;
+   else if(s.type==='jail')pay(pi,20000,null);
+   else if(s.type==='event')event(pi);
+   else if(s.type==='global'){
      const r=Math.floor(Math.random()*3);
      ps.forEach((q,qi)=>{if(!q.active)return;if(r===0)q.money+=20000;else if(r===1)pay(qi,15000,null);else q.money+=q.beaches*30000});
    }
+
+   auditState();
    const alive=ps.filter(x=>x.active);
-   if(alive.length<=1||ps.some(x=>x.active&&x.beaches===4))break;
+   if(alive.length<=1){winnerReason='bankruptcy';break}
+   if(ps.some(x=>x.active&&x.beaches===4)){winnerReason='beaches';break}
  }
- return {actions,rounds:actions/P,purchases,rentsPaid,buyouts,liquidations,bankruptcies,upgrades,propertyTaxes,scheduledCharges,wondersStarted,wonderWins,finished:ps.filter(x=>x.active).length<=1||ps.some(x=>x.active&&x.beaches===4)||wonderWins>0};
+ auditState();
+ return {profile,actions,rounds:actions/P,winnerReason,purchases,rentsPaid,buyouts,liquidations,bankruptcies,upgrades,propertyTaxes,scheduledCharges,wondersStarted,wonderWins,eventCount,bugs:[...new Set(bugs)],finished:winnerReason!=='timeout'};
+}
+function summarizeSim(arr){
+ const avg=k=>arr.reduce((a,x)=>a+(x[k]||0),0)/arr.length;
+ const sorted=arr.map(x=>x.actions).sort((a,b)=>a-b);
+ const med=sorted[Math.floor(sorted.length*.5)]||0;
+ const p90=sorted[Math.floor(sorted.length*.9)]||0;
+ const pct=reason=>arr.filter(x=>x.winnerReason===reason).length/arr.length*100;
+ return {
+   med,p90,minutes:med*12/60,finish:arr.filter(x=>x.finished).length/arr.length*100,
+   bankruptcy:pct('bankruptcy'),beaches:pct('beaches'),wonder:pct('wonder'),timeout:pct('timeout'),
+   bankruptcies:avg('bankruptcies'),purchases:avg('purchases'),upgrades:avg('upgrades'),liquidations:avg('liquidations'),events:avg('eventCount'),
+   bugGames:arr.filter(x=>x.bugs.length).length,
+   bugTypes:[...new Set(arr.flatMap(x=>x.bugs))]
+ };
 }
 function runDevSimulation(count){
  const result=document.getElementById('simResult');if(!result)return;
- result.textContent=`Simulation de ${count.toLocaleString('fr-FR')} parties…`;
+ result.textContent='Simulation comparative de '+count.toLocaleString('fr-FR')+' parties par version…';
  setTimeout(()=>{
-   const arr=[];for(let i=0;i<count;i++)arr.push(simOneGame());
-   const avg=k=>arr.reduce((a,x)=>a+x[k],0)/arr.length;
-   const sorted=arr.map(x=>x.actions).sort((a,b)=>a-b);
-   const med=sorted[Math.floor(sorted.length/2)];
-   const finish=arr.filter(x=>x.finished).length/arr.length;
-   const estimatedMinutes=med*12/60;
-   result.innerHTML=`<b>${count.toLocaleString('fr-FR')} parties · 4 joueurs</b><br>
-   Médiane : <b>${med} actions</b> (~${(med/4).toFixed(0)} tours de table)<br>
-   Temps humain indicatif à 12 s/action : <b>~${estimatedMinutes.toFixed(0)} min</b><br>
-   Parties terminées avant limite : <b>${Math.round(finish*100)} %</b><br>
-   Moyennes : ${avg('purchases').toFixed(1)} achats · ${avg('upgrades').toFixed(1)} constructions · ${avg('rentsPaid').toFixed(1)} loyers · ${avg('buyouts').toFixed(1)} rachats · ${avg('liquidations').toFixed(1)} ventes d'urgence · ${avg('bankruptcies').toFixed(1)} faillites · ${avg('propertyTaxes').toFixed(1)} taxes foncières · ${avg('scheduledCharges').toFixed(1)} charges différées · ${avg('wondersStarted').toFixed(2)} Merveille(s) lancée(s) · ${avg('wonderWins').toFixed(2)} victoire(s) Merveille.<br>
-   <span style="font-size:10px">⚠️ Bots simplifiés : utile pour comparer l'équilibrage, pas pour prédire exactement le comportement humain.</span>`;
+   const legacy=[],current=[];
+   for(let i=0;i<count;i++){legacy.push(simOneGame('legacy'));current.push(simOneGame('current'))}
+   const a=summarizeSim(legacy),b=summarizeSim(current);
+   const deltaMin=b.minutes-a.minutes,deltaBank=b.bankruptcy-a.bankruptcy;
+   const trend=(v,unit='')=>(v>0?'+':'')+v.toFixed(1)+unit;
+   result.innerHTML='<b>Comparatif '+count.toLocaleString('fr-FR')+' + '+count.toLocaleString('fr-FR')+' parties · 4 joueurs</b><br>'+
+   '<b>Durée médiane :</b> avant '+a.med+' actions (~'+a.minutes.toFixed(1)+' min) → actuelle '+b.med+' actions (~'+b.minutes.toFixed(1)+' min) · <b>'+trend(deltaMin,' min')+'</b><br>'+
+   '<b>90 % des parties :</b> terminées avant '+b.p90+' actions (~'+(b.p90*12/60).toFixed(0)+' min)<br><br>'+
+   '<b>Types de victoire V0.47.4 :</b><br>'+
+   'Faillite : <b>'+b.bankruptcy.toFixed(2)+' %</b> ('+trend(deltaBank,' pt')+') · Plages : <b>'+b.beaches.toFixed(2)+' %</b> · Merveille : <b>'+b.wonder.toFixed(2)+' %</b> · Limite : <b>'+b.timeout.toFixed(2)+' %</b><br>'+
+   'Parties terminées : <b>'+b.finish.toFixed(2)+' %</b><br><br>'+
+   'Moyennes actuelles : '+b.purchases.toFixed(1)+' achats · '+b.upgrades.toFixed(1)+' améliorations · '+b.liquidations.toFixed(1)+' liquidations · '+b.bankruptcies.toFixed(2)+' faillites · '+b.events.toFixed(1)+' événements.<br>'+
+   '<b>Audit :</b> '+(b.bugGames===0?'✅ aucune incohérence détectée':'⚠️ '+b.bugGames+' partie(s) avec anomalie : '+b.bugTypes.join(', '))+'<br>'+
+   '<span style="font-size:10px">Estimation temps = 12 s par action. Bots simplifiés : comparaison d’équilibrage, pas prédiction parfaite des humains.</span>';
+ },20);
+}
+function runDevAudit(count=5000){
+ const result=document.getElementById('simResult');if(!result)return;
+ result.textContent='Audit de '+count.toLocaleString('fr-FR')+' parties V0.47.4…';
+ setTimeout(()=>{
+   const arr=[];for(let i=0;i<count;i++)arr.push(simOneGame('current'));
+   const s=summarizeSim(arr);
+   const bugLine=s.bugGames ? ('⚠️ Types : '+s.bugTypes.join(', ')) : '✅ Propriétaires, niveaux, cash, plages et réparations cohérents.';
+   result.innerHTML='<b>Audit QA · '+count.toLocaleString('fr-FR')+' parties</b><br>'+
+   'États invalides : <b>'+s.bugGames+'</b> / '+count.toLocaleString('fr-FR')+'<br>'+
+   bugLine+'<br>'+
+   'Terminaison : <b>'+s.finish.toFixed(2)+' %</b> · médiane '+s.med+' actions · P90 '+s.p90+' actions.<br>'+
+   'Victoires : faillite '+s.bankruptcy.toFixed(2)+' % · plages '+s.beaches.toFixed(2)+' % · Merveille '+s.wonder.toFixed(2)+' %.';
  },20);
 }
 
@@ -2125,6 +2220,7 @@ document.getElementById('devFinishWonder').onclick=()=>{
 document.getElementById('devGlobal').onclick=()=>{if(players[current]&&!pendingDebt&&!pendingRentDecision&&!gameOver)globalEvent()};
 document.getElementById('sim100').onclick=()=>runDevSimulation(100);
 document.getElementById('sim1000').onclick=()=>runDevSimulation(1000);
+document.getElementById('simDebug').onclick=()=>runDevAudit(5000);
 
 const playerCountSelect=document.getElementById('playerCount');
 const lobbyPlayerSummary=document.getElementById('lobbyPlayerSummary');
