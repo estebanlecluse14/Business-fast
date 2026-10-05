@@ -3,14 +3,14 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Business Fast V0.47.4</title>
+<title>Business Fast V0.48</title>
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 <section id="startScreen" class="screen active">
   <div class="start-backdrop" aria-hidden="true"><span class="orb o1"></span><span class="orb o2"></span><span class="orb o3"></span></div>
   <div class="start-wrap lobby-v047">
-    <div class="lobby-badge">V0.47.4 · SIMULATION & DEBUG</div>
+    <div class="lobby-badge">V0.48 · PRISON 2.0</div>
     <h1 class="logo lobby-logo">BUSINESS <span>FAST</span></h1>
     <div class="subtitle">Crée ta table, ajoute des rivaux IA et lance la partie.</div>
 
@@ -192,7 +192,7 @@
       <div class="dev-actions">
         <button id="devCash" type="button">+50k joueur</button>
         <button id="devDebt" type="button">Dette test 250k</button>
-        <button id="devEvent" type="button">⚡ Événement</button>
+        <button id="devEvent" type="button">⚡ Événement</button><button id="devJail" type="button">PRISON 2.0 · Tester</button>
         <button id="devFiscal" type="button">🧾 Contrôle fiscal</button>
         <button id="devWorks" type="button">🚧 Travaux</button>
         <button id="devTax" type="button">🏠 Taxe foncière</button>
@@ -235,6 +235,32 @@
 </div>
 
 
+
+<div id="jailEscapeOverlay" class="jail-escape-overlay" aria-hidden="true">
+  <div class="jail-escape-shell" role="dialog" aria-modal="true" aria-labelledby="jailEscapeTitle">
+    <div class="jail-escape-head">
+      <div><div class="jail-escape-kicker">TENTATIVE D'ÉVASION</div><h2 id="jailEscapeTitle">Scie les barreaux</h2><p>Maintiens pour scier. Relâche avant la surchauffe pour refroidir la lame.</p></div>
+      <div class="jail-fee-stamp">100 000 € PAYÉS</div>
+    </div>
+    <div class="jail-game-stage">
+      <div class="jail-bars">
+        <div class="jail-bar" data-bar="0"><span class="bar-cut"></span></div>
+        <div class="jail-bar" data-bar="1"><span class="bar-cut"></span></div>
+        <div class="jail-bar" data-bar="2"><span class="bar-cut"></span></div>
+        <div class="jail-bar" data-bar="3"><span class="bar-cut"></span></div>
+      </div>
+      <div class="jail-saw" id="jailSaw"><span class="saw-blade"></span><span class="saw-handle"></span></div>
+      <div class="jail-heat-glow" id="jailHeatGlow"></div>
+    </div>
+    <div class="jail-game-hud">
+      <div><div class="jail-meter-title"><span>BARREAU</span><strong id="jailBarLabel">1 / 4</strong></div><div class="jail-cut-meter"><span id="jailCutFill"></span></div></div>
+      <div><div class="jail-meter-title"><span>TEMPÉRATURE</span><strong id="jailHeatLabel">0 %</strong></div><div class="jail-heat-meter"><span id="jailHeatFill"></span></div></div>
+    </div>
+    <button id="jailSawButton" class="jail-saw-button" type="button">MAINTENIR POUR SCIER</button>
+    <div id="jailEscapeStatus" class="jail-escape-status">La lame est froide.</div>
+  </div>
+</div>
+
 <div id="patrimonyModal" class="patrimony-modal" aria-hidden="true">
   <div class="patrimony-box" role="dialog" aria-modal="true" aria-labelledby="patrimonyTitle">
     <div class="patrimony-head">
@@ -275,7 +301,10 @@
       </div>
       <button id="updatesClose" class="updates-close" type="button" aria-label="Fermer">✕</button>
     </div>
-    <div class="updates-list">      <article class="update-item current">
+    <div class="updates-list">
+      <article class="update-item current">
+        <div class="update-version">V0.48</div><div class="update-copy"><div class="update-title">Prison 2.0 <span class="update-tag major">Gameplay</span></div><p>Caution 150 000 €, attente 3 tours ou évasion à 100 000 € avec mini-jeu de sciage et surchauffe. L'IA choisit aussi sa stratégie et un bouton DEV permet de tester la Prison instantanément.</p></div>
+      </article>      <article class="update-item">
         <div class="update-version">V0.47.4</div><div class="update-copy"><div class="update-title">Simulation & debug <span class="update-tag minor">QA</span></div><p>Le simulateur compare désormais l’équilibrage avant/après les nouveaux événements, mesure les types de victoire et la durée médiane, et un audit automatique contrôle les incohérences d’état sur 5 000 parties.</p></div>
       </article>
       <article class="update-item">
