@@ -300,7 +300,7 @@ async function runAITurn(){
 }
 function scheduleAI(delay=420){
  if(aiTimer){clearTimeout(aiTimer);aiTimer=null}
- if(gameOver||!isAIPlayer())return;
+ if(initiativeActive||gameOver||!isAIPlayer())return;
  aiTimer=setTimeout(()=>{
    aiTimer=null;
    if(aiBusy){scheduleAI(180);return}
@@ -404,6 +404,7 @@ const spaces=names.map((name,i)=>{
   return {id:i,name,type,price:basePrices[i],rent:rents[i],baseRent:rents[i],owner:null,level:0,theme,district:district?.name||null};
 });
 let players=[],current=0,rolled=false,lastRoll=0,gameOver=false,winMode='both',animating=false,pendingRentDecision=false;
+let initiativeActive=false,initiativeScores=[];
 let pendingDebt=null,debtQueue=[],zonePressure={},roundNumber=1;
 let devMode=false,devTimer=null;
 let devStats={startedAt:0,rolls:0,turns:0,purchases:0,upgrades:0,rentPayments:0,rentPaid:0,buyouts:0,emergencySales:0,bankruptcies:0,events:0,globalEvents:0,bankVisits:0,jailVisits:0,debtCases:0,moneyInjected:0,moneyRemoved:0,scheduledCharges:0,propertyTaxes:0,wondersStarted:0,wonderWins:0};
@@ -857,6 +858,13 @@ function setTurnGuide(phase,main,detail,kind='neutral'){
 function updateActions(){
  const all=[rollBtn,buyBtn,buildBtn,endBtn,wonderBtn];
  all.forEach(b=>b.classList.remove('recommended'));
+ if(initiativeActive){
+   all.forEach(b=>b.disabled=true);
+   endBtn.classList.remove('turn-ready');
+   setTurnGuide('INITIATIVE','Ordre de départ','Le lancer de dés détermine qui commencera la partie.','wait');
+   if(status)status.textContent='Lancer d’initiative en cours…';
+   return;
+ }
  endBtn.classList.toggle('turn-ready',!!rolled&&!gameOver&&!pendingDebt&&!pendingRentDecision&&!animating);
  if(!players[current]){
    all.forEach(b=>b.disabled=true);
@@ -1625,6 +1633,9 @@ function runDevSimulation(count){
 }
 
 function resetTransientUI(){
+ initiativeActive=false;initiativeScores=[];
+ const init=document.getElementById('initiativeOverlay');
+ if(init){init.classList.remove('open');init.setAttribute('aria-hidden','true');}
  const modalEl=document.getElementById('modal');
  if(modalEl)modalEl.classList.remove('open','event-positive','event-negative','event-neutral');
  ['journalModal','updatesModal','settingsModal'].forEach(id=>{
@@ -1744,6 +1755,121 @@ endBtn.onclick=()=>{if(animating&&!document.getElementById('modal')?.classList.c
  do{current=(current+1)%players.length}while(!players[current].active);
  if(current<=previous){roundNumber++;recoverZonePressure();}
  document.getElementById('dice').dataset.face='1';status.textContent=`${players[current].name}, à toi de jouer.`;addLog(`➡️ Tour de <b>${players[current].name}</b> · tour de table ${roundNumber}.`);refresh();animateTurnChange(current)};
+
+const initiativeOverlay=document.getElementById('initiativeOverlay');
+const initiativePlayers=document.getElementById('initiativePlayers');
+const initiativeDice=document.getElementById('initiativeDice');
+const initiativeMessage=document.getElementById('initiativeMessage');
+const initiativeContinue=document.getElementById('initiativeContinue');
+
+function renderInitiativePlayers(scores=initiativeScores){
+ if(!initiativePlayers)return;
+ initiativePlayers.innerHTML=players.map((p,index)=>{
+   const score=scores[index]??'—';
+   return `<div class="initiative-player" data-initiative-player="${index}">
+     ${pawnVisual(index,p.name,'initiative-pawn')}
+     <div class="initiative-player-copy">
+       <div class="initiative-player-name">${p.name}</div>
+       <div class="initiative-player-type">${p.isAI?'🤖 IA difficile':'👤 Humain'}</div>
+     </div>
+     <div class="initiative-score" data-initiative-score="${index}">${score}</div>
+   </div>`;
+ }).join('');
+}
+
+async function animateInitiativeDie(finalRoll){
+ if(!initiativeDice)return;
+ initiativeDice.classList.add('rolling');
+ const start=performance.now();
+ while(performance.now()-start<430){
+   initiativeDice.dataset.face=String(1+Math.floor(Math.random()*6));
+   playSfx('dice');
+   await sleep(75);
+ }
+ initiativeDice.dataset.face=String(finalRoll);
+ initiativeDice.classList.remove('rolling');
+ await sleep(260);
+}
+
+async function rollInitiativeFor(index){
+ const player=players[index];
+ document.querySelectorAll('.initiative-player').forEach(el=>el.classList.remove('current'));
+ document.querySelector(`[data-initiative-player="${index}"]`)?.classList.add('current');
+ if(initiativeMessage)initiativeMessage.textContent=`${player.name} lance le dé…`;
+ await sleep(220);
+ const roll=1+Math.floor(Math.random()*6);
+ await animateInitiativeDie(roll);
+ initiativeScores[index]=roll;
+ const scoreEl=document.querySelector(`[data-initiative-score="${index}"]`);
+ if(scoreEl)scoreEl.textContent=roll;
+ if(initiativeMessage)initiativeMessage.textContent=`${player.name} obtient ${roll}.`;
+ playSfx(roll>=5?'money':'turn');
+ await sleep(430);
+ return roll;
+}
+
+async function resolveInitiativeTie(playerIndexes){
+ let remaining=[...playerIndexes];
+ while(remaining.length>1){
+   if(initiativeMessage)initiativeMessage.textContent=`Égalité ! Relance entre ${remaining.map(i=>players[i].name).join(', ')}.`;
+   await sleep(700);
+   const roundScores=[];
+   for(const index of remaining){
+     const score=await rollInitiativeFor(index);
+     roundScores.push({index,score});
+   }
+   const best=Math.max(...roundScores.map(x=>x.score));
+   remaining=roundScores.filter(x=>x.score===best).map(x=>x.index);
+ }
+ return remaining[0];
+}
+
+async function startInitiative(){
+ initiativeActive=true;
+ rolled=false;
+ animating=true;
+ initiativeScores=new Array(players.length).fill(null);
+ if(initiativeOverlay){
+   initiativeOverlay.classList.add('open');
+   initiativeOverlay.setAttribute('aria-hidden','false');
+ }
+ if(initiativeContinue)initiativeContinue.hidden=true;
+ if(initiativeDice)initiativeDice.dataset.face='1';
+ renderInitiativePlayers();
+ if(initiativeMessage)initiativeMessage.textContent='Tirage de l’ordre de départ…';
+ updateActions();
+ await sleep(500);
+
+ for(let i=0;i<players.length;i++)await rollInitiativeFor(i);
+
+ const bestScore=Math.max(...initiativeScores);
+ const leaders=initiativeScores.map((score,index)=>({score,index})).filter(x=>x.score===bestScore).map(x=>x.index);
+ const winnerIndex=leaders.length===1?leaders[0]:await resolveInitiativeTie(leaders);
+ current=winnerIndex;
+
+ document.querySelectorAll('.initiative-player').forEach(el=>el.classList.remove('current','winner'));
+ document.querySelector(`[data-initiative-player="${winnerIndex}"]`)?.classList.add('winner');
+ if(initiativeMessage)initiativeMessage.innerHTML=`🏆 <b>${players[winnerIndex].name}</b> commence la partie !`;
+ addLog(`🎲 <b>${players[winnerIndex].name}</b> remporte le lancer d’initiative et commence la partie.`);
+ animating=false;
+ if(initiativeContinue)initiativeContinue.hidden=false;
+}
+
+if(initiativeContinue){
+ initiativeContinue.onclick=()=>{
+   initiativeOverlay?.classList.remove('open');
+   initiativeOverlay?.setAttribute('aria-hidden','true');
+   initiativeActive=false;
+   rolled=false;
+   animating=false;
+   const die=document.getElementById('dice');if(die)die.dataset.face='1';
+   status.textContent=`${players[current].name}, tu commences la partie.`;
+   refresh();
+   animateTurnChange(current);
+   scheduleAI(650);
+ };
+}
+
 function startGame(){
  resetTransientUI();pendingRentDecision=false;pendingDebt=null;debtQueue=[];zonePressure={};roundNumber=1;resetDevStats();
  ensureAudio();stopLobbyMusic();playSfx('start');startAmbient();
@@ -1764,11 +1890,13 @@ function startGame(){
    players.push({name:playerName,isAI,aiDifficulty:isAI?'hard':null,money:200000,pos:0,props:[],beaches:0,active:true,fiscalRollsLeft:0,worksInstallmentsLeft:0,wonderMode:null,wonderTurnsLeft:0,wonderLine:null,wonderSkipCountdown:false});
  }
  spaces.forEach(s=>{s.owner=null;s.level=0;s.rent=rents[s.id];s.baseRent=rents[s.id]});
- current=0;rolled=false;gameOver=false;logBox.innerHTML='';
+ current=0;rolled=false;gameOver=false;animating=false;initiativeActive=true;initiativeScores=[];logBox.innerHTML='';
  document.getElementById('startScreen').classList.remove('active');document.getElementById('gameScreen').classList.add('active');
  const aiCount=players.filter(p=>p.isAI).length;
- addLog(`🚀 Partie lancée avec ${n} joueurs · ${aiCount} IA difficile(s). Chacun commence avec ${moneyFmt(200000)}.`);
- status.textContent=`${players[0].name}, à toi de jouer.`;refresh();setTimeout(()=>animateTurnChange(0),120);
+ addLog(`🚀 Partie créée avec ${n} joueurs · ${aiCount} IA difficile(s). Chacun commence avec ${moneyFmt(200000)}.`);
+ status.textContent='Lancer d’initiative…';
+ drawBoard();renderPlayers();updateActions();refreshDevStats();
+ setTimeout(()=>startInitiative(),420);
 }document.getElementById('startBtn').onclick=startGame;
 document.getElementById('restartBtn').onclick=()=>{if(confirm('Recommencer la partie ?')){playSfx('close');stopAmbient();resetTransientUI();pendingRentDecision=false;pendingDebt=null;debtQueue=[];animating=false;rolled=false;lastRoll=0;const resetDie=document.getElementById('dice');if(resetDie){resetDie.classList.remove('rolling');resetDie.dataset.face='1';}if(typeof setDevMode==='function')setDevMode(false);document.getElementById('gameScreen').classList.remove('active');document.getElementById('startScreen').classList.add('active');stopAmbient();setTimeout(startLobbyMusic,120)}};
 
@@ -1781,7 +1909,7 @@ function setDevMode(open){
  devPanel.style.display=devMode?'block':'none';
  devPanel.classList.toggle('open',devMode);
  devPanel.setAttribute('aria-hidden',devMode?'false':'true');
- devToggle.textContent=devMode?'🧪 Fermer mode développeur':'🧪 Mode développeur';
+ devToggle.textContent=devMode?'✕ Fermer DEV':'🧪 DEV';
  devToggle.setAttribute('aria-expanded',devMode?'true':'false');
  if(devMode){
    refreshDevStats();
