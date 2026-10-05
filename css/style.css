@@ -7740,3 +7740,132 @@ html.phaser-ready .phaser-mount{opacity:1}
   .lobby-side{grid-template-columns:1fr}
   .player-slot{grid-template-columns:26px 34px minmax(0,1fr)}
 }
+
+
+/* === V0.47.1 ACTION PANEL PREMIUM === */
+.action-panel{
+  background:linear-gradient(180deg,#17283a 0%,#112233 100%)!important;
+  border:1px solid rgba(148,163,184,.18)!important;
+  box-shadow:0 18px 42px rgba(15,23,42,.22)!important
+}
+.action-panel .panel-kicker{color:#7dd3fc!important;letter-spacing:.15em!important}
+.action-panel .turn-head{margin-bottom:10px!important}
+.action-panel .turn-head h3{font-size:17px!important;color:#f8fafc!important}
+.action-panel .turn-phase{
+  background:rgba(255,255,255,.92)!important;
+  border-color:rgba(255,255,255,.5)!important;
+  color:#334155!important;
+  box-shadow:0 2px 8px rgba(0,0,0,.08)!important
+}
+.action-panel .turn-guide{
+  padding:11px 12px!important;
+  border-radius:14px!important;
+  box-shadow:0 7px 16px rgba(15,23,42,.10)!important
+}
+.action-panel .turn-guide-main{
+  font-size:15px!important;
+  letter-spacing:-.01em!important
+}
+.action-panel .turn-guide-detail{
+  font-size:8.5px!important;
+  line-height:1.35!important
+}
+.action-panel .actions{
+  gap:8px!important
+}
+.action-panel .actions button{
+  min-height:56px!important;
+  padding:9px 10px!important;
+  border-radius:13px!important;
+  border:1px solid rgba(255,255,255,.11)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.13),0 7px 15px rgba(0,0,0,.12)!important
+}
+.action-panel .action-icon{
+  width:27px!important;height:27px!important;flex-basis:27px!important;border-radius:9px!important
+}
+.action-panel .action-copy b{
+  font-size:11.5px!important;
+  line-height:1.1!important;
+  font-weight:1000!important
+}
+.action-panel .action-copy small{
+  margin-top:2px!important;
+  font-size:7.5px!important;
+  line-height:1.2!important;
+  opacity:.76!important
+}
+.action-panel .action-price{
+  padding:7px 9px!important;
+  border-radius:9px!important;
+  background:rgba(255,255,255,.82)!important;
+  color:#111827!important;
+  font-size:10px!important;
+  font-weight:1000!important
+}
+
+/* Fin du tour : état OFF sombre, état ON franchement lumineux. */
+.action-panel #endBtn{
+  min-height:60px!important;
+  transition:filter .16s ease,box-shadow .16s ease,border-color .16s ease!important
+}
+.action-panel #endBtn:disabled{
+  opacity:.34!important;
+  filter:saturate(.20) brightness(.62)!important;
+  background:linear-gradient(135deg,#273442,#334155)!important;
+  border-color:rgba(148,163,184,.10)!important;
+  box-shadow:none!important
+}
+.action-panel #endBtn:disabled .action-copy b,
+.action-panel #endBtn:disabled .action-copy small,
+.action-panel #endBtn:disabled .action-icon{
+  color:#64748b!important
+}
+.action-panel #endBtn:not(:disabled),
+.action-panel #endBtn.turn-ready{
+  opacity:1!important;
+  filter:none!important;
+  background:linear-gradient(135deg,#22c55e 0%,#10b981 48%,#0ea5a4 100%)!important;
+  border:1px solid #86efac!important;
+  box-shadow:0 0 0 2px rgba(134,239,172,.16),0 9px 20px rgba(16,185,129,.30),inset 0 1px 0 rgba(255,255,255,.28)!important
+}
+.action-panel #endBtn:not(:disabled) .action-copy b,
+.action-panel #endBtn:not(:disabled) .action-copy small,
+.action-panel #endBtn:not(:disabled) .action-icon,
+.action-panel #endBtn.turn-ready .action-copy b,
+.action-panel #endBtn.turn-ready .action-copy small,
+.action-panel #endBtn.turn-ready .action-icon{
+  color:#052e24!important;
+  opacity:1!important
+}
+.action-panel #endBtn:not(:disabled) .action-icon{
+  background:rgba(255,255,255,.38)!important
+}
+.action-panel #endBtn:not(:disabled)::before{
+  content:'PRÊT';
+  position:absolute;
+  right:9px;
+  top:7px;
+  padding:3px 6px;
+  border-radius:999px;
+  background:rgba(255,255,255,.78);
+  color:#047857;
+  font-size:6px;
+  line-height:1;
+  font-weight:1000;
+  letter-spacing:.1em
+}
+
+/* Meilleure séparation entre les actions actives et les actions bloquées. */
+.action-panel .actions button:not(:disabled){opacity:1!important}
+.action-panel .actions button:disabled:not(#endBtn){
+  opacity:.38!important;
+  filter:saturate(.25) brightness(.67)!important
+}
+.action-panel .turn-status{
+  min-height:38px!important;
+  font-size:9.5px!important;
+  border-color:rgba(125,211,252,.22)!important;
+  background:linear-gradient(180deg,rgba(255,255,255,.95),rgba(241,245,249,.96))!important;
+  color:#334155!important;
+  font-weight:900!important
+}
