@@ -91,21 +91,40 @@ function playSfx(name){
 }
 const musicChords=[
  [130.81,164.81,196.00,261.63],
+ [146.83,174.61,220.00,293.66],
  [110.00,146.83,164.81,220.00],
+ [164.81,196.00,246.94,329.63],
  [98.00,130.81,164.81,196.00],
  [116.54,146.83,174.61,233.08]
 ];
 function playAmbientChord(){
  if(!audioSettings.music||!ensureAudio())return;
  const chord=musicChords[musicStep++%musicChords.length];
+ const beat=audioCtx.currentTime;
+
+ // Pad court et plus rythmé.
  chord.forEach((f,i)=>{
-  const now=audioCtx.currentTime,o=audioCtx.createOscillator(),g=audioCtx.createGain();
+  const o=audioCtx.createOscillator(),g=audioCtx.createGain();
   o.type=i===0?'sine':'triangle';o.frequency.value=f;
-  g.gain.setValueAtTime(.0001,now);g.gain.exponentialRampToValueAtTime(i===0?.055:.025,now+.7);g.gain.exponentialRampToValueAtTime(.0001,now+3.1);
-  o.connect(g);g.connect(musicGain);o.start(now);o.stop(now+3.2);
+  g.gain.setValueAtTime(.0001,beat);
+  g.gain.exponentialRampToValueAtTime(i===0?.048:.022,beat+.08);
+  g.gain.exponentialRampToValueAtTime(.0001,beat+1.25);
+  o.connect(g);g.connect(musicGain);o.start(beat);o.stop(beat+1.32);
  });
+
+ // Basse + pulsation légère : dynamique sans devenir agressive.
+ tone(chord[0]/2,.18,'sine',.040,0,musicGain);
+ tone(chord[0]/2,.13,'sine',.028,.48,musicGain);
+ tone(chord[1]*2,.055,'triangle',.018,.24,musicGain);
+ tone(chord[2]*2,.045,'triangle',.015,.72,musicGain);
 }
-function startAmbient(){if(!audioSettings.music||musicTimer)return;stopLobbyMusic();ensureAudio();playAmbientChord();musicTimer=setInterval(playAmbientChord,3200)}
+function startAmbient(){
+ if(!audioSettings.music||musicTimer)return;
+ stopLobbyMusic();ensureAudio();
+ musicStep=0;
+ playAmbientChord();
+ musicTimer=setInterval(playAmbientChord,1250)
+}
 function stopAmbient(){if(musicTimer){clearInterval(musicTimer);musicTimer=null}}
 const lobbySequence=[
  [261.63,329.63,392.00],[293.66,369.99,440.00],[329.63,392.00,493.88],[293.66,349.23,440.00]
@@ -222,41 +241,71 @@ async function runAITurn(){
  aiBusy=true;
  const aiIndex=current;
  try{
-   await aiDelay(650);
+   await aiDelay(520);
    if(current!==aiIndex||gameOver)return;
-   if(aiHandleOpenModal()){await aiDelay(500);return}
+
+   // Toute fenêtre de décision appartenant à l'IA est traitée automatiquement.
+   if(aiHandleOpenModal()){
+     await aiDelay(360);
+     return;
+   }
+
    if(!rolled){
      addLog(`🤖 <b>${players[current].name}</b> analyse le plateau et lance les dés.`);
-     rollBtn.click();return;
+     rollBtn.click();
+     return;
    }
+
    const p=players[current],s=spaces[p.pos];
+
    if(canLaunchWonder(current)){
      addLog(`🤖 <b>${p.name}</b> sécurise un quartier complet et prépare une Merveille.`);
-     openWonderModal();return;
+     openWonderModal();
+     return;
    }
+
    if(aiShouldBuy(current,s)&&!buyBtn.disabled){
      addLog(`🤖 <b>${p.name}</b> juge ${s.name} rentable et l'achète.`);
-     buyBtn.click();await aiDelay(380);
+     buyBtn.click();
+     await aiDelay(300);
    }
+
+   if(current!==aiIndex||gameOver)return;
+
    if(aiShouldBuild(current,s)&&!buildBtn.disabled){
      addLog(`🤖 <b>${p.name}</b> renforce ${s.name} pour augmenter son loyer.`);
-     buildBtn.click();await aiDelay(380);
+     buildBtn.click();
+     await aiDelay(300);
      if(document.getElementById('modal')?.classList.contains('open'))closeModal();
    }
-   await aiDelay(430);
+
+   if(current!==aiIndex||gameOver)return;
+   await aiDelay(320);
    repairTurnState();
+
+   if(current===aiIndex && rolled && !pendingDebt && !pendingRentDecision && !animating && !document.getElementById('modal')?.classList.contains('open')){
+     endBtn.disabled=false;
+   }
+
    if(current===aiIndex&&!endBtn.disabled){
-     addLog(`🤖 <b>${p.name}</b> termine son tour.`);
+     addLog(`🤖 <b>${p.name}</b> termine son tour automatiquement.`);
      endBtn.click();
    }
  }finally{
    aiBusy=false;
+   // Point crucial : un refresh peut survenir pendant que aiBusy=true.
+   // On relance donc la boucle après chaque sous-action afin qu'aucun clic humain ne soit requis.
+   if(!gameOver&&isAIPlayer())scheduleAI(260);
  }
 }
-function scheduleAI(){
+function scheduleAI(delay=420){
  if(aiTimer){clearTimeout(aiTimer);aiTimer=null}
  if(gameOver||!isAIPlayer())return;
- aiTimer=setTimeout(()=>{aiTimer=null;runAITurn();},420);
+ aiTimer=setTimeout(()=>{
+   aiTimer=null;
+   if(aiBusy){scheduleAI(180);return}
+   runAITurn();
+ },delay);
 }
 
 const names=[
@@ -450,6 +499,7 @@ function startWonder(mode,districtName){
  status.textContent=`Merveille de ${p.name} en construction : ${p.wonderTurnsLeft} tours restants.`;
  showCinematic('wonder','NOUVEAU PROJET','MERVEILLE LANCÉE',`${p.name} · ${districtName} · ${p.wonderTurnsLeft} tours`,1900);
  playSfx('build');refresh();
+ scheduleAI(220);
 }
 function advanceWonderForPlayer(playerIndex){
  const p=players[playerIndex];
@@ -701,7 +751,7 @@ function showEventResult({title,icon='✨',description='',effect='',tone='neutra
    if(afterClose)afterClose();
    // Un événement est résolu après le déplacement. On recalcule toujours les
    // actions ici pour éviter que "Fin du tour" reste bloqué dans l'état animation.
-   requestAnimationFrame(()=>{refresh();repairTurnState();});
+   requestAnimationFrame(()=>{refresh();repairTurnState();scheduleAI(220);});
  };
  playSfx(tone==='positive'?'money':tone==='negative'?'bad':'open');
 }
@@ -857,7 +907,7 @@ function updateActions(){
  const canBuild=rolled&&s.type==='property'&&s.owner===current&&s.level<3&&p.money>=nextCost;
  const canWonder=canLaunchWonder(current);
  const modalBlocking=document.getElementById('modal')?.classList.contains('open');
- const canEnd=rolled&&!pendingDebt&&!pendingRentDecision&&!animating&&!modalBlocking;
+ const canEnd=rolled&&!gameOver&&!pendingDebt&&!pendingRentDecision&&!animating&&!modalBlocking;
 
  setActionState(rollBtn,!rolled,rolled?'Les dés ont déjà été lancés ce tour.':'');
  setActionState(buyBtn,canBuy,!rolled?'Lance les dés d’abord.':!isProperty?'Cette case ne peut pas être achetée.':s.owner!==null?'Cette propriété appartient déjà à un joueur.':p.money<price?`Il manque ${moneyFmt(price-p.money)}.`:'');
@@ -1065,6 +1115,7 @@ function payRentChoice(spaceId){
    status.textContent=`Fonds insuffisants : liquidation nécessaire pour ${s.name}.`;
  }
  refresh();
+ scheduleAI(220);
 }
 function buyoutChoice(spaceId){
  const s=spaces[spaceId],buyer=players[current];
@@ -1086,6 +1137,7 @@ function buyoutChoice(spaceId){
  closeRentChoice();
  animatePurchase(s.id,current);
  pulsePlayerCard(current,'positive');
+ scheduleAI(220);
 }
 
 function liquidationRate(saleIndex){return Math.max(.50,.90-(saleIndex*.10))}
@@ -1227,6 +1279,7 @@ function finishDebtCase(){
  refresh();checkWin();
  if(callback)callback(true);
  processNextDebt();
+ scheduleAI(260);
 }
 function finalizeBankruptcy(playerIndex){
  const d=pendingDebt;
@@ -1320,7 +1373,7 @@ function showWorksChoice(p,idx){
  spread.onclick=()=>{
    scheduleWorks(p);
    document.getElementById('modal').classList.remove('open');
-   playSfx('close');refresh();
+   playSfx('close');refresh();scheduleAI(220);
  };
  const pay=document.createElement('button');
  pay.className='primary';
