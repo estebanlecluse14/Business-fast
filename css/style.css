@@ -8118,3 +8118,34 @@ html.phaser-ready .phaser-mount{opacity:1}
 .quake-mini span{position:absolute;height:4px;background:#665140;border-radius:4px}.quake-mini span:nth-child(1){width:42%;left:7%;top:37%;transform:rotate(15deg)}.quake-mini span:nth-child(2){width:34%;right:8%;top:51%;transform:rotate(-23deg)}.quake-mini span:nth-child(3){width:28%;left:38%;bottom:19%;transform:rotate(31deg)}
 .space.quake-damaged{box-shadow:inset 0 0 0 3px rgba(104,72,48,.42)!important}
 .space.quake-damaged::after{background:repeating-linear-gradient(135deg,transparent 0 18px,rgba(78,57,43,.10) 19px 22px)!important}
+
+/* === V0.48 PRISON 2.0 === */
+.jail-player-status{margin-top:4px;padding:4px 6px;border-radius:7px;background:#27272a;border:1px solid #52525b;color:#f4f4f5;font-size:7px;font-weight:1000}
+#modal.modal-jail .box{width:min(760px,96vw)!important}
+.jail-cell-visual{position:relative;height:126px;border-radius:16px;overflow:hidden;background:linear-gradient(180deg,#263440,#0b1117);border:1px solid #465460}
+.jail-cell-visual:before{content:'';position:absolute;inset:-20px 20% 0;background:radial-gradient(ellipse at top,rgba(235,246,251,.38),transparent 62%)}
+.jail-cell-bars{position:absolute;inset:-10px 44px 0;display:flex;justify-content:space-between}
+.jail-cell-bars i{width:20px;background:linear-gradient(90deg,#46525b,#d7dee2 45%,#56616a);border:1px solid #273139;box-shadow:5px 0 9px rgba(0,0,0,.22)}
+.jail-recidive-note{padding:8px 10px;border-radius:10px;background:#3a1717;border:1px solid #7f1d1d;color:#fecaca;font-size:8px;font-weight:900}
+.jail-options{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin-top:10px}
+.jail-option{padding:12px;border-radius:14px;background:#f8fafc;border:1px solid #dbe4e9;color:#172332}
+.jail-option.recommended{background:#effcf5;border-color:#86efac}.jail-option.escape{background:#fff8ed;border-color:#fdba74}.jail-option.wait{background:#f5f3ff;border-color:#c4b5fd}.jail-option.locked{opacity:.48}
+.jail-option-code{display:block;font-size:6px;font-weight:1000;letter-spacing:.14em;color:#71808c}.jail-option b{display:block;margin-top:7px;font-size:11px}.jail-option strong{display:block;margin-top:3px;font-size:20px}.jail-option small{display:block;margin-top:7px;font-size:7.5px;line-height:1.35;color:#63727d;font-weight:700}
+#modal.modal-jail .row{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px!important}#modal.modal-jail .row button{min-width:0!important;padding:10px 8px!important;font-size:9px!important}
+.jail-bail{background:#22c55e!important;color:#052e16!important}.jail-escape{background:#f59e0b!important;color:#3b1d00!important}.jail-wait{background:#8b5cf6!important;color:#fff!important}
+.jail-escape-overlay{position:fixed;inset:0;z-index:1400;display:none;align-items:center;justify-content:center;padding:20px;background:radial-gradient(circle at 50% 20%,rgba(76,95,107,.28),rgba(2,7,11,.94) 62%);user-select:none;touch-action:none}
+.jail-escape-overlay.open{display:flex}.jail-escape-shell{width:min(760px,96vw);padding:20px;border-radius:24px;background:linear-gradient(180deg,#18242d,#0d151b);border:1px solid #46535d;box-shadow:0 34px 100px rgba(0,0,0,.56);color:#fff}
+.jail-escape-head{display:flex;justify-content:space-between;gap:15px}.jail-escape-kicker{color:#fbbf24;font-size:7px;font-weight:1000;letter-spacing:.18em}.jail-escape-head h2{margin:4px 0;font-size:25px}.jail-escape-head p{margin:0;color:#9ba9b4;font-size:9px}.jail-fee-stamp{padding:7px 9px;border:1px solid #7c2d12;border-radius:9px;background:#431407;color:#fed7aa;font-size:7px;font-weight:1000}
+.jail-game-stage{position:relative;height:280px;margin-top:17px;border-radius:18px;overflow:hidden;background:linear-gradient(180deg,#263844,#0c1216);border:1px solid #3c4a54}
+.jail-bars{position:absolute;left:16%;right:16%;top:-20px;bottom:-20px;display:flex;justify-content:space-around}
+.jail-bar{position:relative;width:36px;background:linear-gradient(90deg,#424e56,#d3dade 42%,#313b42);border:2px solid #2b3338;box-shadow:8px 0 13px rgba(0,0,0,.28);transition:.2s}
+.jail-bar .bar-cut{position:absolute;left:-4px;right:-4px;bottom:40%;height:0;max-height:12px;background:linear-gradient(0deg,#f97316,#fde68a);box-shadow:0 0 14px #f97316}
+.jail-bar.active{box-shadow:0 0 0 3px rgba(251,191,36,.20),8px 0 13px rgba(0,0,0,.28)}.jail-bar.cut{opacity:.25;transform:translateY(18px) rotate(4deg)}
+.jail-saw{--heat:0;position:absolute;left:50%;bottom:76px;width:170px;height:48px;transform:translateX(-50%);filter:drop-shadow(0 8px 8px rgba(0,0,0,.35))}
+.saw-blade{position:absolute;left:0;top:15px;width:116px;height:14px;border-radius:4px;background:linear-gradient(180deg,#f8fafc,#fb923c);border:1px solid #6b7280}.saw-handle{position:absolute;right:0;top:5px;width:62px;height:38px;border-radius:7px 16px 16px 7px;background:linear-gradient(180deg,#f59e0b,#b45309);border:3px solid #78350f}
+.jail-heat-glow{position:absolute;left:36%;right:36%;bottom:46px;height:120px;background:radial-gradient(circle,#fb923c,transparent 68%);opacity:0;filter:blur(14px)}
+.jail-game-hud{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}.jail-game-hud>div{padding:9px 10px;border-radius:12px;background:#111c24;border:1px solid #33424d}.jail-meter-title{display:flex;justify-content:space-between;color:#8fa0ad;font-size:7px;font-weight:1000}.jail-meter-title strong{color:#fff}
+.jail-cut-meter,.jail-heat-meter{height:10px;margin-top:7px;border-radius:99px;overflow:hidden;background:#26343e}.jail-cut-meter span{display:block;height:100%;width:0;background:linear-gradient(90deg,#38bdf8,#22c55e)}.jail-heat-meter span{display:block;height:100%;width:0;background:linear-gradient(90deg,#22c55e,#facc15 58%,#f97316 78%,#ef4444)}
+.jail-saw-button{width:100%;margin-top:12px;padding:15px;border:1px solid #fbbf24;border-radius:13px;background:linear-gradient(180deg,#f59e0b,#d97706);color:#271503;font-size:11px;font-weight:1000;cursor:pointer}.jail-escape-status{margin-top:9px;min-height:18px;text-align:center;color:#aab9c4;font-size:9px;font-weight:800}
+.jail-escape-overlay.blade-broken .jail-game-stage{box-shadow:inset 0 0 0 3px rgba(239,68,68,.42)}.jail-escape-overlay.blade-broken .jail-escape-status{color:#fca5a5}.jail-escape-overlay.escaped .jail-game-stage{box-shadow:inset 0 0 0 3px rgba(34,197,94,.38)}.jail-escape-overlay.escaped .jail-escape-status{color:#86efac}
+@media(max-width:700px){.jail-options,#modal.modal-jail .row,.jail-game-hud{grid-template-columns:1fr}.jail-game-stage{height:230px}.jail-bars{left:8%;right:8%}}
