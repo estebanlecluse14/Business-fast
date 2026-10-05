@@ -1507,16 +1507,29 @@ endBtn.onclick=()=>{if(!rolled||gameOver||pendingRentDecision||pendingDebt)retur
  document.getElementById('dice').dataset.face='1';status.textContent=`${players[current].name}, à toi de jouer.`;addLog(`➡️ Tour de <b>${players[current].name}</b> · tour de table ${roundNumber}.`);refresh();animateTurnChange(current)};
 function startGame(){resetTransientUI();pendingRentDecision=false;pendingDebt=null;debtQueue=[];zonePressure={};roundNumber=1;resetDevStats();ensureAudio();playSfx('start');startAmbient();const n=+document.getElementById('playerCount').value;winMode=document.getElementById('winMode').value;players=[];for(let i=0;i<n;i++){players.push({name:(document.getElementById('p'+(i+1)).value||`Joueur ${i+1}`).trim(),money:200000,pos:0,props:[],beaches:0,active:true,fiscalRollsLeft:0,worksInstallmentsLeft:0,wonderMode:null,wonderTurnsLeft:0,wonderLine:null,wonderSkipCountdown:false})}spaces.forEach(s=>{s.owner=null;s.level=0;s.rent=rents[s.id];s.baseRent=rents[s.id]});current=0;rolled=false;gameOver=false;logBox.innerHTML='';document.getElementById('startScreen').classList.remove('active');document.getElementById('gameScreen').classList.add('active');addLog(`🚀 Partie lancée avec ${n} joueurs. Chacun commence avec ${moneyFmt(200000)}.`);status.textContent=`${players[0].name}, à toi de jouer.`;refresh();setTimeout(()=>animateTurnChange(0),120)}
 document.getElementById('startBtn').onclick=startGame;
-document.getElementById('restartBtn').onclick=()=>{if(confirm('Recommencer la partie ?')){playSfx('close');stopAmbient();resetTransientUI();pendingRentDecision=false;pendingDebt=null;debtQueue=[];animating=false;rolled=false;document.getElementById('gameScreen').classList.remove('active');document.getElementById('startScreen').classList.add('active')}};
+document.getElementById('restartBtn').onclick=()=>{if(confirm('Recommencer la partie ?')){playSfx('close');stopAmbient();resetTransientUI();pendingRentDecision=false;pendingDebt=null;debtQueue=[];animating=false;rolled=false;if(typeof setDevMode==='function')setDevMode(false);document.getElementById('gameScreen').classList.remove('active');document.getElementById('startScreen').classList.add('active')}};
 
 
 const devPanel=document.getElementById('devPanel');
-document.getElementById('devToggle').onclick=()=>{
- devMode=!devMode;devPanel.style.display=devMode?'block':'none';
- document.getElementById('devToggle').textContent=devMode?'🧪 Fermer mode développeur':'🧪 Mode développeur';
- if(devMode){refreshDevStats();if(!devTimer)devTimer=setInterval(refreshDevStats,1000)}
- else if(devTimer){clearInterval(devTimer);devTimer=null}
-};
+const devToggle=document.getElementById('devToggle');
+const devClose=document.getElementById('devClose');
+function setDevMode(open){
+ devMode=!!open;
+ devPanel.style.display=devMode?'block':'none';
+ devPanel.classList.toggle('open',devMode);
+ devPanel.setAttribute('aria-hidden',devMode?'false':'true');
+ devToggle.textContent=devMode?'🧪 Fermer mode développeur':'🧪 Mode développeur';
+ devToggle.setAttribute('aria-expanded',devMode?'true':'false');
+ if(devMode){
+   refreshDevStats();
+   if(!devTimer)devTimer=setInterval(refreshDevStats,1000);
+   requestAnimationFrame(()=>{devPanel.scrollTop=0;});
+ }else if(devTimer){
+   clearInterval(devTimer);devTimer=null;
+ }
+}
+devToggle.onclick=()=>setDevMode(!devMode);
+if(devClose)devClose.onclick=()=>setDevMode(false);
 document.getElementById('devCash').onclick=()=>{
  if(!players[current]||gameOver)return;players[current].money+=50000;stat('moneyInjected',50000);
  addLog(`🧪 DEV : +${moneyFmt(50000)} à <b>${players[current].name}</b>.`);refresh();
