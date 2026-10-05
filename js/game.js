@@ -305,7 +305,7 @@ async function runAITurn(){
 }
 function scheduleAI(delay=420){
  if(aiTimer){clearTimeout(aiTimer);aiTimer=null}
- if(initiativeActive||gameOver||!isAIPlayer())return;
+ if(initiativeActive||gameOver||!isAIPlayer()||players[current]?.jailed)return;
  aiTimer=setTimeout(()=>{
    aiTimer=null;
    if(aiBusy){scheduleAI(180);return}
@@ -415,7 +415,7 @@ let players=[],current=0,rolled=false,lastRoll=0,gameOver=false,winMode='both',a
 let initiativeActive=false,initiativeScores=[];
 let pendingDebt=null,debtQueue=[],zonePressure={},roundNumber=1;
 let devMode=false,devTimer=null;
-let devStats={startedAt:0,rolls:0,turns:0,purchases:0,upgrades:0,rentPayments:0,rentPaid:0,buyouts:0,emergencySales:0,bankruptcies:0,events:0,globalEvents:0,bankVisits:0,jailVisits:0,debtCases:0,moneyInjected:0,moneyRemoved:0,scheduledCharges:0,propertyTaxes:0,wondersStarted:0,wonderWins:0};
+let devStats={startedAt:0,rolls:0,turns:0,purchases:0,upgrades:0,rentPayments:0,rentPaid:0,buyouts:0,emergencySales:0,bankruptcies:0,events:0,globalEvents:0,bankVisits:0,jailVisits:0,jailBails:0,jailEscapeAttempts:0,jailEscapes:0,jailBladeBreaks:0,jailWaits:0,debtCases:0,moneyInjected:0,moneyRemoved:0,scheduledCharges:0,propertyTaxes:0,wondersStarted:0,wonderWins:0};
 function resetDevStats(){
  devStats={startedAt:performance.now(),rolls:0,turns:0,purchases:0,upgrades:0,rentPayments:0,rentPaid:0,buyouts:0,emergencySales:0,bankruptcies:0,events:0,globalEvents:0,bankVisits:0,jailVisits:0,debtCases:0,moneyInjected:0,moneyRemoved:0,scheduledCharges:0,propertyTaxes:0,wondersStarted:0,wonderWins:0};
 }
@@ -434,7 +434,7 @@ function refreshDevStats(){
   ['Temps réel',elapsedText()],['Tour de table',roundNumber],['Lancers',devStats.rolls],['Tours joueurs',devStats.turns],
   ['Achats',devStats.purchases],['Constructions',devStats.upgrades],['Loyers payés',devStats.rentPayments],['Montant loyers',moneyFmt(devStats.rentPaid)],
   ['Rachats',devStats.buyouts],['Ventes urgence',devStats.emergencySales],['Crises dette',devStats.debtCases],['Faillites',devStats.bankruptcies],
-  ['Événements',devStats.events],['Mondiaux',devStats.globalEvents],['Joueurs actifs',active],['Zones en crise',pressure],
+  ['Événements',devStats.events],['Mondiaux',devStats.globalEvents],['Prisons',devStats.jailVisits],['Cautions',devStats.jailBails],['Évasions',devStats.jailEscapes],['Lames cassées',devStats.jailBladeBreaks],['Joueurs actifs',active],['Zones en crise',pressure],
   ['Charges différées',devStats.scheduledCharges],['Taxes foncières',devStats.propertyTaxes],['Merveilles lancées',devStats.wondersStarted],['Victoires Merveille',devStats.wonderWins],['Cash total',moneyFmt(totalCash)],['Argent injecté',moneyFmt(devStats.moneyInjected)]
  ];
  el.innerHTML=rows.map(([k,v])=>`<div class="dev-stat"><div class="k">${k}</div><div class="v">${v}</div></div>`).join('');
@@ -611,7 +611,7 @@ function drawBoard(){
     const specialEffect={
       start:'+30k au passage',
       bank:'+25k',
-      jail:'Amende 20k',
+      jail:'Caution · Évasion · 3 tours',
       event:'Effet surprise',
       global:'Tous les joueurs'
     }[s.type]||'';
@@ -834,6 +834,7 @@ function refresh(){
  renderPlayers();
  updateActions();
  refreshDevStats();
+ maybeOpenJailTurn();
  scheduleAI();
 }
 function repairTurnState(){
@@ -880,6 +881,12 @@ function updateActions(){
    renderWonderSite();return;
  }
  const p=players[current],s=spaces[p.pos];
+ if(p.jailed){
+   all.forEach(b=>b.disabled=true);endBtn.classList.remove('turn-ready');
+   setTurnGuide('PRISON','Décision de détention',p.jailTurnsLeft+' tour(s) restant(s) · caution, évasion ou attente.','danger');
+   if(status)status.textContent=p.name+' est actuellement en prison.';
+   return;
+ }
  const isProperty=['property','beach'].includes(s.type);
  const price=isProperty?purchasePrice(s):0;
  const nextCost=s.type==='property'&&s.level<3?upgradeCosts[s.level+1]:0;
@@ -1026,6 +1033,152 @@ async function movePlayer(steps){
  await sleep(70);
  resolveSpace();
 }
+
+let jailGameState=null,jailGameFrame=null,jailHold=false,jailLastTs=0;
+
+function closeJailEscapeGame(){
+ const overlay=document.getElementById('jailEscapeOverlay');
+ if(overlay){overlay.classList.remove('open','blade-broken','escaped');overlay.setAttribute('aria-hidden','true')}
+ jailHold=false;jailGameState=null;jailLastTs=0;
+ if(jailGameFrame){cancelAnimationFrame(jailGameFrame);jailGameFrame=null}
+}
+function forceEndJailTurn(){
+ const modalEl=document.getElementById('modal');
+ if(modalEl)modalEl.classList.remove('open','modal-decision','modal-danger','modal-jail');
+ rolled=true;animating=false;pendingRentDecision=false;
+ endBtn.disabled=false;
+ setTimeout(()=>endBtn.click(),80);
+}
+function releaseFromJail(playerIndex,reason,canPlayNow=false){
+ const p=players[playerIndex];if(!p)return;
+ p.jailed=false;p.jailTurnsLeft=0;p.jailJustEntered=false;
+ addLog('Prison : <b>'+p.name+'</b> est libéré'+(reason?' — '+reason:'')+'.');
+ status.textContent=p.name+' est libre.';
+ if(canPlayNow){rolled=false;animating=false;refresh();scheduleAI(350)}
+ else{refresh();repairTurnState()}
+}
+function chooseJailWait(playerIndex,fromArrival=false){
+ const p=players[playerIndex];if(!p)return;
+ stat('jailWaits');
+ if(fromArrival||p.jailJustEntered){
+   p.jailJustEntered=false;p.jailTurnsLeft=3;
+   addLog('Prison : <b>'+p.name+'</b> choisit d’attendre. 3 tours de détention.');
+   forceEndJailTurn();return;
+ }
+ p.jailTurnsLeft=Math.max(0,(p.jailTurnsLeft||3)-1);
+ addLog('Prison : <b>'+p.name+'</b> passe son tour. '+p.jailTurnsLeft+' tour(s) restant(s).');
+ if(p.jailTurnsLeft<=0){
+   p.jailed=false;p.jailJustEntered=false;
+   addLog('Prison : <b>'+p.name+'</b> a purgé sa peine et sera libre à son prochain tour.');
+ }
+ forceEndJailTurn();
+}
+function applyJailRecidive(playerIndex,onDone){
+ const p=players[playerIndex];
+ if(!p?.hasEscapedJail){onDone();return}
+ p.jailRecidiveCount=(p.jailRecidiveCount||0)+1;
+ const improved=p.props.map(id=>spaces[id]).filter(s=>s.type==='property'&&s.level>0).sort((a,b)=>parcelValue(b)-parcelValue(a))[0];
+ if(improved){improved.level=Math.max(0,improved.level-1);addLog('Récidive : <b>'+p.name+'</b> perd 1 niveau sur <b>'+improved.name+'</b>.')}
+ const fine=50000;
+ addLog('Récidive : <b>'+p.name+'</b> reçoit '+moneyFmt(fine)+' de sanction supplémentaire.');
+ chargePlayer(playerIndex,fine,'Récidive après évasion',()=>onDone());
+}
+function openJailDecision(playerIndex=current,opts={}){
+ const fromArrival=!!opts.fromArrival;
+ const p=players[playerIndex];if(!p||!p.active||gameOver)return;
+ p.jailed=true;if(fromArrival){p.jailTurnsLeft=3;p.jailJustEntered=true}
+ const recidive=p.hasEscapedJail&&fromArrival;
+ const render=()=>{
+   const body='<div class="jail-decision">'+
+    '<div class="jail-cell-visual"><div class="jail-cell-bars"><i></i><i></i><i></i><i></i><i></i></div></div>'+
+    '<div class="decision-kicker">PRISON 2.0</div>'+
+    '<div class="decision-title">'+p.name+' est détenu</div>'+
+    '<div class="decision-sub">'+(fromArrival?'Choisis comment sortir de prison.':'Il reste '+p.jailTurnsLeft+' tour(s) avant la libération automatique.')+'</div>'+
+    (recidive?'<div class="jail-recidive-note">RÉCIDIVE : 50 000 € + perte d’un niveau de propriété si possible.</div>':'')+
+    '<div class="decision-balance"><span>Trésorerie</span><strong>'+moneyFmt(p.money)+'</strong></div>'+
+    '<div class="jail-options">'+
+      '<div class="jail-option '+(p.money>=150000?'recommended':'locked')+'"><span class="jail-option-code">SÛR</span><b>Payer la caution</b><strong>150 000 €</strong><small>Sortie immédiate et garantie.</small></div>'+
+      '<div class="jail-option '+(p.money>=100000?'escape':'locked')+'"><span class="jail-option-code">RISQUÉ</span><b>Tenter l’évasion</b><strong>100 000 €</strong><small>La somme est payée avant le mini-jeu. Si la lame casse, tu restes détenu.</small></div>'+
+      '<div class="jail-option wait"><span class="jail-option-code">GRATUIT</span><b>Attendre</b><strong>'+p.jailTurnsLeft+' tour(s)</strong><small>Pas de déplacement. Les loyers continuent de fonctionner.</small></div>'+
+    '</div></div>';
+   modal('Prison',body,'decision');
+   document.getElementById('modal').classList.add('modal-jail');
+   const row=document.querySelector('#modal .row');row.innerHTML='';
+   const bail=document.createElement('button');bail.className='jail-bail';bail.textContent='Caution · 150 000 €';bail.disabled=p.money<150000;
+   const escape=document.createElement('button');escape.className='jail-escape';escape.textContent='Évasion · 100 000 €';escape.disabled=p.money<100000;
+   const wait=document.createElement('button');wait.className='jail-wait';wait.textContent=fromArrival?'Attendre 3 tours':'Passer ce tour';
+   bail.onclick=()=>{if(p.money<150000)return;p.money-=150000;stat('moneyRemoved',150000);stat('jailBails');document.getElementById('modal').classList.remove('open','modal-decision','modal-jail');releaseFromJail(playerIndex,'caution payée',!fromArrival);if(fromArrival)repairTurnState()};
+   escape.onclick=()=>{if(p.money<100000)return;p.money-=100000;stat('moneyRemoved',100000);stat('jailEscapeAttempts');document.getElementById('modal').classList.remove('open','modal-decision','modal-jail');if(p.isAI)simulateAIEscape(playerIndex,fromArrival);else startJailEscapeGame(playerIndex,fromArrival)};
+   wait.onclick=()=>chooseJailWait(playerIndex,fromArrival);
+   row.append(bail,escape,wait);
+   if(p.isAI)setTimeout(()=>{if(!p.jailed||current!==playerIndex)return;if(p.money>=260000)bail.click();else if(p.money>=100000)escape.click();else wait.click()},520);
+ };
+ if(recidive)applyJailRecidive(playerIndex,render);else render();
+}
+function enterJail(playerIndex=current){
+ const p=players[playerIndex];if(!p||!p.active)return;
+ stat('jailVisits');p.jailed=true;p.jailTurnsLeft=3;p.jailJustEntered=true;
+ status.textContent=p.name+' est envoyé en prison.';
+ addLog('Prison : <b>'+p.name+'</b> doit choisir entre caution, évasion ou détention.');
+ refresh();openJailDecision(playerIndex,{fromArrival:true});
+}
+function maybeOpenJailTurn(){
+ if(initiativeActive||gameOver||pendingDebt||pendingRentDecision||animating)return;
+ const p=players[current];if(!p?.jailed)return;
+ if(document.getElementById('modal')?.classList.contains('open'))return;
+ if(document.getElementById('jailEscapeOverlay')?.classList.contains('open'))return;
+ setTimeout(()=>openJailDecision(current,{fromArrival:false}),120);
+}
+function simulateAIEscape(playerIndex,fromArrival){
+ const p=players[playerIndex];if(!p)return;
+ const success=Math.random()<0.74;
+ showCinematic(success?'start':'bankrupt',success?'ÉVASION RÉUSSIE':'ÉVASION ÉCHOUÉE',p.name,success?'La lame tient jusqu’au dernier barreau.':'La lame casse sous la chaleur.',1200);
+ if(success){stat('jailEscapes');p.hasEscapedJail=true;releaseFromJail(playerIndex,'évasion réussie',!fromArrival);if(fromArrival)repairTurnState()}
+ else{stat('jailBladeBreaks');addLog('Évasion : la lame de <b>'+p.name+'</b> casse. Il reste en prison.');if(fromArrival)forceEndJailTurn();else refresh()}
+}
+function startJailEscapeGame(playerIndex,fromArrival){
+ const overlay=document.getElementById('jailEscapeOverlay');if(!overlay)return;
+ jailGameState={playerIndex,fromArrival,bar:0,cut:0,heat:0,finished:false};jailHold=false;jailLastTs=performance.now();
+ document.querySelectorAll('.jail-bar').forEach(el=>{el.classList.remove('cut','active');el.querySelector('.bar-cut').style.height='0%'});
+ document.querySelector('.jail-bar[data-bar="0"]')?.classList.add('active');
+ document.getElementById('jailBarLabel').textContent='1 / 4';document.getElementById('jailCutFill').style.width='0%';document.getElementById('jailHeatFill').style.width='0%';document.getElementById('jailHeatLabel').textContent='0 %';document.getElementById('jailEscapeStatus').textContent='La lame est froide. Commence doucement.';
+ overlay.classList.remove('blade-broken','escaped');overlay.classList.add('open');overlay.setAttribute('aria-hidden','false');
+ jailGameFrame=requestAnimationFrame(jailEscapeTick);
+}
+function finishJailEscape(success){
+ if(!jailGameState||jailGameState.finished)return;
+ jailGameState.finished=true;jailHold=false;const state={...jailGameState},p=players[state.playerIndex],overlay=document.getElementById('jailEscapeOverlay');
+ if(success){stat('jailEscapes');p.hasEscapedJail=true;overlay?.classList.add('escaped');document.getElementById('jailEscapeStatus').textContent='Évasion réussie. Les 4 barreaux sont coupés.';addLog('Évasion réussie : <b>'+p.name+'</b> quitte la prison.');playSfx('start')}
+ else{stat('jailBladeBreaks');overlay?.classList.add('blade-broken');document.getElementById('jailEscapeStatus').textContent='SURCHAUFFE — la lame vient de casser.';addLog('Évasion ratée : la lame de <b>'+p.name+'</b> casse. Les 100 000 € sont perdus.');playSfx('bad')}
+ setTimeout(()=>{closeJailEscapeGame();if(success){releaseFromJail(state.playerIndex,'évasion réussie',!state.fromArrival);if(state.fromArrival)repairTurnState()}else{if(state.fromArrival)forceEndJailTurn();else refresh()}},1100);
+}
+function jailEscapeTick(ts){
+ if(!jailGameState||jailGameState.finished)return;
+ const dt=Math.min(.05,(ts-jailLastTs)/1000||0);jailLastTs=ts;const state=jailGameState;
+ if(jailHold){state.cut=Math.min(100,state.cut+44*dt);state.heat=Math.min(100,state.heat+38*dt)}
+ else state.heat=Math.max(0,state.heat-30*dt);
+ if(state.heat>=100){finishJailEscape(false);return}
+ if(state.cut>=100){
+   const barEl=document.querySelector('.jail-bar[data-bar="'+state.bar+'"]');barEl?.classList.remove('active');barEl?.classList.add('cut');
+   state.bar++;state.cut=0;if(state.bar>=4){finishJailEscape(true);return}
+   document.querySelector('.jail-bar[data-bar="'+state.bar+'"]')?.classList.add('active');document.getElementById('jailEscapeStatus').textContent='Barreau coupé. Laisse refroidir la lame.';playSfx('build');
+ }
+ const heatPct=Math.round(state.heat),cutPct=Math.round(state.cut);
+ document.getElementById('jailBarLabel').textContent=(state.bar+1)+' / 4';document.getElementById('jailCutFill').style.width=cutPct+'%';document.getElementById('jailHeatFill').style.width=heatPct+'%';document.getElementById('jailHeatLabel').textContent=heatPct+' %';
+ const activeBar=document.querySelector('.jail-bar[data-bar="'+state.bar+'"] .bar-cut');if(activeBar)activeBar.style.height=Math.min(12,cutPct*.12)+'px';
+ const glow=document.getElementById('jailHeatGlow');if(glow)glow.style.opacity=Math.min(.85,state.heat/100);
+ if(state.heat>=82)document.getElementById('jailEscapeStatus').textContent='DANGER : relâche pour refroidir !';
+ else if(state.heat>=60)document.getElementById('jailEscapeStatus').textContent='La lame chauffe fortement.';
+ else if(jailHold)document.getElementById('jailEscapeStatus').textContent='Sciage en cours…';
+ jailGameFrame=requestAnimationFrame(jailEscapeTick);
+}
+const jailSawButton=document.getElementById('jailSawButton');
+if(jailSawButton){
+ const startSaw=e=>{e?.preventDefault();if(jailGameState&&!jailGameState.finished)jailHold=true};
+ const stopSaw=e=>{e?.preventDefault();jailHold=false};
+ jailSawButton.addEventListener('pointerdown',startSaw);jailSawButton.addEventListener('pointerup',stopSaw);jailSawButton.addEventListener('pointercancel',stopSaw);jailSawButton.addEventListener('pointerleave',stopSaw);window.addEventListener('pointerup',()=>{jailHold=false});
+}
+
 function resolveSpace(){const p=players[current],s=spaces[p.pos];
  if(['property','beach'].includes(s.type)){
    if(s.owner===null){
@@ -1045,25 +1198,8 @@ function resolveSpace(){const p=players[current],s=spaces[p.pos];
  showEventResult({title:'🏦 Banque',icon:'🏦',description:'La banque vous accorde une prime exceptionnelle.',effect:`+ ${moneyFmt(amount)}`,tone:'positive'});
 }
  else if(s.type==='jail'){
- const fine=20000;stat('jailVisits');stat('moneyRemoved',fine);
- const canPay=p.money>=fine;
- if(canPay){
-   p.money-=fine;
-   addLog(`🚔 <b>${p.name}</b> paie une amende de ${moneyFmt(fine)}.`);
-   status.textContent='Amende de prison.';
-   showEventResult({title:'🚔 Prison',icon:'🚔',description:'Vous devez régler une amende avant de continuer.',effect:`- ${moneyFmt(fine)}`,tone:'negative'});
- }else{
-   const cash=p.money;
-   p.money=0;
-   const shortfall=fine-cash;
-   addLog(`🚔 <b>${p.name}</b> doit ${moneyFmt(fine)} mais ne dispose que de ${moneyFmt(cash)}.`);
-   showEventResult({
-     title:'🚔 Prison',icon:'🚔',
-     description:`L'amende est de ${moneyFmt(fine)}. Votre trésorerie ne suffit pas : une liquidation d'urgence va être nécessaire.`,
-     effect:`Il manque ${moneyFmt(shortfall)}`,tone:'negative',
-     afterClose:()=>queueDebt(current,shortfall,null,'Amende de prison')
-   });
- }
+ enterJail(current);
+ return;
 }
  else if(s.type==='event'){eventCard(p)} else if(s.type==='global'){globalEvent();}
  checkWin();refresh();}
@@ -1861,6 +1997,7 @@ function resetTransientUI(){
    const el=document.getElementById(id);
    if(el){el.classList.remove('open');el.setAttribute('aria-hidden','true');}
  });
+ closeJailEscapeGame();
  const disaster=document.getElementById('disasterFx');if(disaster)disaster.classList.remove('show','flood','quake');
  const cine=document.getElementById('cinematicOverlay');
  if(cine){cine.classList.remove('show');cine.setAttribute('aria-hidden','true');}
@@ -2144,7 +2281,7 @@ function startGame(){
      playerName=`Joueur ${i+1}`;
    }
    usedNames.push(playerName);
-   players.push({name:playerName,isAI,aiDifficulty:isAI?'hard':null,money:200000,pos:0,props:[],beaches:0,active:true,fiscalRollsLeft:0,worksInstallmentsLeft:0,wonderMode:null,wonderTurnsLeft:0,wonderLine:null,wonderSkipCountdown:false,floodTurnsLeft:0,floodSkipCountdown:false,doubleChance:false});
+   players.push({name:playerName,isAI,aiDifficulty:isAI?'hard':null,money:200000,pos:0,props:[],beaches:0,active:true,fiscalRollsLeft:0,worksInstallmentsLeft:0,wonderMode:null,wonderTurnsLeft:0,wonderLine:null,wonderSkipCountdown:false,floodTurnsLeft:0,floodSkipCountdown:false,doubleChance:false,jailed:false,jailTurnsLeft:0,jailJustEntered:false,hasEscapedJail:false,jailRecidiveCount:0});
  }
  spaces.forEach(s=>{s.owner=null;s.level=0;s.rent=rents[s.id];s.baseRent=rents[s.id];s.repairTurnsLeft=0;s.repairSkipCountdown=false});
  current=0;rolled=false;gameOver=false;animating=false;initiativeActive=true;initiativeScores=[];logBox.innerHTML='';
@@ -2190,6 +2327,11 @@ document.getElementById('devDebt').onclick=()=>{
  refresh();
 };
 document.getElementById('devEvent').onclick=()=>{if(players[current]&&!pendingDebt&&!pendingRentDecision&&!gameOver)eventCard(players[current])};
+document.getElementById('devJail').onclick=()=>{
+ if(!players[current]||pendingDebt||pendingRentDecision||gameOver)return;
+ const jailSpace=spaces.find(s=>s.type==='jail');if(jailSpace)players[current].pos=jailSpace.id;
+ addLog('DEV : test Prison 2.0 pour <b>'+players[current].name+'</b>.');drawBoard();enterJail(current);
+};
 document.getElementById('devFiscal').onclick=()=>{
  if(!players[current]||pendingDebt||pendingRentDecision||gameOver)return;
  const p=players[current];scheduleFiscalFollowup(p);
