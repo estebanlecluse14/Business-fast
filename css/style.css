@@ -7162,3 +7162,64 @@ html.phaser-ready .phaser-mount{opacity:1}
     grid-column:1/-1!important
   }
 }
+
+
+/* === V0.46.3 ACTIONS & PRIX === */
+.action-panel .actions{
+  grid-template-columns:1fr!important;
+  gap:7px!important
+}
+.action-panel .actions button{
+  width:100%!important;
+  min-height:52px!important;
+  padding:9px 10px!important;
+  border-radius:12px!important
+}
+.action-panel .actions .action-copy{
+  min-width:0!important
+}
+.action-panel .actions .action-copy b{
+  white-space:normal!important;
+  overflow:visible!important;
+  text-overflow:clip!important;
+  font-size:11px!important
+}
+.action-panel .actions .action-copy small{
+  white-space:normal!important;
+  overflow:visible!important;
+  text-overflow:clip!important;
+  font-size:7.5px!important;
+  line-height:1.2!important
+}
+.action-price{
+  display:none;
+  flex:0 0 auto;
+  margin-left:auto;
+  padding:6px 8px;
+  border-radius:9px;
+  background:rgba(15,23,42,.10);
+  border:1px solid rgba(15,23,42,.10);
+  font-size:10px;
+  line-height:1;
+  font-weight:1000;
+  white-space:nowrap
+}
+.action-price.visible{display:inline-flex}
+.buy:not(:disabled) .action-price{
+  background:#dcfce7;
+  border-color:#86efac;
+  color:#166534
+}
+.build:not(:disabled) .action-price{
+  background:#fef3c7;
+  border-color:#fcd34d;
+  color:#92400e
+}
+.action-panel .actions button:disabled .action-price.visible{
+  opacity:.72
+}
+.action-panel .actions .wonder-action{
+  grid-column:auto!important
+}
+.turn-guide-main{font-size:15px!important}
+.turn-guide-detail{font-size:8px!important;line-height:1.3!important}
