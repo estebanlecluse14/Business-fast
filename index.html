@@ -3,14 +3,14 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Business Fast V0.47.1</title>
+<title>Business Fast V0.47.2</title>
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 <section id="startScreen" class="screen active">
   <div class="start-backdrop" aria-hidden="true"><span class="orb o1"></span><span class="orb o2"></span><span class="orb o3"></span></div>
   <div class="start-wrap lobby-v047">
-    <div class="lobby-badge">V0.47.1 · IA ALPHA</div>
+    <div class="lobby-badge">V0.47.2 · INITIATIVE</div>
     <h1 class="logo lobby-logo">BUSINESS <span>FAST</span></h1>
     <div class="subtitle">Crée ta table, ajoute des rivaux IA et lance la partie.</div>
 
@@ -215,6 +215,25 @@
 
 
 
+
+<div id="initiativeOverlay" class="initiative-overlay" aria-hidden="true">
+  <div class="initiative-card" role="dialog" aria-modal="true" aria-labelledby="initiativeTitle">
+    <div class="initiative-kicker">BUSINESS FAST · ORDRE DE DÉPART</div>
+    <h2 id="initiativeTitle">🎲 Qui commence ?</h2>
+    <p class="initiative-intro">Chaque joueur lance un dé. Le meilleur score commence la partie.</p>
+    <div id="initiativePlayers" class="initiative-players"></div>
+    <div class="initiative-dice-zone">
+      <div id="initiativeDice" class="initiative-die" data-face="1" aria-label="Dé d'initiative">
+        <span class="pip p1"></span><span class="pip p2"></span><span class="pip p3"></span>
+        <span class="pip p4"></span><span class="pip p5"></span><span class="pip p6"></span>
+        <span class="pip p7"></span><span class="pip p8"></span><span class="pip p9"></span>
+      </div>
+      <div id="initiativeMessage" class="initiative-message">Préparation du tirage…</div>
+    </div>
+    <button id="initiativeContinue" class="initiative-continue" type="button" hidden>Commencer la partie →</button>
+  </div>
+</div>
+
 <div id="journalModal" class="journal-modal" aria-hidden="true">
   <div class="journal-box" role="dialog" aria-modal="true" aria-labelledby="journalTitle">
     <div class="journal-head">
@@ -241,6 +260,9 @@
     </div>
     <div class="updates-list">
       <article class="update-item current">
+        <div class="update-version">V0.47.2</div><div class="update-copy"><div class="update-title">Initiative & HUD <span class="update-tag minor">Gameplay/UX</span></div><p>Le plateau est recentré, les actions passent en bas à droite, le mode développeur est accessible en haut à droite et chaque partie commence par un lancer de dés pour déterminer le premier joueur.</p></div>
+      </article>
+      <article class="update-item">
         <div class="update-version">V0.47.1</div><div class="update-copy"><div class="update-title">IA autonome & actions <span class="update-tag minor">IA/UX</span></div><p>L'IA reprend automatiquement après chaque décision ou popup, la fin de tour devient très visible lorsqu'elle est disponible et la musique de partie gagne un rythme plus dynamique.</p></div>
       </article>
       <article class="update-item">
