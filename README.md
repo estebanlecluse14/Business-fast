@@ -29,3 +29,14 @@ La V0.46 transforme le centre du plateau en zone réellement utile au gameplay :
 - `assets/` — illustrations SVG des quartiers, cases spéciales, pions, bâtiments et Merveille
 
 Projet en développement.
+
+
+## Phaser preparation
+A lightweight Phaser integration layer is now included for the future rendering migration.
+
+- CDN-loaded Phaser 3
+- `js/phaser/bridge.js` bootstrap
+- `#phaserMount` reserved renderer container
+- Existing HTML/CSS gameplay remains the active version for now
+
+The migration will be progressive: first the board renderer, then pawns/animations, then optional effects. The web rules remain the gameplay source of truth during the transition.
