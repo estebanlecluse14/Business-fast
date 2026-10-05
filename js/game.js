@@ -14,6 +14,11 @@ updatesModal.addEventListener('click',e=>{
   }
 });
 
+const patrimonyModal=document.getElementById('patrimonyModal');
+document.getElementById('patrimonyBtn')?.addEventListener('click',openPatrimony);
+document.getElementById('patrimonyClose')?.addEventListener('click',closePatrimony);
+patrimonyModal?.addEventListener('click',e=>{if(e.target===patrimonyModal)closePatrimony()});
+
 const journalModal=document.getElementById('journalModal');
 document.getElementById('journalBtn').addEventListener('click',()=>{
   journalModal.classList.add('open');
@@ -349,7 +354,10 @@ function currentRent(s){
   const raw=(s.baseRent ?? s.rent ?? 0) * (rentMultipliers[s.level] || 1);
   const m=zonePressureInfo(s);
   const wonderMultiplier=communistWonderActive()?.35:1;
-  return roundRentStep(raw*(1-m.rentPenalty)*wonderMultiplier);
+  const owner=s.owner!==null?players[s.owner]:null;
+  if(owner?.floodTurnsLeft>0)return 0;
+  const quakeMultiplier=((s.repairTurnsLeft||0)>0)?0.25:1;
+  return roundRentStep(raw*(1-m.rentPenalty)*wonderMultiplier*quakeMultiplier);
 }
 function parcelValue(s){
   const raw=baseParcelValue(s);
@@ -554,7 +562,7 @@ function drawBoard(){
     const d=document.createElement('div');
     const p=boardPos(s.id);
     const posClass=((p.r===1&&p.c===1)||(p.r===1&&p.c===10)||(p.r===10&&p.c===10)||(p.r===10&&p.c===1))?' corner':(p.r===1?' side-top':p.c===10?' side-right':p.r===10?' side-bottom':' side-left');
-    d.className='space '+s.type+posClass+(s.owner!==null?' owned':'')+(zonePressureInfo(s).level?' market-stress':'');
+    d.className='space '+s.type+posClass+(s.owner!==null?' owned':'')+(zonePressureInfo(s).level?' market-stress':'')+((s.repairTurnsLeft||0)>0?' quake-damaged':'');
     d.dataset.spaceId=s.id;
     d.style.gridRow=p.r;
     d.style.gridColumn=p.c;
@@ -1456,15 +1464,131 @@ function applyPropertyTax(p,idx){
  playSfx('bad');
 }
 
+
+function openPatrimony(){
+ const modalEl=document.getElementById('patrimonyModal'),list=document.getElementById('patrimonyList');
+ if(!modalEl||!list)return;
+ const ranking=players.map((p,index)=>({
+   index,name:p.name,isAI:p.isAI,active:p.active,cash:p.money,
+   propertyValue:p.props.reduce((sum,id)=>sum+parcelValue(spaces[id]),0),
+   total:playerPatrimony(p),properties:p.props.length,beaches:p.beaches
+ })).sort((a,b)=>b.total-a.total);
+ list.innerHTML=ranking.map((r,pos)=>`<div class="patrimony-row ${!r.active?'inactive':''}">
+   <div class="patrimony-rank">${pos+1}</div>
+   ${pawnVisual(r.index,r.name,'patrimony-pawn')}
+   <div class="patrimony-copy"><b>${r.name}${r.isAI?' <span>IA</span>':''}</b><small>${r.properties} bien(s) · ${r.beaches} plage(s)</small></div>
+   <div class="patrimony-values"><small>Cash ${moneyFmt(r.cash)}</small><small>Biens ${moneyFmt(r.propertyValue)}</small><strong>${moneyFmt(r.total)}</strong></div>
+ </div>`).join('');
+ modalEl.classList.add('open');modalEl.setAttribute('aria-hidden','false');playSfx('open');
+}
+function closePatrimony(){
+ const el=document.getElementById('patrimonyModal');if(!el)return;
+ el.classList.remove('open');el.setAttribute('aria-hidden','true');playSfx('close');
+}
+function showDisasterFx(kind,title,sub,duration=1800){
+ const el=document.getElementById('disasterFx');if(!el)return;
+ el.className='disaster-fx show '+kind;
+ document.getElementById('disasterFxTitle').textContent=title||'';
+ document.getElementById('disasterFxSub').textContent=sub||'';
+ el.setAttribute('aria-hidden','false');
+ clearTimeout(showDisasterFx._timer);
+ showDisasterFx._timer=setTimeout(()=>{el.classList.remove('show','flood','quake');el.setAttribute('aria-hidden','true')},duration);
+}
+function availableOwnedProperties(){
+ return spaces.filter(s=>['property','beach'].includes(s.type)&&s.owner!==null&&players[s.owner]?.active);
+}
+function earthquakeChoices(affected,index=0){
+ if(index>=affected.length){refresh();scheduleAI(250);return}
+ const s=affected[index],ownerIndex=s.owner,owner=players[ownerIndex];
+ if(!owner?.active){earthquakeChoices(affected,index+1);return}
+ const cost=30000;
+ const body=`<div class="quake-decision">
+   <div class="disaster-visual quake-mini"><span></span><span></span><span></span></div>
+   <div class="decision-kicker">SÉISME · PROPRIÉTÉ ENDOMMAGÉE</div>
+   <div class="decision-title">${s.name}</div>
+   <div class="decision-sub">Le loyer est divisé par 4 jusqu'à la fin des réparations.</div>
+   <div class="decision-grid two">
+    <div class="decision-card ${owner.money>=cost?'recommended':'locked'}"><div class="decision-card-tag">IMMÉDIAT</div><b>Réparer maintenant</b><strong>${moneyFmt(cost)}</strong><small>Le loyer normal revient immédiatement.</small></div>
+    <div class="decision-card"><div class="decision-card-tag">AUTOMATIQUE</div><b>Attendre 2 tours</b><strong>2 tours</strong><small>Le bien reste à 25 % de son loyer pendant la réparation.</small></div>
+   </div>
+ </div>`;
+ modal(`Séisme · ${owner.name}`,body,'decision');
+ const row=document.querySelector('#modal .row');row.innerHTML='';
+ const repair=document.createElement('button');repair.className='primary quake-repair-now';repair.textContent=`Réparer · ${moneyFmt(cost)}`;repair.disabled=owner.money<cost;
+ const wait=document.createElement('button');wait.className='secondary quake-repair-auto';wait.textContent='Réparation automatique · 2 tours';
+ const finish=()=>{document.getElementById('modal').classList.remove('open','modal-decision');playSfx('close');refresh();setTimeout(()=>earthquakeChoices(affected,index+1),180)};
+ repair.onclick=()=>{if(owner.money<cost)return;owner.money-=cost;stat('moneyRemoved',cost);s.repairTurnsLeft=0;s.repairSkipCountdown=false;addLog(`Réparation : <b>${owner.name}</b> répare <b>${s.name}</b> pour ${moneyFmt(cost)}.`);finish()};
+ wait.onclick=()=>{s.repairTurnsLeft=2;s.repairSkipCountdown=true;addLog(`Réparation : <b>${s.name}</b> sera réparée automatiquement dans 2 tours de ${owner.name}.`);finish()};
+ row.append(repair,wait);
+ if(owner.isAI)setTimeout(()=>{if(owner.money-cost>=AI_RESERVE&&!repair.disabled)repair.click();else wait.click()},420);
+}
+function triggerFlood(p){
+ p.floodTurnsLeft=1;p.floodSkipCountdown=true;
+ addLog(`Grande inondation : les biens de <b>${p.name}</b> ne génèrent plus de loyer pendant 1 tour.`);
+ status.textContent='Grande inondation : loyers suspendus.';
+ showDisasterFx('flood','GRANDE INONDATION',`${p.name} · loyers suspendus pendant 1 tour`,1900);
+ refresh();
+ showEventResult({title:'Grande inondation',icon:'',description:`Les propriétés de ${p.name} ne rapportent aucun loyer pendant 1 tour.`,effect:'LOYERS = 0',tone:'negative'});
+}
+function triggerEarthquake(){
+ const pool=availableOwnedProperties().sort(()=>Math.random()-.5);
+ const affected=pool.slice(0,Math.min(4,pool.length));
+ if(!affected.length){
+   showDisasterFx('quake','SÉISME','Aucune propriété n’a été touchée',1500);
+   showEventResult({title:'Séisme',icon:'',description:'Le séisme traverse la ville, mais aucune propriété possédée n’est touchée.',effect:'Aucun dégât',tone:'neutral'});return;
+ }
+ affected.forEach(s=>{s.repairTurnsLeft=2;s.repairSkipCountdown=true});
+ showDisasterFx('quake','SÉISME',`${affected.length} propriété(s) endommagée(s)`,1900);
+ addLog(`Séisme : ${affected.map(s=>`<b>${s.name}</b>`).join(', ')} endommagée(s).`);
+ const names=affected.map(s=>s.name).join(' · ');
+ showEventResult({
+   title:'Séisme',icon:'',
+   description:`${affected.length} propriété(s) ont été endommagées : ${names}. Chaque propriétaire choisira entre 30 000 € de réparation immédiate ou 2 tours de réparation automatique.`,
+   effect:'Loyers des biens touchés ÷ 4',
+   tone:'negative',
+   afterClose:()=>earthquakeChoices(affected)
+ });
+}
+function triggerLottery(p){
+ const rewards=[10000,20000,40000,60000,100000,200000];
+ const reward=rewards[Math.floor(Math.random()*rewards.length)];
+ p.money+=reward;stat('moneyInjected',reward);
+ addLog(`Loto : <b>${p.name}</b> gagne ${moneyFmt(reward)}.`);
+ refresh();
+ showEventResult({title:'Loto',icon:'',description:'La roue s’arrête sur votre gain.',effect:`+${moneyFmt(reward)}`,tone:'positive'});
+}
+function triggerOverconsumption(p,idx){
+ const amount=Math.round(playerPatrimony(p)*.15);
+ addLog(`Surconsommation : <b>${p.name}</b> doit régler 15 % de son patrimoine, soit ${moneyFmt(amount)}.`);
+ status.textContent='Surconsommation : prélèvement exceptionnel.';
+ showEventResult({title:'Surconsommation',icon:'',description:'Une facture exceptionnelle représente 15 % de votre patrimoine total.',effect:`-${moneyFmt(amount)}`,tone:'negative',afterClose:()=>chargePlayer(idx,amount,'Surconsommation')});
+}
+function triggerDoubleChance(p){
+ p.doubleChance=true;
+ addLog(`Double chance : <b>${p.name}</b> lancera 2 dés à son prochain lancer. Un double offre un lancer supplémentaire.`);
+ refresh();
+ showEventResult({title:'Double chance',icon:'',description:'Lors de votre prochain lancer, deux dés seront utilisés. Si les deux valeurs sont identiques, vous pourrez relancer.',effect:'2 dés au prochain lancer',tone:'positive'});
+}
+
 function eventCard(p){const cards=[
  {t:'Contrat surprise',icon:'💼',desc:'Votre entreprise décroche un contrat inattendu.',kind:'cash',amount:40000,d:'+40 000 €',tone:'positive'},
  {t:'Contrôle fiscal',icon:'🧾',desc:'Le fisc prélève 30 000 € immédiatement. Des frais de dossier de 5 000 € tomberont après vos 2 prochains lancers.',kind:'fiscal',tone:'negative'},
  {t:'Investisseur providentiel',icon:'💰',desc:'Un investisseur décide de soutenir votre développement.',kind:'cash',amount:25000,d:'+25 000 €',tone:'positive'},
  {t:'Travaux imprévus',icon:'🚧',desc:'Une facture de 20 000 € peut être payée maintenant ou répartie sur les 4 prochains lancers.',kind:'works',tone:'negative'},
  {t:'Taxe foncière',icon:'🏠',desc:'Une taxe exceptionnelle de 35 % est calculée sur votre patrimoine total.',kind:'propertyTax',tone:'negative'},
- {t:'Voyage d’affaires',icon:'✈️',desc:'Une opportunité vous fait avancer plus vite.',kind:'move',move:3,d:'Avance de 3 cases',tone:'neutral'}
+ {t:'Voyage d’affaires',icon:'✈️',desc:'Une opportunité vous fait avancer plus vite.',kind:'move',move:3,d:'Avance de 3 cases',tone:'neutral'},
+ {t:'Double chance',icon:'',desc:'Deux dés au prochain lancer. Un double offre un lancer supplémentaire.',kind:'doubleChance',tone:'positive'},
+ {t:'Grande inondation',icon:'',desc:'Les propriétés du joueur ne rapportent aucun loyer pendant 1 tour.',kind:'flood',tone:'negative'},
+ {t:'Surconsommation',icon:'',desc:'15 % du patrimoine total doit être réglé.',kind:'overconsumption',tone:'negative'},
+ {t:'Loto',icon:'',desc:'Une roue attribue un gain entre 10 000 € et 200 000 €.',kind:'lottery',tone:'positive'},
+ {t:'Séisme',icon:'',desc:'Jusqu’à 4 propriétés possédées sont endommagées.',kind:'earthquake',tone:'negative'}
  ];
  const c=cards[Math.floor(Math.random()*cards.length)],idx=players.indexOf(p);stat('events');
+ if(c.kind==='doubleChance'){triggerDoubleChance(p);return}
+ if(c.kind==='flood'){triggerFlood(p);return}
+ if(c.kind==='overconsumption'){triggerOverconsumption(p,idx);return}
+ if(c.kind==='lottery'){triggerLottery(p);return}
+ if(c.kind==='earthquake'){triggerEarthquake();return}
  if(c.kind==='works'){
    addLog(`⚡ Événement pour <b>${p.name}</b> : Travaux imprévus — ${moneyFmt(20000)} à régler.`);
    status.textContent='Événement : Travaux imprévus.';
@@ -1638,10 +1762,11 @@ function resetTransientUI(){
  if(init){init.classList.remove('open');init.setAttribute('aria-hidden','true');}
  const modalEl=document.getElementById('modal');
  if(modalEl)modalEl.classList.remove('open','event-positive','event-negative','event-neutral');
- ['journalModal','updatesModal','settingsModal'].forEach(id=>{
+ ['journalModal','updatesModal','settingsModal','patrimonyModal'].forEach(id=>{
    const el=document.getElementById(id);
    if(el){el.classList.remove('open');el.setAttribute('aria-hidden','true');}
  });
+ const disaster=document.getElementById('disasterFx');if(disaster)disaster.classList.remove('show','flood','quake');
  const cine=document.getElementById('cinematicOverlay');
  if(cine){cine.classList.remove('show');cine.setAttribute('aria-hidden','true');}
 }
@@ -1731,11 +1856,27 @@ function animateBuild(spaceId){
 }
 async function executeRoll(){
  if(rolled||gameOver||animating||pendingRentDecision||pendingDebt)return;
- rolled=true;animating=true;stat('rolls');lastRoll=1+Math.floor(Math.random()*6);
+ const p=players[current];
+ rolled=true;animating=true;stat('rolls');
+ const first=1+Math.floor(Math.random()*6);
+ const useDouble=!!p.doubleChance;
+ const second=useDouble?1+Math.floor(Math.random()*6):0;
+ lastRoll=useDouble?first+second:first;
  try{
-   status.textContent='Les dés roulent...';updateActions();await animateDice(lastRoll);
-   status.textContent=`${players[current].name} avance de ${lastRoll} case(s)...`;
+   status.textContent=useDouble?'Double chance : les deux dés roulent...':'Les dés roulent...';updateActions();await animateDice(first);
+   if(useDouble){
+     await sleep(110);
+     document.getElementById('dice').dataset.face=String(second);
+     addLog(`Double chance : <b>${p.name}</b> obtient ${first} + ${second} = ${lastRoll}.`);
+     p.doubleChance=false;
+   }
+   status.textContent=`${p.name} avance de ${lastRoll} case(s)...`;
    await movePlayer(lastRoll);
+   if(useDouble&&first===second&&!gameOver){
+     rolled=false;
+     addLog(`Double : <b>${p.name}</b> gagne un lancer supplémentaire.`);
+     status.textContent='Double : lancer supplémentaire disponible.';
+   }
  }catch(err){
    console.error('[Business Fast] erreur pendant le lancer',err);
    status.textContent='Le tour a été récupéré après une erreur d’animation.';
@@ -1743,6 +1884,7 @@ async function executeRoll(){
    animating=false;
    refresh();
    repairTurnState();
+   scheduleAI(280);
  }
 }
 rollBtn.onclick=()=>{if(rolled||gameOver||animating||pendingRentDecision||pendingDebt)return;processScheduledCharges(current,()=>executeRoll())};
@@ -1751,6 +1893,26 @@ buildBtn.onclick=()=>{const s=spaces[players[current].pos];upgradeProperty(s.id)
 wonderBtn.onclick=openWonderModal;
 endBtn.onclick=()=>{if(animating&&!document.getElementById('modal')?.classList.contains('open'))animating=false;if(!rolled||gameOver||pendingRentDecision||pendingDebt||animating)return;playSfx('turn');rolled=false;stat('turns');
  const previous=current;
+ const previousPlayer=players[previous];
+ if(previousPlayer){
+   if(previousPlayer.floodTurnsLeft>0){
+     if(previousPlayer.floodSkipCountdown)previousPlayer.floodSkipCountdown=false;
+     else{
+       previousPlayer.floodTurnsLeft=Math.max(0,previousPlayer.floodTurnsLeft-1);
+       if(previousPlayer.floodTurnsLeft===0)addLog(`Fin de l'inondation : les loyers de <b>${previousPlayer.name}</b> reviennent à la normale.`);
+     }
+   }
+   previousPlayer.props.forEach(id=>{
+     const prop=spaces[id];
+     if((prop.repairTurnsLeft||0)>0){
+       if(prop.repairSkipCountdown)prop.repairSkipCountdown=false;
+       else{
+         prop.repairTurnsLeft=Math.max(0,prop.repairTurnsLeft-1);
+         if(prop.repairTurnsLeft===0)addLog(`Réparation terminée : <b>${prop.name}</b> retrouve son loyer normal.`);
+       }
+     }
+   });
+ }
  if(advanceWonderForPlayer(previous))return;
  do{current=(current+1)%players.length}while(!players[current].active);
  if(current<=previous){roundNumber++;recoverZonePressure();}
@@ -1887,9 +2049,9 @@ function startGame(){
      playerName=`Joueur ${i+1}`;
    }
    usedNames.push(playerName);
-   players.push({name:playerName,isAI,aiDifficulty:isAI?'hard':null,money:200000,pos:0,props:[],beaches:0,active:true,fiscalRollsLeft:0,worksInstallmentsLeft:0,wonderMode:null,wonderTurnsLeft:0,wonderLine:null,wonderSkipCountdown:false});
+   players.push({name:playerName,isAI,aiDifficulty:isAI?'hard':null,money:200000,pos:0,props:[],beaches:0,active:true,fiscalRollsLeft:0,worksInstallmentsLeft:0,wonderMode:null,wonderTurnsLeft:0,wonderLine:null,wonderSkipCountdown:false,floodTurnsLeft:0,floodSkipCountdown:false,doubleChance:false});
  }
- spaces.forEach(s=>{s.owner=null;s.level=0;s.rent=rents[s.id];s.baseRent=rents[s.id]});
+ spaces.forEach(s=>{s.owner=null;s.level=0;s.rent=rents[s.id];s.baseRent=rents[s.id];s.repairTurnsLeft=0;s.repairSkipCountdown=false});
  current=0;rolled=false;gameOver=false;animating=false;initiativeActive=true;initiativeScores=[];logBox.innerHTML='';
  document.getElementById('startScreen').classList.remove('active');document.getElementById('gameScreen').classList.add('active');
  const aiCount=players.filter(p=>p.isAI).length;
