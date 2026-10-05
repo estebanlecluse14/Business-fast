@@ -7223,3 +7223,130 @@ html.phaser-ready .phaser-mount{opacity:1}
 }
 .turn-guide-main{font-size:15px!important}
 .turn-guide-detail{font-size:8px!important;line-height:1.3!important}
+
+
+/* === V0.46.4 PLATEAU, ACTIONS & DEBUG === */
+
+/* 1. PIONS : aucune découpe sur les cases, surtout sur la rangée du bas. */
+.board,
+.space,
+.space.property,
+.space.beach,
+.property-layout,
+.special-layout,
+.case-pawn-slot,
+.special-layout > .tokens{
+  overflow:visible!important;
+}
+.case-pawn-slot{
+  top:-23px!important;
+  z-index:60!important;
+  min-height:42px!important;
+}
+.case-pawn-slot .board-pawn,
+.special-layout > .tokens .board-pawn{
+  position:relative!important;
+  z-index:65!important;
+  width:27px!important;
+  height:36px!important;
+  object-fit:contain!important;
+}
+.space.side-bottom .case-pawn-slot{
+  top:-25px!important;
+}
+.space.side-bottom,
+.space.side-bottom .property-layout{
+  overflow:visible!important;
+}
+
+/* 2. CASES : l'illustration remplit la zone visuelle, sans grande bande grise vide. */
+.space.property,
+.space.beach{
+  background:color-mix(in srgb,var(--theme-color) 8%,#f7fafc)!important;
+}
+.property-layout{
+  background:color-mix(in srgb,var(--theme-color) 7%,#f8fafc)!important;
+}
+.case-visual{
+  width:100%!important;
+  height:100%!important;
+  min-width:0!important;
+  min-height:0!important;
+  background:color-mix(in srgb,var(--theme-color) 12%,#eef5f8)!important;
+}
+.case-art{
+  position:absolute!important;
+  inset:0!important;
+  width:100%!important;
+  height:100%!important;
+  object-fit:cover!important;
+  object-position:center bottom!important;
+  display:block!important;
+}
+.space.side-top .property-layout,
+.space.side-bottom .property-layout{
+  grid-template-rows:minmax(0,1.75fr) 18px minmax(32px,.68fr) 24px!important;
+}
+.space.side-left .case-visual,
+.space.side-right .case-visual{
+  align-self:stretch!important;
+}
+
+/* 3. COMMANDES : panneau fixé en bas à droite. */
+@media(min-width:1181px){
+  .action-panel{
+    position:fixed!important;
+    right:14px!important;
+    bottom:14px!important;
+    top:auto!important;
+    width:264px!important;
+    z-index:60!important;
+    max-height:calc(100vh - 28px)!important;
+    overflow:auto!important;
+  }
+  .sidebar{
+    padding-bottom:0!important;
+  }
+}
+
+/* 4. Tous les textes des boutons d'action sont noirs pour rester lisibles
+   quelle que soit la couleur de fond. */
+.action-panel .actions button,
+.action-panel .actions button .action-icon,
+.action-panel .actions button .action-copy,
+.action-panel .actions button .action-copy b,
+.action-panel .actions button .action-copy small,
+.action-panel .actions button .action-price{
+  color:#111827!important;
+}
+.action-panel .actions button:disabled,
+.action-panel .actions button:disabled .action-icon,
+.action-panel .actions button:disabled .action-copy,
+.action-panel .actions button:disabled .action-copy b,
+.action-panel .actions button:disabled .action-copy small{
+  color:#111827!important;
+}
+.action-panel .actions button:disabled{
+  opacity:.46!important;
+}
+
+/* Les badges prix gardent une hiérarchie claire sans changer la couleur du texte. */
+.action-panel .action-price{
+  background:rgba(255,255,255,.62)!important;
+  border-color:rgba(17,24,39,.14)!important;
+  color:#111827!important;
+}
+
+/* 5. Le doublon des joueurs au centre disparaît définitivement. */
+.center-player-strip,
+#centerTokens{
+  display:none!important;
+}
+
+/* 6. Petites sécurités d'interaction : les panneaux ne bloquent jamais le plateau hors de leur zone. */
+.action-panel,
+.player-panel,
+.utility-panel,
+.dev-panel{
+  pointer-events:auto!important;
+}
