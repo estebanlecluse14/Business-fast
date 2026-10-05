@@ -8174,3 +8174,28 @@ html.phaser-ready .phaser-mount{opacity:1}
 /* Airport gets its own cool transport palette on the board */
 .space.airport{--theme-color:#0ea5e9!important}
 .space.airport .special-layout{background:linear-gradient(180deg,#eaf8ff,#c8ebfa)!important}
+
+/* === V0.49.1 ÉVASION RATÉE === */
+#modal.modal-jail-fail .box{width:min(620px,95vw)!important;padding:18px!important;background:#160f12!important;border-color:#71313a!important}
+.jail-fail-screen{display:grid;gap:10px;text-align:center}
+.jail-fail-visual{position:relative;height:150px;border-radius:16px;overflow:hidden;background:linear-gradient(180deg,#35171c,#140d10 68%);border:1px solid #6f3039;box-shadow:inset 0 -30px 50px rgba(0,0,0,.4)}
+.jail-fail-bars{position:absolute;inset:-10px 65px;display:flex;justify-content:space-between;opacity:.8}
+.jail-fail-bars i{width:18px;background:linear-gradient(90deg,#41484c,#adb4b8 48%,#343a3e);box-shadow:5px 0 8px rgba(0,0,0,.3)}
+.jail-alarm{position:absolute;left:50%;top:15px;width:44px;height:22px;transform:translateX(-50%);border-radius:22px 22px 6px 6px;background:#ef4444;box-shadow:0 0 24px rgba(239,68,68,.85);animation:jailAlarmPulse .7s ease-in-out infinite}
+.jail-alarm:before{content:'';position:absolute;left:20px;top:-13px;width:4px;height:12px;background:#fca5a5}
+.broken-blade{position:absolute;left:50%;top:78px;width:180px;height:24px;transform:translateX(-50%) rotate(-8deg);z-index:3}
+.broken-blade span,.broken-blade i{position:absolute;top:6px;height:10px;background:linear-gradient(180deg,#f8fafc,#9ca3af);border:1px solid #4b5563}
+.broken-blade span{left:0;width:82px;clip-path:polygon(0 0,100% 0,84% 100%,0 100%)}
+.broken-blade i{right:0;width:74px;clip-path:polygon(16% 0,100% 0,100% 100%,0 100%)}
+.jail-fail-kicker{color:#f87171;font-size:7px;font-weight:1000;letter-spacing:.17em}
+.jail-fail-title{color:#fff;font-size:27px;line-height:1;font-weight:1000;letter-spacing:.04em}
+.jail-fail-copy{max-width:470px;margin:0 auto;color:#c7b8bd;font-size:10px;line-height:1.45;font-weight:700}
+.jail-fail-penalties{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:3px}
+.jail-fail-penalties>div{padding:11px;border-radius:12px;background:#281419;border:1px solid #5c2931}
+.jail-fail-penalties span{display:block;color:#d6a2aa;font-size:6.5px;font-weight:1000;letter-spacing:.09em}
+.jail-fail-penalties strong{display:block;margin-top:5px;color:#fff;font-size:18px}
+.jail-fail-total{padding:8px 10px;border-radius:10px;background:#211c2e;border:1px solid #4c4069;color:#cfc7e8;font-size:9px}
+.jail-fail-total b{color:#fff}
+.jail-fail-ok{width:100%;min-height:42px;border:0;border-radius:11px;background:#dc2626;color:#fff;font-size:10px;font-weight:1000;letter-spacing:.05em;cursor:pointer}
+@keyframes jailAlarmPulse{0%,100%{opacity:.65;transform:translateX(-50%) scale(.96)}50%{opacity:1;transform:translateX(-50%) scale(1.04)}}
+@media(max-width:700px){.jail-fail-penalties{grid-template-columns:1fr}.jail-fail-visual{height:125px}}
