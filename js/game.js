@@ -316,9 +316,9 @@ function scheduleAI(delay=420){
 const names=[
 'DÉPART','Paris','Lyon','Marseille','Événement','Nice','Plage Azur','Toulouse','Bordeaux','Banque',
 'Nantes','Lille','Événement mondial','Strasbourg','Montpellier','Plage Atlantique','Rennes','Reims','Prison','Le Havre',
-'Saint-Étienne','Toulon','Événement','Grenoble','Dijon','Plage Manche','Angers','Nîmes','Banque','Villeurbanne',
+'Saint-Étienne','Toulon','Événement','Grenoble','Dijon','Plage Manche','Angers','Aéroport','Banque','Villeurbanne',
 'Clermont-Ferrand','Aix-en-Provence','Événement mondial','Brest','Plage Méditerranée','Caen'];
-const types=names.map((n,i)=> i===0?'start': n.includes('Plage')?'beach': n==='Prison'?'jail': n==='Banque'?'bank': n==='Événement'?'event': n==='Événement mondial'?'global':'property');
+const types=names.map((n,i)=> i===0?'start': n.includes('Plage')?'beach': n==='Prison'?'jail': n==='Aéroport'?'airport': n==='Banque'?'bank': n==='Événement'?'event': n==='Événement mondial'?'global':'property');
 const ECONOMY_VALUE_BOOST=1.15;
 const basePrices=names.map((n,i)=> types[i]==='property'? roundPriceStep(Math.round((32000 + ((i*7000)%36000))*ECONOMY_VALUE_BOOST)) : types[i]==='beach'?roundPriceStep(Math.round(75000*ECONOMY_VALUE_BOOST)):0);
 const RENT_BOOST=1.20;
@@ -390,6 +390,7 @@ const fixedThemes={
  global:{label:'Monde',emoji:'🌍',color:'#dc2626'},
  bank:{label:'Finance',emoji:'🏦',color:'#0284c7'},
  jail:{label:'Police',emoji:'🚔',color:'#7c3aed'},
+ airport:{label:'Transport',emoji:'✈️',color:'#0ea5e9'},
  beach:{label:'Vacances',emoji:'🌊',color:'#0891b2'}
 };
 const wonderDistricts=[
@@ -399,7 +400,7 @@ const wonderDistricts=[
  {name:'Quartier Culture',label:'Culture',emoji:'🎭',color:'#c2410c',ids:[2,13,14]},
  {name:'Quartier Nature',label:'Nature',emoji:'🌿',color:'#15803d',ids:[10,16,30]},
  {name:'Quartier Business',label:'Business',emoji:'💼',color:'#0369a1',ids:[7,11,17]},
- {name:'Quartier Gourmet',label:'Gourmet',emoji:'🍷',color:'#7f1d1d',ids:[24,26,27]},
+ {name:'Quartier Gourmet',label:'Gourmet',emoji:'🍷',color:'#7f1d1d',ids:[24,26]},
  {name:'Quartier Tourisme',label:'Tourisme',emoji:'📸',color:'#d97706',ids:[20,21,35]}
 ];
 const districtBySpaceId={};
@@ -415,7 +416,7 @@ let players=[],current=0,rolled=false,lastRoll=0,gameOver=false,winMode='both',a
 let initiativeActive=false,initiativeScores=[];
 let pendingDebt=null,debtQueue=[],zonePressure={},roundNumber=1;
 let devMode=false,devTimer=null;
-let devStats={startedAt:0,rolls:0,turns:0,purchases:0,upgrades:0,rentPayments:0,rentPaid:0,buyouts:0,emergencySales:0,bankruptcies:0,events:0,globalEvents:0,bankVisits:0,jailVisits:0,jailBails:0,jailEscapeAttempts:0,jailEscapes:0,jailBladeBreaks:0,jailWaits:0,debtCases:0,moneyInjected:0,moneyRemoved:0,scheduledCharges:0,propertyTaxes:0,wondersStarted:0,wonderWins:0};
+let devStats={startedAt:0,rolls:0,turns:0,purchases:0,upgrades:0,rentPayments:0,rentPaid:0,buyouts:0,emergencySales:0,bankruptcies:0,events:0,globalEvents:0,bankVisits:0,jailVisits:0,jailBails:0,jailEscapeAttempts:0,jailEscapes:0,jailBladeBreaks:0,jailWaits:0,airportVisits:0,airportDirect:0,airportStandby:0,debtCases:0,moneyInjected:0,moneyRemoved:0,scheduledCharges:0,propertyTaxes:0,wondersStarted:0,wonderWins:0};
 function resetDevStats(){
  devStats={startedAt:performance.now(),rolls:0,turns:0,purchases:0,upgrades:0,rentPayments:0,rentPaid:0,buyouts:0,emergencySales:0,bankruptcies:0,events:0,globalEvents:0,bankVisits:0,jailVisits:0,debtCases:0,moneyInjected:0,moneyRemoved:0,scheduledCharges:0,propertyTaxes:0,wondersStarted:0,wonderWins:0};
 }
@@ -434,7 +435,7 @@ function refreshDevStats(){
   ['Temps réel',elapsedText()],['Tour de table',roundNumber],['Lancers',devStats.rolls],['Tours joueurs',devStats.turns],
   ['Achats',devStats.purchases],['Constructions',devStats.upgrades],['Loyers payés',devStats.rentPayments],['Montant loyers',moneyFmt(devStats.rentPaid)],
   ['Rachats',devStats.buyouts],['Ventes urgence',devStats.emergencySales],['Crises dette',devStats.debtCases],['Faillites',devStats.bankruptcies],
-  ['Événements',devStats.events],['Mondiaux',devStats.globalEvents],['Prisons',devStats.jailVisits],['Cautions',devStats.jailBails],['Évasions',devStats.jailEscapes],['Lames cassées',devStats.jailBladeBreaks],['Joueurs actifs',active],['Zones en crise',pressure],
+  ['Événements',devStats.events],['Mondiaux',devStats.globalEvents],['Prisons',devStats.jailVisits],['Cautions',devStats.jailBails],['Évasions',devStats.jailEscapes],['Lames cassées',devStats.jailBladeBreaks],['Aéroports',devStats.airportVisits],['Vols directs',devStats.airportDirect],['Standby',devStats.airportStandby],['Joueurs actifs',active],['Zones en crise',pressure],
   ['Charges différées',devStats.scheduledCharges],['Taxes foncières',devStats.propertyTaxes],['Merveilles lancées',devStats.wondersStarted],['Victoires Merveille',devStats.wonderWins],['Cash total',moneyFmt(totalCash)],['Argent injecté',moneyFmt(devStats.moneyInjected)]
  ];
  el.innerHTML=rows.map(([k,v])=>`<div class="dev-stat"><div class="k">${k}</div><div class="v">${v}</div></div>`).join('');
@@ -607,11 +608,12 @@ function drawBoard(){
       return;
     }
 
-    const specialAsset={start:'start',event:'event',global:'global',bank:'bank',jail:'jail'}[s.type]||'';
+    const specialAsset={start:'start',event:'event',global:'global',bank:'bank',jail:'jail',airport:'airport'}[s.type]||'';
     const specialEffect={
       start:'+30k au passage',
       bank:'+25k',
       jail:'Caution · Évasion · 3 tours',
+      airport:'Voyager sur le plateau',
       event:'Effet surprise',
       global:'Tous les joueurs'
     }[s.type]||'';
@@ -619,6 +621,7 @@ function drawBoard(){
       start:'BONUS',
       bank:'FINANCE',
       jail:'RISQUE',
+      airport:'TRANSPORT',
       event:'CARTE',
       global:'MONDE'
     }[s.type]||'';
@@ -1183,6 +1186,99 @@ if(jailSawButton){
  const startSaw=e=>{e?.preventDefault();if(jailGameState&&!jailGameState.finished)jailHold=true};
  const stopSaw=e=>{e?.preventDefault();jailHold=false};
  jailSawButton.addEventListener('pointerdown',startSaw);jailSawButton.addEventListener('pointerup',stopSaw);jailSawButton.addEventListener('pointercancel',stopSaw);jailSawButton.addEventListener('pointerleave',stopSaw);window.addEventListener('pointerup',()=>{jailHold=false});
+}
+
+
+const AIRPORT_DIRECT_COST=35000;
+const AIRPORT_HUBS=[1,5,11,13,33,35];
+
+function airportHubLabel(spaceId){
+ const s=spaces[spaceId];
+ const zone={1:'CAPITALE',5:'RIVIERA',11:'NORD',13:'EST',33:'ATLANTIQUE',35:'NORMANDIE'}[spaceId]||'DESTINATION';
+ return {id:spaceId,name:s?.name||'Destination',zone};
+}
+function moveByAirport(playerIndex,destinationId,mode){
+ const p=players[playerIndex],from=p.pos,dest=spaces[destinationId];
+ if(!p||!dest)return;
+ document.getElementById('modal')?.classList.remove('open','modal-decision','modal-airport');
+ p.pos=destinationId;
+ addLog('Aéroport : <b>'+p.name+'</b> prend un '+(mode==='direct'?'vol direct':'vol Standby')+' vers <b>'+dest.name+'</b>.');
+ status.textContent=p.name+' atterrit à '+dest.name+'.';
+ drawBoard();renderPlayers();playSfx('turn');
+ showAirportArrival(destinationId,()=>resolveSpace());
+}
+function showAirportArrival(destinationId,onDone){
+ const dest=spaces[destinationId];
+ const body='<div class="airport-arrival">'+
+   '<div class="airport-arrival-sky"><span class="airport-plane-mark">✦</span><div class="airport-runway"></div></div>'+
+   '<div class="decision-kicker">ARRIVÉE</div><div class="decision-title">'+dest.name+'</div>'+
+   '<div class="decision-sub">Le vol est terminé. La case de destination va maintenant être résolue normalement.</div>'+
+ '</div>';
+ modal('Aéroport · Arrivée',body,'decision');
+ document.getElementById('modal').classList.add('modal-airport');
+ const btn=document.getElementById('modalOk');btn.textContent='Débarquer';
+ btn.onclick=()=>{document.getElementById('modal').classList.remove('open','modal-decision','modal-airport');playSfx('close');if(onDone)onDone()};
+}
+function takeAirportDirect(playerIndex,destinationId){
+ const p=players[playerIndex];if(!p||p.money<AIRPORT_DIRECT_COST)return;
+ p.money-=AIRPORT_DIRECT_COST;stat('moneyRemoved',AIRPORT_DIRECT_COST);stat('airportDirect');
+ addLog('Aéroport : <b>'+p.name+'</b> paie '+moneyFmt(AIRPORT_DIRECT_COST)+' pour choisir sa destination.');
+ moveByAirport(playerIndex,destinationId,'direct');
+}
+function takeAirportStandby(playerIndex){
+ const p=players[playerIndex];if(!p)return;
+ const choices=AIRPORT_HUBS.filter(id=>id!==p.pos);
+ const destinationId=choices[Math.floor(Math.random()*choices.length)];
+ stat('airportStandby');
+ moveByAirport(playerIndex,destinationId,'standby');
+}
+function aiChooseAirportDestination(playerIndex){
+ const p=players[playerIndex];
+ const scored=AIRPORT_HUBS.map(id=>{
+   const s=spaces[id];let score=0;
+   if(['property','beach'].includes(s.type)){
+     if(s.owner===null&&p.money>=purchasePrice(s)+AI_RESERVE)score+=7;
+     if(s.owner===playerIndex)score+=2;
+     if(s.owner!==null&&s.owner!==playerIndex)score-=Math.min(6,currentRent(s)/10000);
+     const d=s.district?wonderDistricts.find(x=>x.name===s.district):null;
+     if(d)score+=districtProgress(playerIndex,d).owned*2.5;
+   }
+   score+=Math.random()*1.4;
+   return {id,score};
+ }).sort((a,b)=>b.score-a.score);
+ return scored[0]?.id||AIRPORT_HUBS[0];
+}
+function openAirportDecision(playerIndex=current){
+ const p=players[playerIndex];if(!p||!p.active||gameOver)return;
+ stat('airportVisits');
+ const hubs=AIRPORT_HUBS.map(airportHubLabel);
+ const cards=hubs.map(h=>{
+   const s=spaces[h.id],owner=s.owner!==null?players[s.owner]:null;
+   const note=owner?('Propriétaire : '+owner.name+' · loyer '+moneyFmt(currentRent(s))):('Disponible · achat '+moneyFmt(purchasePrice(s)));
+   return '<button class="airport-destination" data-airport-dest="'+h.id+'" '+(p.money<AIRPORT_DIRECT_COST?'disabled':'')+'>'+
+     '<span class="airport-zone">'+h.zone+'</span><b>'+h.name+'</b><small>'+note+'</small></button>';
+ }).join('');
+ const body='<div class="airport-decision">'+
+  '<div class="airport-hero"><div class="airport-terminal"><span></span><span></span><span></span></div><div><div class="decision-kicker">CASE UNIQUE · AÉROPORT</div><div class="decision-title">Choisis ton vol</div><div class="decision-sub">Un vol direct coûte '+moneyFmt(AIRPORT_DIRECT_COST)+'. Le Standby est gratuit mais la destination est aléatoire.</div></div></div>'+
+  '<div class="decision-balance"><span>Trésorerie de '+p.name+'</span><strong>'+moneyFmt(p.money)+'</strong></div>'+
+  '<div class="airport-board"><div class="airport-board-head"><span>VOL DIRECT</span><strong>'+moneyFmt(AIRPORT_DIRECT_COST)+'</strong></div><div class="airport-destinations">'+cards+'</div></div>'+
+  '<div class="airport-standby-card"><div><span>STANDBY</span><b>Destination surprise</b><small>Gratuit · un des 6 hubs sera tiré au sort.</small></div><button id="airportStandbyBtn" type="button">VOL GRATUIT</button></div>'+
+ '</div>';
+ modal('Aéroport',body,'decision');
+ document.getElementById('modal').classList.add('modal-airport');
+ const row=document.querySelector('#modal .row');row.innerHTML='<button id="airportStayBtn" class="secondary">Rester à l’aéroport</button>';
+ document.querySelectorAll('[data-airport-dest]').forEach(btn=>btn.onclick=()=>takeAirportDirect(playerIndex,+btn.dataset.airportDest));
+ document.getElementById('airportStandbyBtn').onclick=()=>takeAirportStandby(playerIndex);
+ document.getElementById('airportStayBtn').onclick=()=>{document.getElementById('modal').classList.remove('open','modal-decision','modal-airport');status.textContent=p.name+' reste à l’aéroport.';refresh();scheduleAI(220)};
+ if(p.isAI){
+   setTimeout(()=>{
+     if(current!==playerIndex||!document.getElementById('modal')?.classList.contains('open'))return;
+     if(p.money>=AIRPORT_DIRECT_COST+AI_RESERVE){
+       const dest=aiChooseAirportDestination(playerIndex);
+       document.querySelector('[data-airport-dest="'+dest+'"]')?.click();
+     }else document.getElementById('airportStandbyBtn')?.click();
+   },520);
+ }
 }
 
 function resolveSpace(){const p=players[current],s=spaces[p.pos];
@@ -1930,6 +2026,11 @@ function simOneGame(profile='current'){
      }
    }else if(s.type==='bank')p.money+=25000;
    else if(s.type==='jail')pay(pi,20000,null);
+   else if(s.type==='airport'){
+     const hubs=[1,5,11,13,33,35];
+     if(p.money>=35000+55000){p.money-=35000;move(pi,hubs[Math.floor(Math.random()*hubs.length)])}
+     else p.pos=hubs[Math.floor(Math.random()*hubs.length)];
+   }
    else if(s.type==='event')event(pi);
    else if(s.type==='global'){
      const r=Math.floor(Math.random()*3);
@@ -2337,6 +2438,11 @@ document.getElementById('devJail').onclick=()=>{
  if(!players[current]||pendingDebt||pendingRentDecision||gameOver)return;
  const jailSpace=spaces.find(s=>s.type==='jail');if(jailSpace)players[current].pos=jailSpace.id;
  addLog('DEV : test Prison 2.0 pour <b>'+players[current].name+'</b>.');drawBoard();enterJail(current);
+};
+document.getElementById('devAirport').onclick=()=>{
+ if(!players[current]||pendingDebt||pendingRentDecision||gameOver)return;
+ const airport=spaces.find(s=>s.type==='airport');if(airport)players[current].pos=airport.id;
+ addLog('DEV : test Aéroport pour <b>'+players[current].name+'</b>.');drawBoard();openAirportDecision(current);
 };
 document.getElementById('devFiscal').onclick=()=>{
  if(!players[current]||pendingDebt||pendingRentDecision||gameOver)return;
