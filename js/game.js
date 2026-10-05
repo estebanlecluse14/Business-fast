@@ -637,10 +637,13 @@ function repairTurnState(){
  if(animating && !modalOpen && !pendingDebt && !pendingRentDecision){
    animating=false;
  }
- if(rolled && !gameOver && !pendingDebt && !pendingRentDecision && !animating){
-   endBtn.disabled=false;
- }
  updateActions();
+ if(rolled && !gameOver && !pendingDebt && !pendingRentDecision && !animating && !modalOpen){
+   endBtn.disabled=false;
+   endBtn.classList.add('turn-ready');
+   endBtn.title='';
+   if(endHint)endHint.textContent='Passer au joueur suivant';
+ }
 }
 function setActionState(btn,enabled,reason=''){
  btn.disabled=!enabled;
@@ -659,6 +662,7 @@ function setTurnGuide(phase,main,detail,kind='neutral'){
 function updateActions(){
  const all=[rollBtn,buyBtn,buildBtn,endBtn,wonderBtn];
  all.forEach(b=>b.classList.remove('recommended'));
+ endBtn.classList.toggle('turn-ready',!!rolled&&!gameOver&&!pendingDebt&&!pendingRentDecision&&!animating);
  if(!players[current]){
    all.forEach(b=>b.disabled=true);
    setTurnGuide('EN ATTENTE','Partie non lancée','Choisis les joueurs puis lance la partie.','wait');
@@ -707,7 +711,8 @@ function updateActions(){
  const canBuy=rolled&&isProperty&&s.owner===null&&p.money>=price;
  const canBuild=rolled&&s.type==='property'&&s.owner===current&&s.level<3&&p.money>=nextCost;
  const canWonder=canLaunchWonder(current);
- const canEnd=rolled;
+ const modalBlocking=document.getElementById('modal')?.classList.contains('open');
+ const canEnd=rolled&&!pendingDebt&&!pendingRentDecision&&!animating&&!modalBlocking;
 
  setActionState(rollBtn,!rolled,rolled?'Les dés ont déjà été lancés ce tour.':'');
  setActionState(buyBtn,canBuy,!rolled?'Lance les dés d’abord.':!isProperty?'Cette case ne peut pas être achetée.':s.owner!==null?'Cette propriété appartient déjà à un joueur.':p.money<price?`Il manque ${moneyFmt(price-p.money)}.`:'');
@@ -1532,7 +1537,7 @@ async function executeRoll(){
  }
 }
 rollBtn.onclick=()=>{if(rolled||gameOver||animating||pendingRentDecision||pendingDebt)return;processScheduledCharges(current,()=>executeRoll())};
-buyBtn.onclick=()=>{const p=players[current],s=spaces[p.pos],price=purchasePrice(s);if(s.owner!==null||p.money<price)return;p.money-=price;s.owner=current;p.props.push(s.id);if(s.type==='beach')p.beaches++;stat('purchases');addLog(`🏙️ <b>${p.name}</b> achète <b>${s.name}</b> pour ${moneyFmt(price)}. Loyer de départ : ${moneyFmt(currentRent(s))}.`);status.textContent=`${s.name} acheté · loyer ${moneyFmt(currentRent(s))}.`;refresh();animatePurchase(s.id,current);checkWin();};
+buyBtn.onclick=()=>{const p=players[current],s=spaces[p.pos],price=purchasePrice(s);if(s.owner!==null||p.money<price)return;p.money-=price;s.owner=current;p.props.push(s.id);if(s.type==='beach')p.beaches++;stat('purchases');addLog(`🏙️ <b>${p.name}</b> achète <b>${s.name}</b> pour ${moneyFmt(price)}. Loyer de départ : ${moneyFmt(currentRent(s))}.`);status.textContent=`${s.name} acheté · loyer ${moneyFmt(currentRent(s))}.`;refresh();animatePurchase(s.id,current);checkWin();requestAnimationFrame(()=>repairTurnState());};
 buildBtn.onclick=()=>{const s=spaces[players[current].pos];upgradeProperty(s.id);};
 wonderBtn.onclick=openWonderModal;
 endBtn.onclick=()=>{if(animating&&!document.getElementById('modal')?.classList.contains('open'))animating=false;if(!rolled||gameOver||pendingRentDecision||pendingDebt||animating)return;playSfx('turn');rolled=false;stat('turns');
