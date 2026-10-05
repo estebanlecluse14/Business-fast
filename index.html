@@ -3,27 +3,106 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Business Fast V0.46.5</title>
+<title>Business Fast V0.47</title>
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 <section id="startScreen" class="screen active">
-  <div class="start-wrap">
-    <h1 class="logo">BUSINESS <span>FAST</span></h1>
-    <div class="subtitle">V0.46.5 — cases pleines & stabilité</div>
-    <div class="card">
-      <div class="setup-grid">
-        <div class="field"><label>Nombre de joueurs</label><select id="playerCount"><option>2</option><option>3</option><option selected>4</option></select></div>
-        <div class="field"><label>Objectif</label><select id="winMode"><option value="both" selected>Faillite OU 4 plages OU Merveille</option><option value="bankrupt">Faillite des rivaux OU Merveille</option><option value="beaches">4 plages OU Merveille</option></select></div>
-        <div class="field"><label>Joueur 1</label><input id="p1" value="Esteban"></div>
-        <div class="field"><label>Joueur 2</label><input id="p2" value="Joueur 2"></div>
-        <div class="field"><label>Joueur 3</label><input id="p3" value="Joueur 3"></div>
-        <div class="field"><label>Joueur 4</label><input id="p4" value="Joueur 4"></div>
+  <div class="start-backdrop" aria-hidden="true"><span class="orb o1"></span><span class="orb o2"></span><span class="orb o3"></span></div>
+  <div class="start-wrap lobby-v047">
+    <div class="lobby-badge">V0.47 · IA ALPHA</div>
+    <h1 class="logo lobby-logo">BUSINESS <span>FAST</span></h1>
+    <div class="subtitle">Crée ta table, ajoute des rivaux IA et lance la partie.</div>
+
+    <div class="lobby-shell">
+      <div class="lobby-main">
+        <div class="lobby-section-head">
+          <div><span class="eyebrow">CONFIGURATION</span><h2>Créer une partie</h2></div>
+          <div class="lobby-music"><span class="music-dot"></span><span>Ambiance lobby</span></div>
+        </div>
+
+        <div class="setup-grid setup-top">
+          <div class="field"><label>Nombre de joueurs</label><select id="playerCount"><option>2</option><option>3</option><option selected>4</option></select></div>
+          <div class="field"><label>Objectif</label><select id="winMode"><option value="both" selected>Faillite OU 4 plages OU Merveille</option><option value="bankrupt">Faillite des rivaux OU Merveille</option><option value="beaches">4 plages OU Merveille</option></select></div>
+        </div>
+
+        <div class="player-slots" id="playerSlots">
+          <div class="player-slot" data-player-slot="1">
+            <div class="slot-index">1</div>
+            <div class="slot-avatar slot-avatar-1">👤</div>
+            <div class="slot-main">
+              <label for="p1">Joueur 1</label>
+              <input id="p1" value="Esteban">
+            </div>
+            <div class="slot-type">
+              <button type="button" class="player-type-toggle human" data-player-type="1" aria-pressed="false">
+                <span class="type-icon">👤</span><span class="type-copy"><b>Humain</b><small>Contrôle manuel</small></span>
+              </button>
+            </div>
+          </div><div class="player-slot" data-player-slot="2">
+            <div class="slot-index">2</div>
+            <div class="slot-avatar slot-avatar-2">◆</div>
+            <div class="slot-main">
+              <label for="p2">Joueur 2</label>
+              <input id="p2" value="Joueur 2">
+            </div>
+            <div class="slot-type">
+              <button type="button" class="player-type-toggle human" data-player-type="2" aria-pressed="false">
+                <span class="type-icon">👤</span><span class="type-copy"><b>Humain</b><small>Contrôle manuel</small></span>
+              </button>
+            </div>
+          </div><div class="player-slot" data-player-slot="3">
+            <div class="slot-index">3</div>
+            <div class="slot-avatar slot-avatar-3">◆</div>
+            <div class="slot-main">
+              <label for="p3">Joueur 3</label>
+              <input id="p3" value="Joueur 3">
+            </div>
+            <div class="slot-type">
+              <button type="button" class="player-type-toggle human" data-player-type="3" aria-pressed="false">
+                <span class="type-icon">👤</span><span class="type-copy"><b>Humain</b><small>Contrôle manuel</small></span>
+              </button>
+            </div>
+          </div><div class="player-slot" data-player-slot="4">
+            <div class="slot-index">4</div>
+            <div class="slot-avatar slot-avatar-4">◆</div>
+            <div class="slot-main">
+              <label for="p4">Joueur 4</label>
+              <input id="p4" value="Joueur 4">
+            </div>
+            <div class="slot-type">
+              <button type="button" class="player-type-toggle human" data-player-type="4" aria-pressed="false">
+                <span class="type-icon">👤</span><span class="type-copy"><b>Humain</b><small>Contrôle manuel</small></span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="lobby-note"><span>🤖</span><div><b>IA difficile uniquement</b><small>Elle gère sa trésorerie, vise les quartiers complets, améliore ses biens et poursuit la Merveille.</small></div></div>
+
+        <div class="start-actions">
+          <button class="primary lobby-start" id="startBtn"><span>Lancer la partie</span><b>→</b></button>
+          <button class="secondary updates-btn" id="updatesBtn">📋 Mises à jour</button>
+        </div>
       </div>
-      <div class="start-actions" style="margin-top:22px">
-  <button class="primary" id="startBtn">Lancer la partie</button>
-  <button class="secondary updates-btn" id="updatesBtn">📋 Mises à jour</button>
-</div>
+
+      <aside class="lobby-side">
+        <div class="lobby-side-card">
+          <span class="eyebrow">TABLE</span>
+          <strong id="lobbyPlayerSummary">4 joueurs</strong>
+          <small id="lobbyAiSummary">0 IA · 4 humains</small>
+        </div>
+        <div class="lobby-side-card ai-card">
+          <div class="ai-core">AI</div>
+          <strong>Rival stratégique</strong>
+          <small>Une seule difficulté : difficile.</small>
+        </div>
+        <div class="lobby-side-card">
+          <span class="eyebrow">CAPITAL INITIAL</span>
+          <strong>200 000 €</strong>
+          <small>Par joueur</small>
+        </div>
+      </aside>
     </div>
   </div>
 </section>
@@ -162,6 +241,9 @@
     </div>
     <div class="updates-list">
       <article class="update-item current">
+        <div class="update-version">V0.47</div><div class="update-copy"><div class="update-title">IA Alpha <span class="update-tag minor">IA</span></div><p>Nouvel écran de création de partie, choix Humain/IA pour chaque place, 20 prénoms anglophones, IA difficile locale et nouvelle ambiance musicale de lobby.</p></div>
+      </article>
+      <article class="update-item">
         <div class="update-version">V0.46.5</div><div class="update-copy"><div class="update-title">Cases pleines & stabilité <span class="update-tag minor">Corrective</span></div><p>Les cases haut/bas utilisent désormais toute leur surface, la zone Merveille est beaucoup plus lisible, et la fin de tour est fiabilisée et visuellement active dès que le lancer est résolu.</p></div>
       </article>
       <article class="update-item">
