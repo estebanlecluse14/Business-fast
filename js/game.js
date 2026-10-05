@@ -499,10 +499,13 @@ function renderPlayers(){
  playerBox.innerHTML=players.map((p,i)=>`<div class="player ${i===current&&p.active?'active':''}">${pawnVisual(i,p.name,'panel-pawn')}<div class="pmeta"><div class="pname">${p.name}${!p.active?' 💀':''}</div><div class="pmoney">${moneyFmt(p.money)} · ${p.props.length} biens · ${p.beaches} plage(s)</div>${p.wonderMode&&p.active?`<div class="wonder-progress">🏛️ ${p.wonderLine} · ${p.wonderTurnsLeft} tour(s) · ${p.wonderMode==='communist'?'collective':'accélérée'}</div>`:''}</div></div>`).join('');
  const activeWonder=players.find(p=>p.active&&p.wonderMode&&p.wonderTurnsLeft>0);
  document.getElementById('turnText').innerHTML=gameOver?'Partie terminée':`<span class="turn-player-name">${players[current]?.name||''}</span><small class="turn-round">Tour de table ${roundNumber}</small>${communistWonderActive()?'<div class="global-rent-alert">☭ Construction collective : tous les loyers -65 %</div>':activeWonder?`<div class="wonder-banner">🏛️ ${activeWonder.name} · Merveille dans ${activeWonder.wonderTurnsLeft} tour(s)</div>`:''}`;
- document.getElementById('centerTokens').innerHTML=players.filter(p=>p.active).map(p=>{
-   const i=players.indexOf(p);
-   return `<span class="center-token ${i===current?'current':''}">${pawnVisual(i,p.name,'center-pawn')}<small>${p.name}</small></span>`;
- }).join('');
+ const centerTokens=document.getElementById('centerTokens');
+ if(centerTokens){
+   centerTokens.innerHTML=players.filter(p=>p.active).map(p=>{
+     const i=players.indexOf(p);
+     return `<span class="center-token ${i===current?'current':''}">${pawnVisual(i,p.name,'center-pawn')}<small>${p.name}</small></span>`;
+   }).join('');
+ }
  renderWonderSite();
 }
 
@@ -528,7 +531,7 @@ function modal(title,html,variant='default'){
 function closeModal(){
  if(pendingRentDecision)return;
  const modalEl=document.getElementById('modal');
- modalEl.classList.remove('open','event-positive','event-negative','event-neutral','modal-decision','modal-property','modal-danger','modal-wonder','modal-event');
+ if(modalEl)modalEl.classList.remove('open','event-positive','event-negative','event-neutral','modal-decision','modal-property','modal-danger','modal-wonder','modal-event');
  playSfx('close');
  requestAnimationFrame(()=>refresh());
 }
@@ -554,7 +557,7 @@ function showEventResult({title,icon='✨',description='',effect='',tone='neutra
    if(afterClose)afterClose();
    // Un événement est résolu après le déplacement. On recalcule toujours les
    // actions ici pour éviter que "Fin du tour" reste bloqué dans l'état animation.
-   requestAnimationFrame(()=>refresh());
+   requestAnimationFrame(()=>{refresh();repairTurnState();});
  };
  playSfx(tone==='positive'?'money':tone==='negative'?'bad':'open');
 }
@@ -623,7 +626,22 @@ function upgradeProperty(spaceId){
  playSfx('build');
 }
 document.getElementById('modalOk').onclick=closeModal;
-function refresh(){drawBoard();renderPlayers();updateActions();refreshDevStats();}
+function refresh(){
+ drawBoard();
+ renderPlayers();
+ updateActions();
+ refreshDevStats();
+}
+function repairTurnState(){
+ const modalOpen=document.getElementById('modal')?.classList.contains('open');
+ if(animating && !modalOpen && !pendingDebt && !pendingRentDecision){
+   animating=false;
+ }
+ if(rolled && !gameOver && !pendingDebt && !pendingRentDecision && !animating){
+   endBtn.disabled=false;
+ }
+ updateActions();
+}
 function setActionState(btn,enabled,reason=''){
  btn.disabled=!enabled;
  btn.title=enabled?'':reason;
@@ -1500,15 +1518,24 @@ function animateBuild(spaceId){
 async function executeRoll(){
  if(rolled||gameOver||animating||pendingRentDecision||pendingDebt)return;
  rolled=true;animating=true;stat('rolls');lastRoll=1+Math.floor(Math.random()*6);
- status.textContent='Les dés roulent...';updateActions();await animateDice(lastRoll);
- status.textContent=`${players[current].name} avance de ${lastRoll} case(s)...`;
- await movePlayer(lastRoll);animating=false;refresh();
+ try{
+   status.textContent='Les dés roulent...';updateActions();await animateDice(lastRoll);
+   status.textContent=`${players[current].name} avance de ${lastRoll} case(s)...`;
+   await movePlayer(lastRoll);
+ }catch(err){
+   console.error('[Business Fast] erreur pendant le lancer',err);
+   status.textContent='Le tour a été récupéré après une erreur d’animation.';
+ }finally{
+   animating=false;
+   refresh();
+   repairTurnState();
+ }
 }
 rollBtn.onclick=()=>{if(rolled||gameOver||animating||pendingRentDecision||pendingDebt)return;processScheduledCharges(current,()=>executeRoll())};
 buyBtn.onclick=()=>{const p=players[current],s=spaces[p.pos],price=purchasePrice(s);if(s.owner!==null||p.money<price)return;p.money-=price;s.owner=current;p.props.push(s.id);if(s.type==='beach')p.beaches++;stat('purchases');addLog(`🏙️ <b>${p.name}</b> achète <b>${s.name}</b> pour ${moneyFmt(price)}. Loyer de départ : ${moneyFmt(currentRent(s))}.`);status.textContent=`${s.name} acheté · loyer ${moneyFmt(currentRent(s))}.`;refresh();animatePurchase(s.id,current);checkWin();};
 buildBtn.onclick=()=>{const s=spaces[players[current].pos];upgradeProperty(s.id);};
 wonderBtn.onclick=openWonderModal;
-endBtn.onclick=()=>{if(!rolled||gameOver||pendingRentDecision||pendingDebt)return;playSfx('turn');rolled=false;stat('turns');
+endBtn.onclick=()=>{if(animating&&!document.getElementById('modal')?.classList.contains('open'))animating=false;if(!rolled||gameOver||pendingRentDecision||pendingDebt||animating)return;playSfx('turn');rolled=false;stat('turns');
  const previous=current;
  if(advanceWonderForPlayer(previous))return;
  do{current=(current+1)%players.length}while(!players[current].active);
@@ -1516,7 +1543,7 @@ endBtn.onclick=()=>{if(!rolled||gameOver||pendingRentDecision||pendingDebt)retur
  document.getElementById('dice').dataset.face='1';status.textContent=`${players[current].name}, à toi de jouer.`;addLog(`➡️ Tour de <b>${players[current].name}</b> · tour de table ${roundNumber}.`);refresh();animateTurnChange(current)};
 function startGame(){resetTransientUI();pendingRentDecision=false;pendingDebt=null;debtQueue=[];zonePressure={};roundNumber=1;resetDevStats();ensureAudio();playSfx('start');startAmbient();const n=+document.getElementById('playerCount').value;winMode=document.getElementById('winMode').value;players=[];for(let i=0;i<n;i++){players.push({name:(document.getElementById('p'+(i+1)).value||`Joueur ${i+1}`).trim(),money:200000,pos:0,props:[],beaches:0,active:true,fiscalRollsLeft:0,worksInstallmentsLeft:0,wonderMode:null,wonderTurnsLeft:0,wonderLine:null,wonderSkipCountdown:false})}spaces.forEach(s=>{s.owner=null;s.level=0;s.rent=rents[s.id];s.baseRent=rents[s.id]});current=0;rolled=false;gameOver=false;logBox.innerHTML='';document.getElementById('startScreen').classList.remove('active');document.getElementById('gameScreen').classList.add('active');addLog(`🚀 Partie lancée avec ${n} joueurs. Chacun commence avec ${moneyFmt(200000)}.`);status.textContent=`${players[0].name}, à toi de jouer.`;refresh();setTimeout(()=>animateTurnChange(0),120)}
 document.getElementById('startBtn').onclick=startGame;
-document.getElementById('restartBtn').onclick=()=>{if(confirm('Recommencer la partie ?')){playSfx('close');stopAmbient();resetTransientUI();pendingRentDecision=false;pendingDebt=null;debtQueue=[];animating=false;rolled=false;if(typeof setDevMode==='function')setDevMode(false);document.getElementById('gameScreen').classList.remove('active');document.getElementById('startScreen').classList.add('active')}};
+document.getElementById('restartBtn').onclick=()=>{if(confirm('Recommencer la partie ?')){playSfx('close');stopAmbient();resetTransientUI();pendingRentDecision=false;pendingDebt=null;debtQueue=[];animating=false;rolled=false;lastRoll=0;const resetDie=document.getElementById('dice');if(resetDie){resetDie.classList.remove('rolling');resetDie.dataset.face='1';}if(typeof setDevMode==='function')setDevMode(false);document.getElementById('gameScreen').classList.remove('active');document.getElementById('startScreen').classList.add('active')}};
 
 
 const devPanel=document.getElementById('devPanel');
