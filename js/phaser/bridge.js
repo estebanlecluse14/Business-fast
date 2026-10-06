@@ -73,7 +73,7 @@
    this.add.text(910,626,"MÉDITERRANÉE",{fontFamily:"Arial",fontSize:"18px",fontStyle:"bold",color:"#4cc9f0"}).setAlpha(.62);
    this.add.text(606,332,"BUSINESS\nFAST",{fontFamily:"Arial",fontSize:"36px",fontStyle:"bold",align:"center",color:"#ffffff",stroke:"#071525",strokeThickness:8}).setOrigin(.5).setAlpha(.16);
   }
-  makeBuilding(x,y,color,level=0){
+  makeBuilding(x,y,color,level=0,variant=0){
    const compact=isCompact(),c=this.add.container(x,y-20),g=this.add.graphics();c.add(g);
    const w=compact?27:38,d=compact?11:16,h=(compact?23:32)+(level||0)*(compact?10:15);
    // cast shadow
@@ -99,6 +99,9 @@
    // windows on the front plane
    g.fillStyle(0xbcecff,.72);
    for(let yy=-h+8;yy<-3;yy+=8){g.fillRect(-w/2+4,yy,4,3);if(w>20)g.fillRect(2,yy+2,4,3)}
+   // Distinct silhouettes make neighbouring cities easier to identify.
+   if(variant%3===1){g.fillStyle(0xcbd5e1,.95);g.fillTriangle(-w/2,-h,-w/2+d/2,-h-d-9,w/2+d,-h)}
+   if(variant%3===2){g.fillStyle(0x0f172a,.65);g.fillRect(-w/2+3,-h-5,w-4,5)}
    // rooftop accent grows with property level
    if(level>=2){g.fillStyle(0xf8fafc,.9);g.fillRect(-2,-h-d-5,4,6)}
    if(level>=3){g.lineStyle(2,0xbcecff,.8);g.beginPath();g.moveTo(w/2+d,-h);g.lineTo(w/2+d+7,-h-7);g.strokePath()}
@@ -151,7 +154,7 @@
     g.fillStyle(owner!==null&&owner!==undefined?color:0x94a3b8,.30);g.fillRoundedRect(x-tw/2,y-th/2,tw,th,6);
     g.lineStyle(owner!==null&&owner!==undefined?3:2,color,.82);g.strokeRoundedRect(x-tw/2,y-th/2,tw,th,6);
     if(space.type==="property"){
-      const b=this.makeBuilding(x,y,color,space.level||0);b.setDepth(y+50);this.dynamic.add(b);
+      const b=this.makeBuilding(x,y,color,space.level||0,i);b.setDepth(y+50);this.dynamic.add(b);
     }
     const special=this.makeSpecialAsset(space.type,x,y,color);if(special){special.setDepth(y+80);this.dynamic.add(special);}
     const mark=icon(space.type);
