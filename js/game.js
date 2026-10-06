@@ -194,7 +194,7 @@ function aiShouldBuy(playerIndex,s){
 function aiShouldBuild(playerIndex,s){
  const p=players[playerIndex];
  if(!p||!s||s.type!=='property'||s.owner!==playerIndex||s.level>=3)return false;
- const cost=upgradeCosts[s.level+1]||Infinity;
+ const cost=upgradeCost(s,s.level+1)||Infinity;
  if(p.money<cost)return false;
  const districtScore=aiDistrictNeed(playerIndex,s);
  const reserve=districtScore>=3?40000:AI_RESERVE;
@@ -353,17 +353,33 @@ const PROPERTY_PRICES={
 };
 const basePrices=names.map((n,i)=>{
   if(types[i]==='property')return PROPERTY_PRICES[n]||0;
-  if(types[i]==='beach')return 85000;
+  if(types[i]==='beach')return 75000;
   return 0;
 });
-const RENT_BOOST=1.20;
-const rents=basePrices.map((p,i)=> p?roundRentStep(p*0.18*RENT_BOOST):0);
-const upgradeCosts=[0,30000,20000,55000];
-const rentMultipliers=[1,1.5,2.1,3];
+const CITY_RENT_TIERS=[
+  {max:155000,rents:[15000,25000,40000,60000]},
+  {max:190000,rents:[20000,35000,55000,80000]},
+  {max:235000,rents:[25000,45000,70000,110000]},
+  {max:270000,rents:[35000,60000,95000,145000]},
+  {max:320000,rents:[45000,80000,125000,190000]},
+  {max:350000,rents:[55000,95000,150000,225000]},
+  {max:Infinity,rents:[70000,120000,180000,260000]}
+];
+function rentForPrice(price,level=0,type='property'){
+  if(type==='beach')return 10000;
+  const tier=CITY_RENT_TIERS.find(t=>price<=t.max)||CITY_RENT_TIERS[CITY_RENT_TIERS.length-1];
+  return tier.rents[Math.max(0,Math.min(3,level))];
+}
+function upgradeCost(s,nextLevel){
+  if(!s||s.type!=='property'||nextLevel<1||nextLevel>3)return 0;
+  const rates=[0,.25,.35,.50];
+  return roundPriceStep(Math.round(s.price*rates[nextLevel]));
+}
+const rents=basePrices.map((p,i)=>p?rentForPrice(p,0,types[i]):0);
 function baseParcelValue(s){
   if(!s.price)return 0;
   let v=s.price;
-  for(let lvl=1;lvl<=s.level;lvl++)v+=upgradeCosts[lvl];
+  for(let lvl=1;lvl<=s.level;lvl++)v+=upgradeCost(s,lvl);
   return v;
 }
 function zoneKey(s){return s?.theme?.label || 'Autre'}
@@ -386,7 +402,7 @@ function communistWonderActive(){
   return players.some(p=>p?.active&&p.wonderMode==='communist'&&p.wonderTurnsLeft>0);
 }
 function currentRent(s){
-  const raw=(s.baseRent ?? s.rent ?? 0) * (rentMultipliers[s.level] || 1);
+  const raw=rentForPrice(s.price,s.level,s.type);
   const m=zonePressureInfo(s);
   const wonderMultiplier=communistWonderActive()?.35:1;
   const owner=s.owner!==null?players[s.owner]:null;
@@ -807,9 +823,9 @@ function openPropertyModal(spaceId){
  const owner=s.owner!==null?players[s.owner]:null;
  const canUpgrade=s.type==='property'&&s.owner===current&&s.level<3&&!gameOver&&!animating&&players[current].active;
  const nextLevel=Math.min(3,s.level+1);
- const cost=upgradeCosts[nextLevel]||0;
+ const cost=upgradeCost(s,nextLevel)||0;
  const rentNow=s.owner!==null?currentRent(s):s.baseRent;
- const rentNext=s.level<3?roundRentStep(s.baseRent*(rentMultipliers[nextLevel]||1)):rentNow;
+ const rentNext=s.level<3?rentForPrice(s.price,nextLevel,s.type):rentNow;
  const valueNow=s.owner!==null?parcelValue(s):purchasePrice(s);
  const ownerName=owner?owner.name:'Aucun propriétaire';
  const market=zonePressureInfo(s);
@@ -851,7 +867,7 @@ function openPropertyModal(spaceId){
 function upgradeProperty(spaceId){
  const s=spaces[spaceId],p=players[current];
  if(!s||s.type!=='property'||s.owner!==current||s.level>=3||gameOver||animating)return;
- const cost=upgradeCosts[s.level+1];
+ const cost=upgradeCost(s,s.level+1);
  if(p.money<cost){status.textContent='Fonds insuffisants pour cette amélioration.';return}
  p.money-=cost;
  s.level++;
@@ -925,7 +941,7 @@ function updateActions(){
  }
  const isProperty=['property','beach'].includes(s.type);
  const price=isProperty?purchasePrice(s):0;
- const nextCost=s.type==='property'&&s.level<3?upgradeCosts[s.level+1]:0;
+ const nextCost=s.type==='property'&&s.level<3?upgradeCost(s,s.level+1):0;
  const district=ownedWonderDistrict(current);
 
  if(buyLabel)buyLabel.textContent=isProperty&&s.owner===null?'Acheter':'Acheter';
@@ -1978,20 +1994,21 @@ function globalEvent(){const events=[
 function simOneGame(profile='current'){
  const useNewEvents=profile==='current';
  const P=4;
- const ps=Array.from({length:P},()=>({money:200000,pos:0,active:true,props:[],beaches:0,fiscal:0,works:0,wonder:null,wonderLeft:0,wonderSkip:false,flood:0,floodSkip:false,doubleChance:false}));
+ const ps=Array.from({length:P},()=>({money:200000,pos:0,active:true,props:[],beaches:0,fiscal:0,works:0,wonder:null,wonderLeft:0,wonderSkip:false,flood:0,floodSkip:false,doubleChance:false,jailed:0,escapedBefore:false}));
  const ss=spaces.map(s=>({type:s.type,price:s.price,baseRent:s.baseRent,owner:null,level:0,repair:0,repairSkip:false}));
- const simDistricts=[[1,23,29],[5,8,31],[3,19,33],[2,13,14],[10,16,30],[7,11,17],[24,26,27],[20,21,35]];
+ const simDistricts=[[1,5,8,31],[2,7,10,11],[14,16,23,29],[3,19,21,33],[13,17,24,35],[20,26,28,30]];
  let actions=0,purchases=0,rentsPaid=0,buyouts=0,liquidations=0,bankruptcies=0,upgrades=0,propertyTaxes=0,scheduledCharges=0,wondersStarted=0,wonderWins=0,eventCount=0;
  let winnerReason='timeout';
  const bugs=[];
  const collective=()=>ps.some(p=>p.active&&p.wonder==='communist'&&p.wonderLeft>0);
- const simValue=s=>{let v=s.price;for(let l=1;l<=s.level;l++)v+=upgradeCosts[l];return v};
+ const simUpgradeCost=(s,l)=>s.type==='property'?roundPriceStep(Math.round(s.price*([0,.25,.35,.50][l]||0))):0;
+ const simValue=s=>{let v=s.price;for(let l=1;l<=s.level;l++)v+=simUpgradeCost(s,l);return v};
  const patrimony=p=>p.money+p.props.reduce((sum,id)=>sum+simValue(ss[id]),0);
  const fullDistrict=pi=>simDistricts.some(ids=>ids.every(id=>ss[id].owner===pi));
  const simRent=s=>{
    const owner=s.owner!==null?ps[s.owner]:null;
    if(owner?.flood>0)return 0;
-   return Math.round(s.baseRent*(rentMultipliers[s.level]||1)*(collective()?.35:1)*((s.repair||0)>0?.25:1));
+   return Math.round(rentForPrice(s.price,s.level,s.type)*(collective()?.35:1)*((s.repair||0)>0?.25:1));
  };
  function auditState(){
    for(let i=0;i<ps.length;i++){
@@ -2065,6 +2082,17 @@ function simOneGame(profile='current'){
  }
  for(let step=0;step<1200;step++){
    const pi=step%P,p=ps[pi];if(!p.active)continue;actions++;
+   if(p.jailed>0){
+     if(p.money>=260000){pay(pi,150000,null);p.jailed=0}
+     else if(p.money>=100000){
+       pay(pi,100000,null);
+       if(Math.random()<.74){p.jailed=0;p.escapedBefore=true}
+       else{pay(pi,50000,null);p.jailed++}
+     }else{
+       p.jailed=Math.max(0,p.jailed-1);
+     }
+     continue;
+   }
 
    if(p.flood>0){if(p.floodSkip)p.floodSkip=false;else p.flood=Math.max(0,p.flood-1)}
    p.props.forEach(id=>{const s=ss[id];if(s.repair>0){if(s.repairSkip)s.repairSkip=false;else s.repair=Math.max(0,s.repair-1)}});
@@ -2102,11 +2130,14 @@ function simOneGame(profile='current'){
          s.owner=pi;buyouts++;
        }else{rentsPaid++;pay(pi,rent,s.owner)}
      }else if(s.owner===pi&&s.type==='property'&&s.level<3){
-       const cost=upgradeCosts[s.level+1];
+       const cost=upgradeCost(s,s.level+1);
        if(p.money>=cost+70000&&Math.random()<.34){p.money-=cost;s.level++;upgrades++}
      }
    }else if(s.type==='bank')p.money+=25000;
-   else if(s.type==='jail')pay(pi,20000,null);
+   else if(s.type==='jail'){
+     p.jailed=3;
+     if(p.escapedBefore)pay(pi,50000,null);
+   }
    else if(s.type==='airport'){
      const hubs=[1,5,11,13,33,35];
      if(p.money>=35000+55000){p.money-=35000;move(pi,hubs[Math.floor(Math.random()*hubs.length)])}
@@ -2152,7 +2183,7 @@ function runDevSimulation(count){
    result.innerHTML='<b>Comparatif '+count.toLocaleString('fr-FR')+' + '+count.toLocaleString('fr-FR')+' parties · 4 joueurs</b><br>'+
    '<b>Durée médiane :</b> avant '+a.med+' actions (~'+a.minutes.toFixed(1)+' min) → actuelle '+b.med+' actions (~'+b.minutes.toFixed(1)+' min) · <b>'+trend(deltaMin,' min')+'</b><br>'+
    '<b>90 % des parties :</b> terminées avant '+b.p90+' actions (~'+(b.p90*12/60).toFixed(0)+' min)<br><br>'+
-   '<b>Types de victoire V0.47.4 :</b><br>'+
+   '<b>Types de victoire V0.50 :</b><br>'+
    'Faillite : <b>'+b.bankruptcy.toFixed(2)+' %</b> ('+trend(deltaBank,' pt')+') · Plages : <b>'+b.beaches.toFixed(2)+' %</b> · Merveille : <b>'+b.wonder.toFixed(2)+' %</b> · Limite : <b>'+b.timeout.toFixed(2)+' %</b><br>'+
    'Parties terminées : <b>'+b.finish.toFixed(2)+' %</b><br><br>'+
    'Moyennes actuelles : '+b.purchases.toFixed(1)+' achats · '+b.upgrades.toFixed(1)+' améliorations · '+b.liquidations.toFixed(1)+' liquidations · '+b.bankruptcies.toFixed(2)+' faillites · '+b.events.toFixed(1)+' événements.<br>'+
@@ -2162,7 +2193,7 @@ function runDevSimulation(count){
 }
 function runDevAudit(count=5000){
  const result=document.getElementById('simResult');if(!result)return;
- result.textContent='Audit de '+count.toLocaleString('fr-FR')+' parties V0.47.4…';
+ result.textContent='Audit de '+count.toLocaleString('fr-FR')+' parties V0.50…';
  setTimeout(()=>{
    const arr=[];for(let i=0;i<count;i++)arr.push(simOneGame('current'));
    const s=summarizeSim(arr);
