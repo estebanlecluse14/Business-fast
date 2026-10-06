@@ -8263,3 +8263,35 @@ html.phaser-ready .phaser-mount{opacity:1}
   color:#111827 !important;
   font-weight:800;
 }
+
+
+/* === PHASER FRANCE MAP — migration preview === */
+html.phaser-france .board-stage{
+  padding:34px 30px 95px;
+}
+html.phaser-france .phaser-mount{
+  z-index:4;
+  opacity:1;
+  width:min(calc(100vw - 390px),1260px);
+  min-width:1040px;
+  aspect-ratio:16/9;
+  position:relative;
+  inset:auto;
+  border:3px solid #334155;
+  border-radius:28px;
+  overflow:hidden;
+  box-shadow:0 34px 0 #06101b,0 48px 70px rgba(0,0,0,.58);
+}
+html.phaser-france .board{
+  position:absolute;
+  left:30px;
+  top:34px;
+  z-index:5;
+  opacity:0;
+  pointer-events:none;
+}
+html.phaser-france .stage-decor{display:none!important}
+html.phaser-france .phaser-mount canvas{width:100%!important;height:100%!important}
+@media(max-width:1180px){
+ html.phaser-france .phaser-mount{width:1040px}
+}
