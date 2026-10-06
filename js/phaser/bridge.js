@@ -190,14 +190,14 @@
     g.lineStyle(2,0xffffff,.30);g.beginPath();g.moveTo(x-tw/2+9,y-th/2+5);g.lineTo(x+tw/2-9,y-th/2+5);g.strokePath();
     if(space.type==="property"){
       const b=this.makeBuilding(x,y-18,color,space.level||0,i);b.setDepth(y+50);this.dynamic.add(b);
-      const price=Number(space.price||space.cost||space.value||0);
+      const price=Number(space.price||0);
       const title=this.add.text(x,y-4,space.name.toUpperCase(),{
-       fontFamily:"Arial",fontSize:"11px",fontStyle:"bold",color:"#ffffff",
+       fontFamily:"Arial",fontSize:"11px",fontStyle:"bold",color:"#ffffff",stroke:"#06101b",strokeThickness:3,
        align:"center",wordWrap:{width:74}
       }).setOrigin(.5,.5).setDepth(y+2100);
       const priceTxt=price?price.toLocaleString("fr-FR")+" €":"";
       const ptxt=this.add.text(x,y+13,priceTxt,{
-       fontFamily:"Arial",fontSize:"9px",fontStyle:"bold",color:"#f8fafc"
+       fontFamily:"Arial",fontSize:"10px",fontStyle:"bold",color:"#ffffff",stroke:"#06101b",strokeThickness:3
       }).setOrigin(.5,.5).setDepth(y+2100);
       this.dynamic.add(title);this.dynamic.add(ptxt);
     }
