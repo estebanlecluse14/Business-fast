@@ -45,11 +45,21 @@
   create(){
    state.scene=this;this.cameras.main.setBackgroundColor("#071525");
    this.world=this.add.container(0,0);
-   this.cameras.main.setZoom(isCompact()?1.03:1.0);
-   this.scale.on("resize",()=>{this.cameras.main.centerOn(W/2,H/2)});
-   this.drawBase();
+   this.fitDesktopCamera();
+   this.scale.on("resize",(gameSize)=>{this.fitDesktopCamera(gameSize.width,gameSize.height)});
+      this.drawBase();
    this.dynamic=this.add.container(0,0);
    this.renderSnapshot();
+  }
+  fitDesktopCamera(viewW,viewH){
+   const cam=this.cameras.main;
+   const w=viewW||this.scale.width,h=viewH||this.scale.height;
+   if(isCompact()){cam.setZoom(1.03);cam.centerOn(W/2,H/2);return}
+   // COVER, not FIT: the 16:9 world fills the entire desktop viewport.
+   // A little extra scale keeps the board visually dominant behind floating UI.
+   const cover=Math.max(w/W,h/H);
+   cam.setZoom(cover*1.02);
+   cam.centerOn(W/2,H/2);
   }
   drawBase(){
    const g=this.add.graphics();this.world.add(g);
@@ -201,7 +211,7 @@
   if(state.game||typeof Phaser==="undefined"||!document.getElementById("phaserMount"))return;
   state.game=new Phaser.Game({type:Phaser.AUTO,parent:"phaserMount",width:W,height:H,backgroundColor:"#071525",
    render:{antialias:true,pixelArt:false,roundPixels:true,powerPreference:"high-performance"},
-   scale:{mode:Phaser.Scale.FIT,autoCenter:Phaser.Scale.CENTER_BOTH},scene:[FranceBoard]});
+   scale:{mode:Phaser.Scale.RESIZE,autoCenter:Phaser.Scale.NO_CENTER},scene:[FranceBoard]});
   state.enabled=true;document.documentElement.classList.add("phaser-ready","phaser-france");
  }
  function sync(snapshot){state.snapshot=snapshot||null;state.revision++;if(state.scene)state.scene.renderSnapshot()}
