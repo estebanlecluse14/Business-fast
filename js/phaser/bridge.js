@@ -159,12 +159,21 @@
     // Every property keeps its city name visible; secondary data stays out of the map.
     const isCity=space.type==="property",important=["start","bank","jail","airport","beach"].includes(space.type);
     if(isCity||important){
-      const ly=y+(isCity?(compact?18:24):(compact?31:39));
-      const label=this.add.text(x,ly,space.name.toUpperCase(),{
+      // Put labels toward the inside of the loop so edge labels are never clipped.
+      const cx=640,cy=360,dx=cx-x,dy=cy-y,len=Math.max(1,Math.hypot(dx,dy));
+      const inwardX=dx/len,inwardY=dy/len;
+      const offset=isCity?(compact?27:34):(compact?39:48);
+      let lx=x+inwardX*offset,ly=y+inwardY*offset;
+      // Stagger neighbours to prevent long city names from colliding.
+      const tangentX=-inwardY,tangentY=inwardX,stagger=((i%3)-1)*(compact?7:10);
+      lx+=tangentX*stagger;ly+=tangentY*stagger;
+      const maxW=isCity?(compact?92:118):(compact?105:132);
+      const label=this.add.text(lx,ly,space.name.toUpperCase(),{
        fontFamily:"Arial",fontSize:isCity?(compact?"10px":"13px"):(compact?"10px":"12px"),
        fontStyle:"bold",color:"#ffffff",backgroundColor:"#071525",
-       padding:{x:compact?5:7,y:compact?3:4},align:"center"
-      }).setOrigin(.5,0).setDepth(y+2000);
+       padding:{x:compact?5:7,y:compact?3:4},align:"center",
+       wordWrap:{width:maxW,useAdvancedWrap:false}
+      }).setOrigin(.5,.5).setDepth(y+2000);
       this.dynamic.add(label);
     }
    });
