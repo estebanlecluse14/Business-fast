@@ -5,10 +5,10 @@
  const state={enabled:false,game:null,scene:null,snapshot:null,revision:0};
  const W=1280,H=720;
  const ROUTE=[
-  [505,116],[570,94],[650,110],[730,132],[810,118],[886,152],[934,202],[960,260],[952,322],
-  [920,378],[890,432],[846,480],[792,520],[732,554],[666,584],[598,596],[530,586],[466,560],
-  [410,526],[360,482],[324,430],[302,374],[292,318],[306,262],[334,214],[372,176],[416,144],
-  [462,122],[516,154],[570,188],[628,204],[688,194],[744,170],[796,190],[844,226],[872,276]
+  [382,92],[468,72],[558,66],[650,70],[742,76],[832,94],[918,126],[992,170],[1048,226],
+  [1080,294],[1086,366],[1068,438],[1030,504],[974,558],[904,602],[824,632],[738,650],[648,656],
+  [558,650],[472,632],[394,602],[324,558],[268,504],[230,440],[210,370],[214,298],[236,232],
+  [276,174],[326,128],[440,126],[540,142],[642,150],[744,144],[844,130],[936,154],[1002,204]
  ];
  const FRANCE=[
   [500,74],[566,88],[620,72],[684,98],[748,92],[820,132],[858,184],[922,216],[940,286],
@@ -68,15 +68,15 @@
     const [x,y]=ROUTE[i%ROUTE.length],owner=space.owner;
     const color=owner!==null&&owner!==undefined?hex(space.ownerColor):specialColor(space.type,space.themeColor);
     const g=this.add.graphics();this.dynamic.add(g);
-    g.fillStyle(0x020617,.34);g.fillRoundedRect(x-32,y-19+7,64,38,9);
-    g.fillStyle(owner!==null&&owner!==undefined?color:0xf8fafc,1);g.fillRoundedRect(x-32,y-19,64,38,9);
-    g.lineStyle(owner!==null&&owner!==undefined?4:3,color,1);g.strokeRoundedRect(x-32,y-19,64,38,9);
+    g.fillStyle(0x020617,.34);g.fillRoundedRect(x-29,y-18+7,58,36,9);
+    g.fillStyle(owner!==null&&owner!==undefined?color:0xf8fafc,1);g.fillRoundedRect(x-29,y-18,58,36,9);
+    g.lineStyle(owner!==null&&owner!==undefined?4:3,color,1);g.strokeRoundedRect(x-29,y-18,58,36,9);
     if(owner!==null&&owner!==undefined||space.type==="property")this.dynamic.add(this.makeBuilding(x,y,color,space.level||0));
     const mark=icon(space.type);
     if(mark)this.dynamic.add(this.add.text(x,y,mark,{fontFamily:"Arial",fontSize:"17px",fontStyle:"bold",color:space.type==="property"?"#0f172a":"#0f172a"}).setOrigin(.5));
     // labels are deliberately sparse to keep the board readable
-    if(space.type!=="property"||i%3===1){
-      const label=this.add.text(x,y+29,space.name,{fontFamily:"Arial",fontSize:"11px",fontStyle:"bold",color:"#f8fafc",backgroundColor:"#071525",padding:{x:5,y:3}}).setOrigin(.5,0);
+    if(space.type!=="property"||i%4===1){
+      const label=this.add.text(x,y+25,space.name,{fontFamily:"Arial",fontSize:"11px",fontStyle:"bold",color:"#f8fafc",backgroundColor:"#071525",padding:{x:5,y:3}}).setOrigin(.5,0);
       this.dynamic.add(label);
     }
    });
