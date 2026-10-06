@@ -5,7 +5,10 @@
  const state={enabled:false,game:null,scene:null,snapshot:null,revision:0};
  const isCompact=()=>window.innerWidth<760;
  const ISO_SKEW=.28, ISO_LIFT=16;
- const isoPoint=([x,y])=>[640+(x-640)*.96,360+(y-360)*.76+(x-640)*.055];
+ const isoPoint=([x,y])=>{
+  const compact=isCompact(),sx=compact?.96:1.12,sy=compact?.76:.86;
+  return [640+(x-640)*sx,360+(y-360)*sy+(x-640)*(compact?.055:.045)];
+ };
  const W=1280,H=720;
  const ROUTE_ANCHORS=[
   [380,92],[540,66],[708,70],[868,104],[998,178],[1074,288],[1084,414],[1024,532],[910,612],
@@ -43,6 +46,7 @@
    state.scene=this;this.cameras.main.setBackgroundColor("#071525");
    this.world=this.add.container(0,0);
    this.cameras.main.setZoom(isCompact()?1.03:1.0);
+   this.scale.on("resize",()=>{this.cameras.main.centerOn(W/2,H/2)});
    this.drawBase();
    this.dynamic=this.add.container(0,0);
    this.renderSnapshot();
@@ -170,9 +174,9 @@
       // Stagger neighbours to prevent long city names from colliding.
       const tangentX=-inwardY,tangentY=inwardX,stagger=((i%3)-1)*(compact?7:10);
       lx+=tangentX*stagger;ly+=tangentY*stagger;
-      const maxW=isCity?(compact?92:118):(compact?105:132);
+      const maxW=isCity?(compact?92:148):(compact?105:158);
       const label=this.add.text(lx,ly,space.name.toUpperCase(),{
-       fontFamily:"Arial",fontSize:isCity?(compact?"10px":"13px"):(compact?"10px":"12px"),
+       fontFamily:"Arial",fontSize:isCity?(compact?"10px":"15px"):(compact?"10px":"14px"),
        fontStyle:"bold",color:"#ffffff",backgroundColor:"#071525",
        padding:{x:compact?5:7,y:compact?3:4},align:"center",
        wordWrap:{width:maxW,useAdvancedWrap:false}
