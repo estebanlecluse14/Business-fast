@@ -317,8 +317,8 @@
  }
  function boot(){
   if(state.game||typeof Phaser==="undefined"||!document.getElementById("phaserMount"))return;
-  state.game=new Phaser.Game({type:Phaser.AUTO,parent:"phaserMount",width:W,height:H,backgroundColor:"#071525",
-   render:{antialias:true,pixelArt:false,roundPixels:true,powerPreference:"high-performance"},
+  state.game=new Phaser.Game({type:Phaser.WEBGL,parent:"phaserMount",width:W,height:H,transparent:true,backgroundColor:"rgba(0,0,0,0)",
+   render:{antialias:true,pixelArt:false,roundPixels:true,powerPreference:"high-performance",premultipliedAlpha:true},
    scale:{mode:Phaser.Scale.FIT,autoCenter:Phaser.Scale.CENTER_BOTH},scene:[FranceBoard]});
   state.enabled=true;document.documentElement.classList.add("phaser-ready","phaser-france");
  }
