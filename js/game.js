@@ -465,9 +465,9 @@ let players=[],current=0,rolled=false,lastRoll=0,gameOver=false,winMode='both',a
 let initiativeActive=false,initiativeScores=[];
 let pendingDebt=null,debtQueue=[],zonePressure={},roundNumber=1;
 let devMode=false,devTimer=null;
-let devStats={startedAt:0,rolls:0,turns:0,purchases:0,upgrades:0,rentPayments:0,rentPaid:0,buyouts:0,emergencySales:0,bankruptcies:0,events:0,globalEvents:0,bankVisits:0,jailVisits:0,jailBails:0,jailEscapeAttempts:0,jailEscapes:0,jailBladeBreaks:0,jailWaits:0,airportVisits:0,airportDirect:0,airportStandby:0,debtCases:0,moneyInjected:0,moneyRemoved:0,scheduledCharges:0,propertyTaxes:0,wondersStarted:0,wonderWins:0};
+let devStats={startedAt:0,rolls:0,turns:0,purchases:0,upgrades:0,rentPayments:0,rentPaid:0,buyouts:0,emergencySales:0,bankruptcies:0,events:0,globalEvents:0,bankVisits:0,bankCashChoices:0,bankInvestments:0,bankInvestmentPayouts:0,bankRobberies:0,bankRobberyEscapes:0,bankRobberyCaught:0,jailVisits:0,jailBails:0,jailEscapeAttempts:0,jailEscapes:0,jailBladeBreaks:0,jailWaits:0,airportVisits:0,airportDirect:0,airportStandby:0,debtCases:0,moneyInjected:0,moneyRemoved:0,scheduledCharges:0,propertyTaxes:0,wondersStarted:0,wonderWins:0};
 function resetDevStats(){
- devStats={startedAt:performance.now(),rolls:0,turns:0,purchases:0,upgrades:0,rentPayments:0,rentPaid:0,buyouts:0,emergencySales:0,bankruptcies:0,events:0,globalEvents:0,bankVisits:0,jailVisits:0,jailBails:0,jailEscapeAttempts:0,jailEscapes:0,jailBladeBreaks:0,jailWaits:0,airportVisits:0,airportDirect:0,airportStandby:0,debtCases:0,moneyInjected:0,moneyRemoved:0,scheduledCharges:0,propertyTaxes:0,wondersStarted:0,wonderWins:0};
+ devStats={startedAt:performance.now(),rolls:0,turns:0,purchases:0,upgrades:0,rentPayments:0,rentPaid:0,buyouts:0,emergencySales:0,bankruptcies:0,events:0,globalEvents:0,bankVisits:0,bankCashChoices:0,bankInvestments:0,bankInvestmentPayouts:0,bankRobberies:0,bankRobberyEscapes:0,bankRobberyCaught:0,jailVisits:0,jailBails:0,jailEscapeAttempts:0,jailEscapes:0,jailBladeBreaks:0,jailWaits:0,airportVisits:0,airportDirect:0,airportStandby:0,debtCases:0,moneyInjected:0,moneyRemoved:0,scheduledCharges:0,propertyTaxes:0,wondersStarted:0,wonderWins:0};
 }
 function stat(name,amount=1){if(Object.prototype.hasOwnProperty.call(devStats,name))devStats[name]+=amount;refreshDevStats()}
 function elapsedText(){
@@ -484,7 +484,7 @@ function refreshDevStats(){
   ['Temps réel',elapsedText()],['Tour de table',roundNumber],['Lancers',devStats.rolls],['Tours joueurs',devStats.turns],
   ['Achats',devStats.purchases],['Constructions',devStats.upgrades],['Loyers payés',devStats.rentPayments],['Montant loyers',moneyFmt(devStats.rentPaid)],
   ['Rachats',devStats.buyouts],['Ventes urgence',devStats.emergencySales],['Crises dette',devStats.debtCases],['Faillites',devStats.bankruptcies],
-  ['Événements',devStats.events],['Mondiaux',devStats.globalEvents],['Prisons',devStats.jailVisits],['Cautions',devStats.jailBails],['Évasions',devStats.jailEscapes],['Lames cassées',devStats.jailBladeBreaks],['Aéroports',devStats.airportVisits],['Vols directs',devStats.airportDirect],['Standby',devStats.airportStandby],['Joueurs actifs',active],['Zones en crise',pressure],
+  ['Événements',devStats.events],['Mondiaux',devStats.globalEvents],['Banques',devStats.bankVisits],['Cash Banque',devStats.bankCashChoices],['Placements Banque',devStats.bankInvestments],['Braquages',devStats.bankRobberies],['Arrestations Banque',devStats.bankRobberyCaught],['Prisons',devStats.jailVisits],['Cautions',devStats.jailBails],['Évasions',devStats.jailEscapes],['Lames cassées',devStats.jailBladeBreaks],['Aéroports',devStats.airportVisits],['Vols directs',devStats.airportDirect],['Standby',devStats.airportStandby],['Joueurs actifs',active],['Zones en crise',pressure],
   ['Charges différées',devStats.scheduledCharges],['Taxes foncières',devStats.propertyTaxes],['Merveilles lancées',devStats.wondersStarted],['Victoires Merveille',devStats.wonderWins],['Cash total',moneyFmt(totalCash)],['Argent injecté',moneyFmt(devStats.moneyInjected)]
  ];
  el.innerHTML=rows.map(([k,v])=>`<div class="dev-stat"><div class="k">${k}</div><div class="v">${v}</div></div>`).join('');
@@ -778,7 +778,7 @@ function modal(title,html,variant='default'){
  row.innerHTML='<button id="modalOk" class="primary">Fermer</button>';
  document.getElementById('modalOk').onclick=closeModal;
  const modalEl=document.getElementById('modal');
- modalEl.classList.remove('modal-decision','modal-property','modal-danger','modal-wonder','modal-event','modal-jail-fail');
+ modalEl.classList.remove('modal-decision','modal-property','modal-danger','modal-wonder','modal-event','modal-jail-fail','modal-bank','modal-bank-robbery');
  if(variant&&variant!=='default')modalEl.classList.add('modal-'+variant);
  modalEl.classList.add('open','visual-alpha-modal');
  playSfx('open');
@@ -1286,6 +1286,14 @@ if(jailSawButton){
 }
 
 
+const BANK_CASH_BONUS=25000;
+const BANK_INVESTMENT_DEPOSIT=25000;
+const BANK_INVESTMENT_GAIN=15000; // +60 % du dépôt initial à chaque tour du joueur.
+const BANK_ROBBERY_LOOT=[50000,100000,175000,250000];
+const BANK_ROBBERY_TARGET_WIDTH=[44,34,24,16];
+const BANK_ROBBERY_ALARM_SPEED=[4.5,6.5,9,13];
+let bankRobberyState=null;
+let bankRobberyFrame=0;
 const AIRPORT_DIRECT_COST=35000;
 const AIRPORT_HUBS=[1,5,11,13,33,35];
 
@@ -1378,6 +1386,186 @@ function openAirportDecision(playerIndex=current){
  }
 }
 
+
+function bankCloseModal(){
+ const modalEl=document.getElementById('modal');
+ if(modalEl)modalEl.classList.remove('open','modal-bank','modal-bank-robbery');
+ cancelAnimationFrame(bankRobberyFrame);bankRobberyFrame=0;bankRobberyState=null;
+ playSfx('close');
+ requestAnimationFrame(()=>{refresh();repairTurnState();scheduleAI(220);});
+}
+function collectBankInvestment(playerIndex){
+ const p=players[playerIndex];
+ if(!p?.bankInvestment)return 0;
+ const amount=p.bankInvestment;
+ p.money+=amount;
+ p.bankInvestment=0;
+ p.bankInvestmentSkip=false;
+ stat('bankInvestmentPayouts');stat('moneyInjected',Math.max(0,amount-BANK_INVESTMENT_DEPOSIT));
+ addLog('📈 <b>'+p.name+'</b> récupère son placement Banque 2.0 : <b>'+moneyFmt(amount)+'</b>.');
+ return amount;
+}
+function accrueBankInvestment(playerIndex){
+ const p=players[playerIndex];
+ if(!p?.active||!p.bankInvestment)return;
+ if(p.bankInvestmentSkip){p.bankInvestmentSkip=false;return}
+ p.bankInvestment+=BANK_INVESTMENT_GAIN;
+ stat('moneyInjected',BANK_INVESTMENT_GAIN);
+ addLog('📈 Placement de <b>'+p.name+'</b> : +'+moneyFmt(BANK_INVESTMENT_GAIN)+' · valeur '+moneyFmt(p.bankInvestment)+'.');
+}
+function chooseBankCash(playerIndex){
+ const p=players[playerIndex];if(!p)return;
+ p.money+=BANK_CASH_BONUS;
+ stat('bankCashChoices');stat('moneyInjected',BANK_CASH_BONUS);
+ addLog('🏦 <b>'+p.name+'</b> choisit le versement sûr : +'+moneyFmt(BANK_CASH_BONUS)+'.');
+ status.textContent='Banque 2.0 : '+moneyFmt(BANK_CASH_BONUS)+' encaissés.';
+ animateBankGain(players[playerIndex].pos,playerIndex,BANK_CASH_BONUS);
+ bankCloseModal();
+}
+function chooseBankInvestment(playerIndex){
+ const p=players[playerIndex];if(!p||p.bankInvestment||p.money<BANK_INVESTMENT_DEPOSIT)return;
+ p.money-=BANK_INVESTMENT_DEPOSIT;
+ p.bankInvestment=BANK_INVESTMENT_DEPOSIT;
+ p.bankInvestmentSkip=true;
+ stat('bankInvestments');stat('moneyRemoved',BANK_INVESTMENT_DEPOSIT);
+ addLog('📈 <b>'+p.name+'</b> place '+moneyFmt(BANK_INVESTMENT_DEPOSIT)+' à la Banque · +'+moneyFmt(BANK_INVESTMENT_GAIN)+' par tour jusqu’au retour à la Banque.');
+ status.textContent='Placement actif : '+moneyFmt(BANK_INVESTMENT_DEPOSIT)+' · +60 % par tour.';
+ bankCloseModal();
+}
+function finishBankRobbery(playerIndex,caught=false){
+ const p=players[playerIndex];if(!p)return;
+ const state=bankRobberyState;
+ cancelAnimationFrame(bankRobberyFrame);bankRobberyFrame=0;bankRobberyState=null;
+ const modalEl=document.getElementById('modal');
+ if(modalEl)modalEl.classList.remove('open','modal-bank','modal-bank-robbery');
+ if(caught){
+   stat('bankRobberyCaught');
+   addLog('🚨 Braquage raté : <b>'+p.name+'</b> est arrêté et envoyé en prison.');
+   status.textContent='Braquage raté : direction Prison.';
+   playSfx('bad');
+   const jail=spaces.find(x=>x.type==='jail');if(jail)p.pos=jail.id;
+   drawBoard();
+   setTimeout(()=>enterJail(playerIndex),180);
+   return;
+ }
+ const loot=state?.loot||0;
+ if(loot<=0){bankCloseModal();return}
+ p.money+=loot;stat('bankRobberyEscapes');stat('moneyInjected',loot);
+ addLog('💰 <b>'+p.name+'</b> fuit la Banque avec <b>'+moneyFmt(loot)+'</b> de butin.');
+ status.textContent='Braquage réussi : +'+moneyFmt(loot)+'.';
+ animateBankGain(p.pos,playerIndex,loot);playSfx('money');
+ showEventResult({title:'💰 Braquage réussi',icon:'👜',description:'Tu as quitté la Banque avant le déclenchement total de l’alarme.',effect:'+ '+moneyFmt(loot),tone:'positive'});
+}
+function startBankRobbery(playerIndex){
+ const p=players[playerIndex];if(!p)return;
+ stat('bankRobberies');
+ bankRobberyState={playerIndex,stage:0,loot:0,alarm:8,cursor:0,dir:1,last:performance.now(),targetLeft:28,targetWidth:BANK_ROBBERY_TARGET_WIDTH[0],finished:false};
+ const body=`
+  <div class="bank-robbery">
+   <div class="bank-robbery-head"><div><span>BUTIN</span><strong id="bankLoot">0 €</strong></div><div><span>COFFRE</span><strong id="bankStage">1 / 4</strong></div></div>
+   <div class="bank-alarm-line"><span>ALARME</span><b id="bankAlarmPct">8 %</b></div>
+   <div class="bank-alarm"><i id="bankAlarmFill"></i></div>
+   <div class="bank-vault">🔐<div class="bank-vault-title" id="bankVaultTitle">COFFRE 1 · 50 000 €</div><small>Appuie quand le curseur traverse la zone sûre.</small></div>
+   <div class="bank-skillbar"><div id="bankTarget" class="bank-target"></div><div id="bankCursor" class="bank-cursor"></div></div>
+   <div class="bank-robbery-hint" id="bankRobberyHint">Plus tu avances, plus l’alarme monte vite.</div>
+  </div>`;
+ modal('🏦 Banque 2.0 · Braquage',body,'bank-robbery');
+ const row=document.querySelector('#modal .row');row.innerHTML='';
+ const force=document.createElement('button');force.id='bankForceBtn';force.className='primary';force.textContent='🔓 FORCER LE COFFRE';
+ const flee=document.createElement('button');flee.id='bankFleeBtn';flee.className='secondary';flee.textContent='🏃 FUIR · 0 €';flee.disabled=true;
+ row.append(force,flee);
+ const render=()=>{
+   const st=bankRobberyState;if(!st||st.finished)return;
+   const target=document.getElementById('bankTarget'),cursor=document.getElementById('bankCursor'),alarm=document.getElementById('bankAlarmFill');
+   if(target){target.style.left=st.targetLeft+'%';target.style.width=st.targetWidth+'%'}
+   if(cursor)cursor.style.left=st.cursor+'%';
+   if(alarm)alarm.style.width=Math.min(100,st.alarm)+'%';
+   const ap=document.getElementById('bankAlarmPct');if(ap)ap.textContent=Math.floor(st.alarm)+' %';
+   const loot=document.getElementById('bankLoot');if(loot)loot.textContent=moneyFmt(st.loot);
+   const sb=document.getElementById('bankStage');if(sb)sb.textContent=Math.min(4,st.stage+1)+' / 4';
+   if(flee){flee.disabled=st.loot<=0;flee.textContent='🏃 FUIR · '+moneyFmt(st.loot)}
+ };
+ force.onclick=()=>{
+   const st=bankRobberyState;if(!st||st.finished)return;
+   const hit=st.cursor>=st.targetLeft&&st.cursor<=st.targetLeft+st.targetWidth;
+   const hint=document.getElementById('bankRobberyHint');
+   if(hit){
+     st.loot=BANK_ROBBERY_LOOT[st.stage];st.alarm=Math.min(99,st.alarm+8);st.stage++;
+     if(hint)hint.textContent='✅ Coffre ouvert ! Pars maintenant ou tente le suivant.';
+     playSfx('money');
+     if(st.stage>=4){st.finished=true;finishBankRobbery(playerIndex,false);return}
+     st.targetWidth=BANK_ROBBERY_TARGET_WIDTH[st.stage];
+     st.targetLeft=10+Math.random()*(80-st.targetWidth);
+     const title=document.getElementById('bankVaultTitle');if(title)title.textContent='COFFRE '+(st.stage+1)+' · '+moneyFmt(BANK_ROBBERY_LOOT[st.stage]);
+   }else{
+     st.alarm=Math.min(100,st.alarm+22);
+     if(hint)hint.textContent='⚠️ Raté ! L’alarme bondit de 22 %.';
+     playSfx('bad');
+     if(st.alarm>=100){st.finished=true;finishBankRobbery(playerIndex,true);return}
+   }
+   render();
+ };
+ flee.onclick=()=>{const st=bankRobberyState;if(!st||st.loot<=0)return;st.finished=true;finishBankRobbery(playerIndex,false)};
+ const tick=ts=>{
+   const st=bankRobberyState;if(!st||st.finished)return;
+   const dt=Math.min(.05,(ts-st.last)/1000);st.last=ts;
+   st.cursor+=st.dir*82*dt;
+   if(st.cursor>=100){st.cursor=100;st.dir=-1}else if(st.cursor<=0){st.cursor=0;st.dir=1}
+   st.alarm+=BANK_ROBBERY_ALARM_SPEED[Math.min(3,st.stage)]*dt;
+   if(st.alarm>=100){st.alarm=100;render();st.finished=true;finishBankRobbery(playerIndex,true);return}
+   render();bankRobberyFrame=requestAnimationFrame(tick);
+ };
+ render();bankRobberyFrame=requestAnimationFrame(tick);
+}
+function simulateAIBankRobbery(playerIndex){
+ const p=players[playerIndex];if(!p)return;
+ stat('bankRobberies');
+ const risk=Math.random();
+ let loot=0,caught=false;
+ if(risk<.12)caught=true;
+ else if(risk<.42)loot=50000;
+ else if(risk<.70)loot=100000;
+ else if(risk<.90)loot=175000;
+ else loot=250000;
+ if(caught){
+   stat('bankRobberyCaught');addLog('🚨 Braquage IA raté : <b>'+p.name+'</b> est arrêté.');
+   const jail=spaces.find(x=>x.type==='jail');if(jail)p.pos=jail.id;
+   drawBoard();setTimeout(()=>enterJail(playerIndex),350);
+ }else{
+   p.money+=loot;stat('bankRobberyEscapes');stat('moneyInjected',loot);
+   addLog('💰 <b>'+p.name+'</b> réussit son braquage et fuit avec '+moneyFmt(loot)+'.');
+   animateBankGain(p.pos,playerIndex,loot);refresh();scheduleAI(350);
+ }
+}
+function openBankDecision(playerIndex=current){
+ const p=players[playerIndex];if(!p?.active)return;
+ stat('bankVisits');
+ const payout=collectBankInvestment(playerIndex);
+ const canInvest=!p.bankInvestment&&p.money>=BANK_INVESTMENT_DEPOSIT;
+ const body=`
+  <div class="bank2-shell">
+   ${payout?`<div class="bank2-payout">📈 Placement arrivé à terme : <b>+${moneyFmt(payout)}</b></div>`:''}
+   <div class="decision-balance"><span>Trésorerie</span><strong>${moneyFmt(p.money)}</strong></div>
+   <div class="bank2-grid">
+    <button class="bank2-card safe" id="bankCashChoice"><span>💵</span><b>Encaisser</b><strong>+ ${moneyFmt(BANK_CASH_BONUS)}</strong><small>Argent immédiat, aucun risque.</small></button>
+    <button class="bank2-card invest" id="bankInvestChoice" ${canInvest?'':'disabled'}><span>📈</span><b>Investir</b><strong>${moneyFmt(BANK_INVESTMENT_DEPOSIT)}</strong><small>+60 % du dépôt initial par tour (+${moneyFmt(BANK_INVESTMENT_GAIN)}). Récupération au prochain retour à la Banque.</small></button>
+    <button class="bank2-card robbery" id="bankRobChoice"><span>🥷</span><b>Braquer</b><strong>jusqu’à 250 000 €</strong><small>Quitte avec le butin avant 100 % d’alarme. Sinon : Prison.</small></button>
+   </div>
+  </div>`;
+ modal('🏦 Banque 2.0',body,'bank');
+ const row=document.querySelector('#modal .row');row.innerHTML='';
+ document.getElementById('bankCashChoice').onclick=()=>chooseBankCash(playerIndex);
+ const invest=document.getElementById('bankInvestChoice');if(invest&&!invest.disabled)invest.onclick=()=>chooseBankInvestment(playerIndex);
+ document.getElementById('bankRobChoice').onclick=()=>{document.getElementById('modal').classList.remove('open','modal-bank');if(p.isAI)simulateAIBankRobbery(playerIndex);else startBankRobbery(playerIndex)};
+ if(p.isAI)setTimeout(()=>{
+   if(current!==playerIndex||!document.getElementById('modal')?.classList.contains('open'))return;
+   const r=Math.random();
+   if(canInvest&&p.money>=90000&&r<.38)document.getElementById('bankInvestChoice')?.click();
+   else if(r<.63)document.getElementById('bankRobChoice')?.click();
+   else document.getElementById('bankCashChoice')?.click();
+ },500);
+}
+
 function resolveSpace(){const p=players[current],s=spaces[p.pos];
  if(['property','beach'].includes(s.type)){
    if(s.owner===null){
@@ -1389,12 +1577,8 @@ function resolveSpace(){const p=players[current],s=spaces[p.pos];
  }
  else if(s.type==='start'){status.textContent='Case départ : rien de plus à payer.'}
  else if(s.type==='bank'){
- const amount=25000;
- p.money+=amount;stat('bankVisits');stat('moneyInjected',amount);
- addLog(`🏦 La banque verse ${moneyFmt(amount)} à <b>${p.name}</b>.`);
- status.textContent='Prime bancaire reçue.';
- animateBankGain(s.id,current,amount);
- showEventResult({title:'🏦 Banque',icon:'🏦',description:'La banque vous accorde une prime exceptionnelle.',effect:`+ ${moneyFmt(amount)}`,tone:'positive'});
+ openBankDecision(current);
+ return;
 }
  else if(s.type==='jail'){
  enterJail(current);
@@ -1994,10 +2178,10 @@ function globalEvent(){const events=[
 function simOneGame(profile='current'){
  const useNewEvents=profile==='current';
  const P=4;
- const ps=Array.from({length:P},()=>({money:200000,pos:0,active:true,props:[],beaches:0,fiscal:0,works:0,wonder:null,wonderLeft:0,wonderSkip:false,flood:0,floodSkip:false,doubleChance:false,jailed:0,escapedBefore:false}));
+ const ps=Array.from({length:P},()=>({money:200000,pos:0,active:true,props:[],beaches:0,fiscal:0,works:0,wonder:null,wonderLeft:0,wonderSkip:false,flood:0,floodSkip:false,doubleChance:false,bankInvestment:0,bankSkip:false,jailed:0,escapedBefore:false}));
  const ss=spaces.map(s=>({type:s.type,price:s.price,baseRent:s.baseRent,owner:null,level:0,repair:0,repairSkip:false}));
  const simDistricts=[[1,5,8,31],[2,7,10,11],[14,16,23,29],[3,19,21,33],[13,17,24,35],[20,26,28,30]];
- let actions=0,purchases=0,rentsPaid=0,buyouts=0,liquidations=0,bankruptcies=0,upgrades=0,propertyTaxes=0,scheduledCharges=0,wondersStarted=0,wonderWins=0,eventCount=0;
+ let actions=0,purchases=0,rentsPaid=0,buyouts=0,liquidations=0,bankruptcies=0,upgrades=0,propertyTaxes=0,scheduledCharges=0,wondersStarted=0,wonderWins=0,eventCount=0,bankVisits=0,bankCash=0,bankInvestments=0,bankRobberies=0,bankCaught=0,bankInjected=0;
  let winnerReason='timeout';
  const bugs=[];
  const collective=()=>ps.some(p=>p.active&&p.wonder==='communist'&&p.wonderLeft>0);
@@ -2082,6 +2266,10 @@ function simOneGame(profile='current'){
  }
  for(let step=0;step<1200;step++){
    const pi=step%P,p=ps[pi];if(!p.active)continue;actions++;
+   if(p.bankInvestment){
+     if(p.bankSkip)p.bankSkip=false;
+     else{p.bankInvestment+=BANK_INVESTMENT_GAIN;bankInjected+=BANK_INVESTMENT_GAIN}
+   }
    if(p.jailed>0){
      if(p.money>=260000){pay(pi,150000,null);p.jailed=0}
      else if(p.money>=100000){
@@ -2133,7 +2321,22 @@ function simOneGame(profile='current'){
        const cost=upgradeCost(s,s.level+1);
        if(p.money>=cost+70000&&Math.random()<.34){p.money-=cost;s.level++;upgrades++}
      }
-   }else if(s.type==='bank')p.money+=25000;
+   }else if(s.type==='bank'){
+     bankVisits++;
+     if(p.bankInvestment){p.money+=p.bankInvestment;p.bankInvestment=0;p.bankSkip=false}
+     const r=Math.random();
+     if(p.money>=90000&&r<.38){
+       p.money-=BANK_INVESTMENT_DEPOSIT;p.bankInvestment=BANK_INVESTMENT_DEPOSIT;p.bankSkip=true;bankInvestments++;
+     }else if(r<.63){
+       bankRobberies++;
+       const rr=Math.random();
+       if(rr<.12){bankCaught++;p.jailed=3}
+       else{
+         const loot=rr<.42?50000:rr<.70?100000:rr<.90?175000:250000;
+         p.money+=loot;bankInjected+=loot;
+       }
+     }else{p.money+=BANK_CASH_BONUS;bankCash++;bankInjected+=BANK_CASH_BONUS}
+   }
    else if(s.type==='jail'){
      p.jailed=3;
      if(p.escapedBefore)pay(pi,50000,null);
@@ -2164,7 +2367,7 @@ function simOneGame(profile='current'){
    if(ps.some(x=>x.active&&x.beaches===4)){winnerReason='beaches';break}
  }
  auditState();
- return {profile,actions,rounds:actions/P,winnerReason,purchases,rentsPaid,buyouts,liquidations,bankruptcies,upgrades,propertyTaxes,scheduledCharges,wondersStarted,wonderWins,eventCount,bugs:[...new Set(bugs)],finished:winnerReason!=='timeout'};
+ return {profile,actions,rounds:actions/P,winnerReason,purchases,rentsPaid,buyouts,liquidations,bankruptcies,upgrades,propertyTaxes,scheduledCharges,wondersStarted,wonderWins,eventCount,bankVisits,bankCash,bankInvestments,bankRobberies,bankCaught,bankInjected,bugs:[...new Set(bugs)],finished:winnerReason!=='timeout'};
 }
 function summarizeSim(arr){
  const avg=k=>arr.reduce((a,x)=>a+(x[k]||0),0)/arr.length;
@@ -2175,7 +2378,7 @@ function summarizeSim(arr){
  return {
    med,p90,minutes:med*12/60,finish:arr.filter(x=>x.finished).length/arr.length*100,
    bankruptcy:pct('bankruptcy'),beaches:pct('beaches'),wonder:pct('wonder'),timeout:pct('timeout'),
-   bankruptcies:avg('bankruptcies'),purchases:avg('purchases'),upgrades:avg('upgrades'),liquidations:avg('liquidations'),events:avg('eventCount'),
+   bankruptcies:avg('bankruptcies'),purchases:avg('purchases'),upgrades:avg('upgrades'),liquidations:avg('liquidations'),events:avg('eventCount'),bankVisits:avg('bankVisits'),bankCash:avg('bankCash'),bankInvestments:avg('bankInvestments'),bankRobberies:avg('bankRobberies'),bankCaught:avg('bankCaught'),bankInjected:avg('bankInjected'),
    bugGames:arr.filter(x=>x.bugs.length).length,
    bugTypes:[...new Set(arr.flatMap(x=>x.bugs))]
  };
@@ -2192,17 +2395,17 @@ function runDevSimulation(count){
    result.innerHTML='<b>Comparatif '+count.toLocaleString('fr-FR')+' + '+count.toLocaleString('fr-FR')+' parties · 4 joueurs</b><br>'+
    '<b>Durée médiane :</b> avant '+a.med+' actions (~'+a.minutes.toFixed(1)+' min) → actuelle '+b.med+' actions (~'+b.minutes.toFixed(1)+' min) · <b>'+trend(deltaMin,' min')+'</b><br>'+
    '<b>90 % des parties :</b> terminées avant '+b.p90+' actions (~'+(b.p90*12/60).toFixed(0)+' min)<br><br>'+
-   '<b>Types de victoire V0.50 :</b><br>'+
+   '<b>Types de victoire V0.51 :</b><br>'+
    'Faillite : <b>'+b.bankruptcy.toFixed(2)+' %</b> ('+trend(deltaBank,' pt')+') · Plages : <b>'+b.beaches.toFixed(2)+' %</b> · Merveille : <b>'+b.wonder.toFixed(2)+' %</b> · Limite : <b>'+b.timeout.toFixed(2)+' %</b><br>'+
    'Parties terminées : <b>'+b.finish.toFixed(2)+' %</b><br><br>'+
-   'Moyennes actuelles : '+b.purchases.toFixed(1)+' achats · '+b.upgrades.toFixed(1)+' améliorations · '+b.liquidations.toFixed(1)+' liquidations · '+b.bankruptcies.toFixed(2)+' faillites · '+b.events.toFixed(1)+' événements.<br>'+
+   'Moyennes actuelles : '+b.purchases.toFixed(1)+' achats · '+b.upgrades.toFixed(1)+' améliorations · '+b.liquidations.toFixed(1)+' liquidations · '+b.bankruptcies.toFixed(2)+' faillites · '+b.events.toFixed(1)+' événements.<br>'+ 'Banque 2.0 : '+b.bankVisits.toFixed(1)+' visites · '+b.bankCash.toFixed(1)+' cash · '+b.bankInvestments.toFixed(1)+' placements · '+b.bankRobberies.toFixed(1)+' braquages · '+b.bankCaught.toFixed(2)+' arrestations · '+moneyFmt(Math.round(b.bankInjected))+' injectés en moyenne.<br>'+
    '<b>Audit :</b> '+(b.bugGames===0?'✅ aucune incohérence détectée':'⚠️ '+b.bugGames+' partie(s) avec anomalie : '+b.bugTypes.join(', '))+'<br>'+
    '<span style="font-size:10px">Estimation temps = 12 s par action. Bots simplifiés : comparaison d’équilibrage, pas prédiction parfaite des humains.</span>';
  },20);
 }
 function runDevAudit(count=5000){
  const result=document.getElementById('simResult');if(!result)return;
- result.textContent='Audit de '+count.toLocaleString('fr-FR')+' parties V0.50…';
+ result.textContent='Audit de '+count.toLocaleString('fr-FR')+' parties V0.51…';
  setTimeout(()=>{
    const arr=[];for(let i=0;i<count;i++)arr.push(simOneGame('current'));
    const s=summarizeSim(arr);
@@ -2373,6 +2576,7 @@ endBtn.onclick=()=>{if(animating&&!document.getElementById('modal')?.classList.c
      }
    });
  }
+ accrueBankInvestment(previous);
  if(advanceWonderForPlayer(previous))return;
  do{current=(current+1)%players.length}while(!players[current].active);
  if(current<=previous){roundNumber++;recoverZonePressure();}
@@ -2509,7 +2713,7 @@ function startGame(){
      playerName=`Joueur ${i+1}`;
    }
    usedNames.push(playerName);
-   players.push({name:playerName,isAI,aiDifficulty:isAI?'hard':null,money:200000,pos:0,props:[],beaches:0,active:true,fiscalRollsLeft:0,worksInstallmentsLeft:0,wonderMode:null,wonderTurnsLeft:0,wonderLine:null,wonderSkipCountdown:false,floodTurnsLeft:0,floodSkipCountdown:false,doubleChance:false,jailed:false,jailTurnsLeft:0,jailJustEntered:false,hasEscapedJail:false,jailRecidiveCount:0});
+   players.push({name:playerName,isAI,aiDifficulty:isAI?'hard':null,money:200000,pos:0,props:[],beaches:0,active:true,fiscalRollsLeft:0,worksInstallmentsLeft:0,wonderMode:null,wonderTurnsLeft:0,wonderLine:null,wonderSkipCountdown:false,floodTurnsLeft:0,floodSkipCountdown:false,doubleChance:false,bankInvestment:0,bankInvestmentSkip:false,jailed:false,jailTurnsLeft:0,jailJustEntered:false,hasEscapedJail:false,jailRecidiveCount:0});
  }
  spaces.forEach(s=>{s.owner=null;s.level=0;s.rent=rents[s.id];s.baseRent=rents[s.id];s.repairTurnsLeft=0;s.repairSkipCountdown=false});
  current=0;rolled=false;gameOver=false;animating=false;initiativeActive=true;initiativeScores=[];logBox.innerHTML='';
