@@ -41,7 +41,7 @@
  }
  function icon(type){return {start:"D",event:"?",global:"!",bank:"€",jail:"P",airport:"✈",beach:"≈"}[type]||""}
  class FranceBoard extends Phaser.Scene{
-  constructor(){super("FranceBoard");this.lastRevision=-1}
+  constructor(){super("FranceBoard");this.lastRevision=-1;this.hoveredSpace=null;this.selectedSpace=null}
   preload(){
    // Real sprite pipeline. Missing files never block the board: coded assets remain the fallback.
    const sprites={
@@ -72,6 +72,7 @@
    this.cameras.main.centerOn(W/2,H/2);
       this.drawBase();
    this.dynamic=this.add.container(0,0);
+   this.fx=this.add.container(0,0);
    this.renderSnapshot();
   }
   drawBase(){
@@ -212,6 +213,7 @@
   renderSnapshot(){
    if(!this.dynamic)return;
    this.dynamic.removeAll(true);
+   if(this.fx)this.fx.removeAll(true);
    const s=state.snapshot;if(!s?.spaces)return;
    [...s.spaces].sort((a,b)=>ROUTE[a.id][1]-ROUTE[b.id][1]).forEach((space)=>{
     const i=space.id;
@@ -229,6 +231,17 @@
     g.fillStyle(isPriced?tileColor:0xf1f5f9,1);g.fillRoundedRect(x-tw/2,y-th/2,tw,th,9);
     g.lineStyle(3,isPriced?0xffffff:tileColor,.34);g.strokeRoundedRect(x-tw/2,y-th/2,tw,th,9);
     g.lineStyle(2,0xffffff,.30);g.beginPath();g.moveTo(x-tw/2+9,y-th/2+5);g.lineTo(x+tw/2-9,y-th/2+5);g.strokePath();
+    // Interactive hit area stays invisible until hover/selection.
+    const hit=this.add.rectangle(x,y,tw+8,th+8,0xffffff,0).setInteractive({useHandCursor:true}).setDepth(y+2200);
+    hit.on("pointerover",()=>{this.hoveredSpace=i;hit.setFillStyle(0xffffff,.10);hit.setStrokeStyle(2,0xffffff,.72)});
+    hit.on("pointerout",()=>{this.hoveredSpace=null;if(this.selectedSpace!==i){hit.setFillStyle(0xffffff,0);hit.setStrokeStyle()}});
+    hit.on("pointerdown",()=>{
+      this.selectedSpace=this.selectedSpace===i?null:i;
+      this.renderSnapshot();
+      window.dispatchEvent(new CustomEvent("businessfast:space-selected",{detail:{spaceId:i,space}}));
+    });
+    if(this.selectedSpace===i){hit.setFillStyle(0xffffff,.13);hit.setStrokeStyle(3,0xfbbf24,.95)}
+    this.dynamic.add(hit);
     if(space.type==="property"){
       const level=Math.max(0,Math.min(3,space.level||0));
       const b=this.sprite("city_"+level,x,y-10,level>=2?.48:.44)||this.makeBuilding(x,y-18,color,level,i);
@@ -295,6 +308,8 @@
     g.fillStyle(0xffffff,.22);g.fillRoundedRect(-4,8,3,10,2);
     if(p.index===s.current){g.lineStyle(3,0xffffff,.9);g.strokeCircle(0,3,13);this.tweens.add({targets:pawn,y:pawn.y-5,duration:650,yoyo:true,repeat:-1,ease:"Sine.easeInOut"})}
     pawn.setDepth(y+1000);
+    pawn.setScale(.96);
+    this.tweens.add({targets:pawn,scaleX:1,scaleY:1,duration:240,ease:"Back.easeOut"});
     this.dynamic.add(pawn);
    });
   }
