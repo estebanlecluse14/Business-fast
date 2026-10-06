@@ -394,14 +394,12 @@ const fixedThemes={
  beach:{label:'Vacances',emoji:'🌊',color:'#0891b2'}
 };
 const wonderDistricts=[
- {name:'Quartier Tech',label:'Tech',emoji:'💻',color:'#7c3aed',ids:[1,23,29]},
- {name:'Quartier Luxe',label:'Luxe',emoji:'💎',color:'#e11d48',ids:[5,8,31]},
- {name:'Quartier Port',label:'Port',emoji:'⚓',color:'#0f766e',ids:[3,19,33]},
- {name:'Quartier Culture',label:'Culture',emoji:'🎭',color:'#c2410c',ids:[2,13,14]},
- {name:'Quartier Nature',label:'Nature',emoji:'🌿',color:'#15803d',ids:[10,16,28,30]},
- {name:'Quartier Business',label:'Business',emoji:'💼',color:'#0369a1',ids:[7,11,17]},
- {name:'Quartier Gourmet',label:'Gourmet',emoji:'🍷',color:'#7f1d1d',ids:[24,26]},
- {name:'Quartier Tourisme',label:'Tourisme',emoji:'📸',color:'#d97706',ids:[20,21,35]}
+ {name:'Quartier Luxe',label:'Luxe',emoji:'💎',color:'#e11d48',ids:[1,5,8,31]},
+ {name:'Quartier Business',label:'Business',emoji:'💼',color:'#0369a1',ids:[2,7,10,11]},
+ {name:'Quartier Innovation',label:'Innovation',emoji:'💻',color:'#7c3aed',ids:[14,16,23,29]},
+ {name:'Quartier Port',label:'Port',emoji:'⚓',color:'#0f766e',ids:[3,19,21,33]},
+ {name:'Quartier Culture',label:'Culture',emoji:'🎭',color:'#c2410c',ids:[13,17,24,35]},
+ {name:'Quartier Régional',label:'Régional',emoji:'🏘️',color:'#15803d',ids:[20,26,28,30]}
 ];
 const districtBySpaceId={};
 wonderDistricts.forEach(d=>d.ids.forEach(id=>districtBySpaceId[id]=d));
