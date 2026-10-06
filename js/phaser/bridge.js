@@ -1,98 +1,107 @@
-/* Business Fast — Phaser rendering bridge
-   Phase 1: Phaser owns the animated board FX layer while legacy HTML remains the
-   authoritative gameplay/UI layer. This bridge consumes a serializable snapshot
-   published by game.js so the renderer can be replaced progressively. */
+/* Business Fast — Phaser France map renderer
+   Gameplay remains in game.js. Phaser renders the new readable 2.5D France board. */
 (function(){
-  if(typeof window==="undefined") return;
-
-  const state={enabled:false,game:null,scene:null,snapshot:null,revision:0};
-
-  function canBoot(){
-    return typeof Phaser!=="undefined" && !!document.getElementById("phaserMount");
+ if(typeof window==="undefined")return;
+ const state={enabled:false,game:null,scene:null,snapshot:null,revision:0};
+ const W=1280,H=720;
+ const ROUTE=[
+  [505,116],[570,94],[650,110],[730,132],[810,118],[886,152],[934,202],[960,260],[952,322],
+  [920,378],[890,432],[846,480],[792,520],[732,554],[666,584],[598,596],[530,586],[466,560],
+  [410,526],[360,482],[324,430],[302,374],[292,318],[306,262],[334,214],[372,176],[416,144],
+  [462,122],[516,154],[570,188],[628,204],[688,194],[744,170],[796,190],[844,226],[872,276]
+ ];
+ const FRANCE=[
+  [500,74],[566,88],[620,72],[684,98],[748,92],[820,132],[858,184],[922,216],[940,286],
+  [918,340],[934,402],[890,450],[860,520],[792,548],[742,610],[674,620],[624,660],[558,628],
+  [494,640],[446,594],[390,578],[358,520],[304,488],[300,420],[264,372],[286,310],[270,252],
+  [322,210],[340,152],[406,136],[448,94]
+ ];
+ function hex(v,f=0x64748b){if(typeof v!=="string")return f;const h=v.replace("#","");return /^[0-9a-f]{6}$/i.test(h)?parseInt(h,16):f}
+ function specialColor(type,theme){
+  return {start:0x22c55e,event:0xf59e0b,global:0xef4444,bank:0x38bdf8,jail:0xa78bfa,airport:0x0ea5e9,beach:0x06b6d4}[type]||hex(theme,0x64748b);
+ }
+ function icon(type){return {start:"D",event:"?",global:"!",bank:"€",jail:"P",airport:"✈",beach:"≈"}[type]||""}
+ class FranceBoard extends Phaser.Scene{
+  constructor(){super("FranceBoard");this.lastRevision=-1}
+  create(){
+   state.scene=this;this.cameras.main.setBackgroundColor("#071525");
+   this.world=this.add.container(0,0);
+   this.drawBase();
+   this.dynamic=this.add.container(0,0);
+   this.renderSnapshot();
   }
-
-  function cssColor(value,fallback=0x64748b){
-    if(typeof value!=="string") return fallback;
-    const hex=value.trim().replace("#","");
-    return /^[0-9a-f]{6}$/i.test(hex)?parseInt(hex,16):fallback;
+  drawBase(){
+   const g=this.add.graphics();this.world.add(g);
+   g.fillStyle(0x08243a,1);g.fillRect(0,0,W,H);
+   // restrained water lines
+   g.lineStyle(1,0x1e6b8e,.16);
+   for(let y=70;y<700;y+=42){g.beginPath();g.moveTo(70,y);g.lineTo(1210,y+12);g.strokePath()}
+   // France shadow + land mass
+   g.fillStyle(0x020617,.34);g.fillPoints(FRANCE.map(([x,y])=>new Phaser.Geom.Point(x+13,y+18)),true);
+   g.fillStyle(0x244d36,1);g.fillPoints(FRANCE.map(([x,y])=>new Phaser.Geom.Point(x,y)),true);
+   g.lineStyle(5,0x78a879,.8);g.strokePoints(FRANCE.map(([x,y])=>new Phaser.Geom.Point(x,y)),true);
+   // simple terrain patches
+   g.fillStyle(0x315f3f,.75);g.fillEllipse(520,300,330,230);g.fillEllipse(690,390,300,230);
+   g.fillStyle(0x465d45,.55);g.fillTriangle(770,185,808,122,846,190);g.fillTriangle(804,205,846,142,884,214);
+   // route
+   g.lineStyle(28,0x111827,.72);g.strokePoints(ROUTE.map(p=>new Phaser.Geom.Point(...p)),true);
+   g.lineStyle(18,0xd7dee7,1);g.strokePoints(ROUTE.map(p=>new Phaser.Geom.Point(...p)),true);
+   g.lineStyle(3,0xffffff,.22);g.strokePoints(ROUTE.map(p=>new Phaser.Geom.Point(...p)),true);
+   this.add.text(118,596,"OCÉAN\nATLANTIQUE",{fontFamily:"Arial",fontSize:"18px",fontStyle:"bold",color:"#4cc9f0",align:"center"}).setAlpha(.62);
+   this.add.text(910,626,"MÉDITERRANÉE",{fontFamily:"Arial",fontSize:"18px",fontStyle:"bold",color:"#4cc9f0"}).setAlpha(.62);
+   this.add.text(606,332,"BUSINESS\nFAST",{fontFamily:"Arial",fontSize:"36px",fontStyle:"bold",align:"center",color:"#ffffff",stroke:"#071525",strokeThickness:8}).setOrigin(.5).setAlpha(.16);
   }
-
-  class BusinessFastBoardScene extends Phaser.Scene{
-    constructor(){super("BusinessFastBoard")}
-    create(){
-      state.scene=this;
-      this.cameras.main.setBackgroundColor("rgba(0,0,0,0)");
-      this.fx=this.add.graphics();
-      this.tokenFx=this.add.graphics();
-      this.title=this.add.text(640,360,"BUSINESS CITY",{
-        fontFamily:"Arial, sans-serif",fontSize:"44px",fontStyle:"bold",
-        color:"#ffffff",stroke:"#06101b",strokeThickness:8
-      }).setOrigin(.5).setAlpha(.07);
-      this.tweens.add({targets:this.title,alpha:{from:.045,to:.10},duration:2400,yoyo:true,repeat:-1,ease:"Sine.easeInOut"});
-      this.renderSnapshot();
+  makeBuilding(x,y,color,level=0){
+   const c=this.add.container(x,y-25),g=this.add.graphics();c.add(g);
+   const floors=level+1,h=12+floors*7;
+   g.fillStyle(0x0b1220,.25);g.fillEllipse(0,22,36,12);
+   g.fillStyle(color,.92);g.fillRoundedRect(-13,-h,26,h,4);
+   g.fillStyle(0xffffff,.28);g.fillRect(-8,-h+5,5,5);g.fillRect(3,-h+5,5,5);
+   if(level>0){g.fillStyle(0xf8fafc,.88);g.fillTriangle(-10,-h,-1,-h-10,8,-h)}
+   return c;
+  }
+  renderSnapshot(){
+   if(!this.dynamic)return;
+   this.dynamic.removeAll(true);
+   const s=state.snapshot;if(!s?.spaces)return;
+   s.spaces.forEach((space,i)=>{
+    const [x,y]=ROUTE[i%ROUTE.length],owner=space.owner;
+    const color=owner!==null&&owner!==undefined?hex(space.ownerColor):specialColor(space.type,space.themeColor);
+    const g=this.add.graphics();this.dynamic.add(g);
+    g.fillStyle(0x020617,.34);g.fillRoundedRect(x-32,y-19+7,64,38,9);
+    g.fillStyle(owner!==null&&owner!==undefined?color:0xf8fafc,1);g.fillRoundedRect(x-32,y-19,64,38,9);
+    g.lineStyle(owner!==null&&owner!==undefined?4:3,color,1);g.strokeRoundedRect(x-32,y-19,64,38,9);
+    if(owner!==null&&owner!==undefined||space.type==="property")this.dynamic.add(this.makeBuilding(x,y,color,space.level||0));
+    const mark=icon(space.type);
+    if(mark)this.dynamic.add(this.add.text(x,y,mark,{fontFamily:"Arial",fontSize:"17px",fontStyle:"bold",color:space.type==="property"?"#0f172a":"#0f172a"}).setOrigin(.5));
+    // labels are deliberately sparse to keep the board readable
+    if(space.type!=="property"||i%3===1){
+      const label=this.add.text(x,y+29,space.name,{fontFamily:"Arial",fontSize:"11px",fontStyle:"bold",color:"#f8fafc",backgroundColor:"#071525",padding:{x:5,y:3}}).setOrigin(.5,0);
+      this.dynamic.add(label);
     }
-    renderSnapshot(){
-      if(!this.fx||!this.tokenFx)return;
-      const snap=state.snapshot;
-      this.fx.clear(); this.tokenFx.clear();
-      if(!snap||!snap.spaces)return;
-
-      // Soft animated ownership lights. The HTML tiles remain readable above this
-      // layer while Phaser starts owning the board atmosphere and movement FX.
-      snap.spaces.forEach((s,i)=>{
-        if(s.owner===null||s.owner===undefined)return;
-        const a=(i/36)*Math.PI*2, radius=265;
-        const x=640+Math.cos(a)*radius, y=360+Math.sin(a)*radius*.72;
-        const color=cssColor(s.ownerColor,0x22c55e);
-        this.fx.fillStyle(color,.10);
-        this.fx.fillCircle(x,y,24+(s.level||0)*4);
-      });
-
-      (snap.players||[]).filter(p=>p.active).forEach((p,i)=>{
-        const a=((p.pos||0)/36)*Math.PI*2, radius=285;
-        const x=640+Math.cos(a)*radius, y=360+Math.sin(a)*radius*.72;
-        const color=cssColor(p.color,0xffffff);
-        this.tokenFx.lineStyle(i===snap.current?5:3,color,i===snap.current?.75:.32);
-        this.tokenFx.strokeCircle(x,y,i===snap.current?18:13);
-      });
-    }
-    update(){
-      if(state.revision!==this.lastRevision){
-        this.lastRevision=state.revision;
-        this.renderSnapshot();
-      }
-    }
+   });
+   (s.players||[]).filter(p=>p.active).forEach((p,slot)=>{
+    const [x,y]=ROUTE[(p.pos||0)%ROUTE.length],color=hex(p.color,0xffffff);
+    const pawn=this.add.container(x+(slot-1.5)*8,y-31);
+    const g=this.add.graphics();pawn.add(g);
+    g.fillStyle(0x020617,.28);g.fillEllipse(2,17,18,7);
+    g.fillStyle(color,1);g.fillCircle(0,0,7);g.fillRoundedRect(-6,6,12,15,5);
+    if(p.index===s.current){g.lineStyle(3,0xffffff,.9);g.strokeCircle(0,3,13);this.tweens.add({targets:pawn,y:pawn.y-5,duration:650,yoyo:true,repeat:-1,ease:"Sine.easeInOut"})}
+    this.dynamic.add(pawn);
+   });
   }
-
-  function boot(){
-    if(!canBoot()||state.game)return;
-    state.game=new Phaser.Game({
-      type:Phaser.AUTO,parent:"phaserMount",width:1280,height:720,
-      transparent:true,backgroundColor:"rgba(0,0,0,0)",
-      render:{antialias:true,pixelArt:false,roundPixels:true,powerPreference:"high-performance"},
-      scale:{mode:Phaser.Scale.FIT,autoCenter:Phaser.Scale.CENTER_BOTH},
-      scene:[BusinessFastBoardScene]
-    });
-    enable();
-  }
-
-  function sync(snapshot){
-    state.snapshot=snapshot||null;
-    state.revision++;
-    if(state.scene)state.scene.renderSnapshot();
-  }
-
-  function enable(){
-    boot();
-    state.enabled=true;
-    document.documentElement.classList.add("phaser-ready");
-  }
-  function disable(){
-    state.enabled=false;
-    document.documentElement.classList.remove("phaser-ready");
-  }
-
-  window.BusinessFastPhaser={state,boot,sync,enable,disable};
-  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",boot,{once:true});
-  else boot();
+  update(){if(this.lastRevision!==state.revision){this.lastRevision=state.revision;this.renderSnapshot()}}
+ }
+ function boot(){
+  if(state.game||typeof Phaser==="undefined"||!document.getElementById("phaserMount"))return;
+  state.game=new Phaser.Game({type:Phaser.AUTO,parent:"phaserMount",width:W,height:H,backgroundColor:"#071525",
+   render:{antialias:true,pixelArt:false,roundPixels:true,powerPreference:"high-performance"},
+   scale:{mode:Phaser.Scale.FIT,autoCenter:Phaser.Scale.CENTER_BOTH},scene:[FranceBoard]});
+  state.enabled=true;document.documentElement.classList.add("phaser-ready","phaser-france");
+ }
+ function sync(snapshot){state.snapshot=snapshot||null;state.revision++;if(state.scene)state.scene.renderSnapshot()}
+ function enable(){boot();state.enabled=true;document.documentElement.classList.add("phaser-ready","phaser-france")}
+ function disable(){state.enabled=false;document.documentElement.classList.remove("phaser-ready","phaser-france")}
+ window.BusinessFastPhaser={state,boot,sync,enable,disable};
+ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",boot,{once:true});else boot();
 })();
