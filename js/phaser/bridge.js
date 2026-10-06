@@ -67,6 +67,13 @@
    // simple terrain patches
    g.fillStyle(0x315f3f,.75);g.fillEllipse(520,320,330,170);g.fillEllipse(690,390,300,170);
    g.fillStyle(0x465d45,.55);g.fillTriangle(770,185,808,122,846,190);g.fillTriangle(804,205,846,142,884,214);
+   // readable regional scenery: sparse enough to preserve city labels
+   const tree=(x,y,s=1)=>{g.fillStyle(0x102a20,.35);g.fillEllipse(x+6*s,y+8*s,20*s,8*s);g.fillStyle(0x173d2b,1);g.fillTriangle(x-10*s,y+7*s,x,y-18*s,x+10*s,y+7*s);g.fillStyle(0x245c3b,1);g.fillTriangle(x-8*s,y,x,y-24*s,x+8*s,y)};
+   [[430,250,.8],[470,280,1],[560,450,.9],[720,300,.8],[760,430,1],[650,250,.7]].forEach(p=>tree(...p));
+   // mountain ridge / Alps
+   [[790,238,34],[825,250,27],[855,266,22]].forEach(([x,y,s])=>{g.fillStyle(0x324b43,.9);g.fillTriangle(x-s,y+s,x,y-s,x+s,y+s);g.fillStyle(0xdde8e5,.72);g.fillTriangle(x-10,y-5,x,y-s,x+10,y-5)});
+   // subtle river ribbon
+   g.lineStyle(5,0x38bdf8,.24);g.beginPath();g.moveTo(610,180);g.lineTo(625,245);g.lineTo(600,315);g.lineTo(635,390);g.lineTo(620,500);g.strokePath();
    // raised route: dark lower edge creates a readable 2.5D slab
    g.lineStyle(32,0x050b12,.65);g.strokePoints(ROUTE.map(([x,y])=>new Phaser.Geom.Point(x+7,y+11)),true);
    // route
