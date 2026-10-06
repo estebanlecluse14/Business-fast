@@ -319,8 +319,43 @@ const names=[
 'Saint-Étienne','Toulon','Événement','Grenoble','Dijon','Plage Manche','Angers','Aéroport','Rouen','Villeurbanne',
 'Clermont-Ferrand','Aix-en-Provence','Événement mondial','Brest','Plage Méditerranée','Caen'];
 const types=names.map((n,i)=> i===0?'start': n.includes('Plage')?'beach': n==='Prison'?'jail': n==='Aéroport'?'airport': n==='Banque'?'bank': n==='Événement'?'event': n==='Événement mondial'?'global':'property');
-const ECONOMY_VALUE_BOOST=1.15;
-const basePrices=names.map((n,i)=> types[i]==='property'? roundPriceStep(Math.round((32000 + ((i*7000)%36000))*ECONOMY_VALUE_BOOST)) : types[i]==='beach'?roundPriceStep(Math.round(75000*ECONOMY_VALUE_BOOST)):0);
+const ECONOMY_VALUE_BOOST=1;
+const PROPERTY_PRICES={
+  'Paris':400000,
+  'Nice':350000,
+  'Bordeaux':320000,
+  'Aix-en-Provence':300000,
+
+  'Lyon':290000,
+  'Lille':260000,
+  'Toulouse':250000,
+  'Nantes':235000,
+
+  'Grenoble':270000,
+  'Montpellier':240000,
+  'Rennes':225000,
+  'Villeurbanne':210000,
+
+  'Marseille':280000,
+  'Le Havre':210000,
+  'Toulon':200000,
+  'Brest':180000,
+
+  'Strasbourg':230000,
+  'Dijon':190000,
+  'Reims':175000,
+  'Caen':160000,
+
+  'Clermont-Ferrand':170000,
+  'Rouen':155000,
+  'Angers':140000,
+  'Saint-Étienne':120000
+};
+const basePrices=names.map((n,i)=>{
+  if(types[i]==='property')return PROPERTY_PRICES[n]||0;
+  if(types[i]==='beach')return 85000;
+  return 0;
+});
 const RENT_BOOST=1.20;
 const rents=basePrices.map((p,i)=> p?roundRentStep(p*0.18*RENT_BOOST):0);
 const upgradeCosts=[0,30000,20000,55000];
