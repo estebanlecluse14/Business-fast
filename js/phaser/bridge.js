@@ -75,7 +75,7 @@
   }
   makeBuilding(x,y,color,level=0){
    const compact=isCompact(),c=this.add.container(x,y-20),g=this.add.graphics();c.add(g);
-   const w=compact?18:27,d=compact?8:12,h=(compact?15:23)+(level||0)*(compact?8:12);
+   const w=compact?27:38,d=compact?11:16,h=(compact?23:32)+(level||0)*(compact?10:15);
    // cast shadow
    g.fillStyle(0x020617,.30);g.fillPoints([
     new Phaser.Geom.Point(-w/2+8,8),new Phaser.Geom.Point(w/2+15,8),
@@ -106,7 +106,7 @@
   }
   makeSpecialAsset(type,x,y,color){
    const compact=isCompact(),c=this.add.container(x,y-22),g=this.add.graphics();c.add(g);
-   const s=compact?.72:1;
+   const s=compact?1.02:1.28;
    g.fillStyle(0x020617,.28);g.fillEllipse(8*s,18*s,54*s,14*s);
    if(type==="bank"){
     g.fillStyle(0xe2e8f0,1);g.fillPoints([[-26,0],[0,-18],[26,0]].map(p=>new Phaser.Geom.Point(p[0]*s,p[1]*s)),true);
@@ -144,21 +144,24 @@
     const [x,y]=ROUTE[i%ROUTE.length],owner=space.owner;
     const color=owner!==null&&owner!==undefined?hex(space.ownerColor):specialColor(space.type,space.themeColor);
     const compact=isCompact(),g=this.add.graphics();this.dynamic.add(g);
-    const tw=compact?42:58,th=compact?25:32,depth=compact?5:8;
-    // tile thickness + top plate
-    g.fillStyle(0x07111c,.72);g.fillRoundedRect(x-tw/2+4,y-th/2+depth,tw,th,compact?7:9);
-    g.fillStyle(owner!==null&&owner!==undefined?color:0xf8fafc,1);g.fillRoundedRect(x-tw/2,y-th/2,tw,th,compact?7:9);
-    g.lineStyle(owner!==null&&owner!==undefined?4:3,color,1);g.strokeRoundedRect(x-tw/2,y-th/2,tw,th,compact?7:9);
-    // top highlight / bottom shade reinforces elevation
-    g.lineStyle(2,0xffffff,.28);g.beginPath();g.moveTo(x-tw/2+7,y-th/2+3);g.lineTo(x+tw/2-7,y-th/2+3);g.strokePath();
+    const tw=compact?38:50,th=compact?15:20,depth=compact?4:6;
+    // subdued land plot: buildings and city names are now the visual priority
+    g.fillStyle(0x020617,.40);g.fillEllipse(x+4,y+depth+5,tw+8,th+7);
+    g.fillStyle(owner!==null&&owner!==undefined?color:0x94a3b8,.30);g.fillRoundedRect(x-tw/2,y-th/2,tw,th,6);
+    g.lineStyle(owner!==null&&owner!==undefined?3:2,color,.82);g.strokeRoundedRect(x-tw/2,y-th/2,tw,th,6);
     if(space.type==="property")this.dynamic.add(this.makeBuilding(x,y,color,space.level||0));
     const special=this.makeSpecialAsset(space.type,x,y,color);if(special)this.dynamic.add(special);
     const mark=icon(space.type);
     if(mark)this.dynamic.add(this.add.text(x,y,mark,{fontFamily:"Arial",fontSize:compact?"13px":"17px",fontStyle:"bold",color:space.type==="property"?"#0f172a":"#0f172a"}).setOrigin(.5));
-    // labels are deliberately sparse to keep the board readable
-    const important=["start","bank","jail","airport"].includes(space.type);
-    if((compact&&important)||(!compact&&(space.type!=="property"||i%4===1))){
-      const label=this.add.text(x,y+25,space.name,{fontFamily:"Arial",fontSize:compact?"9px":"11px",fontStyle:"bold",color:"#f8fafc",backgroundColor:"#071525",padding:{x:5,y:3}}).setOrigin(.5,0);
+    // Every property keeps its city name visible; secondary data stays out of the map.
+    const isCity=space.type==="property",important=["start","bank","jail","airport","beach"].includes(space.type);
+    if(isCity||important){
+      const ly=y+(isCity?(compact?18:24):(compact?31:39));
+      const label=this.add.text(x,ly,space.name.toUpperCase(),{
+       fontFamily:"Arial",fontSize:isCity?(compact?"10px":"13px"):(compact?"10px":"12px"),
+       fontStyle:"bold",color:"#ffffff",backgroundColor:"#071525",
+       padding:{x:compact?5:7,y:compact?3:4},align:"center"
+      }).setOrigin(.5,0).setDepth(y+2000);
       this.dynamic.add(label);
     }
    });
