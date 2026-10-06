@@ -104,6 +104,37 @@
    if(level>=3){g.lineStyle(2,0xbcecff,.8);g.beginPath();g.moveTo(w/2+d,-h);g.lineTo(w/2+d+7,-h-7);g.strokePath()}
    return c;
   }
+  makeSpecialAsset(type,x,y,color){
+   const compact=isCompact(),c=this.add.container(x,y-22),g=this.add.graphics();c.add(g);
+   const s=compact?.72:1;
+   g.fillStyle(0x020617,.28);g.fillEllipse(8*s,18*s,54*s,14*s);
+   if(type==="bank"){
+    g.fillStyle(0xe2e8f0,1);g.fillPoints([[-26,0],[0,-18],[26,0]].map(p=>new Phaser.Geom.Point(p[0]*s,p[1]*s)),true);
+    g.fillStyle(0x94a3b8,1);g.fillRect(-23*s,0,46*s,7*s);
+    [-14,0,14].forEach(px=>{g.fillStyle(0xf8fafc,1);g.fillRect((px-4)*s,7*s,8*s,24*s)});
+    g.fillStyle(0x38bdf8,1);g.fillRect(-27*s,31*s,54*s,7*s);
+    c.add(this.add.text(0,11*s,"€",{fontFamily:"Arial",fontSize:(compact?13:17)+"px",fontStyle:"bold",color:"#0f172a"}).setOrigin(.5));
+   }else if(type==="jail"){
+    g.fillStyle(0x475569,1);g.fillRoundedRect(-25*s,-8*s,50*s,42*s,5*s);
+    g.fillStyle(0x0f172a,1);[-14,0,14].forEach(px=>g.fillRect((px-3)*s,-2*s,6*s,27*s));
+    g.fillStyle(0xa78bfa,1);g.fillRect(-28*s,29*s,56*s,7*s);
+    g.fillStyle(0xef4444,.95);g.fillCircle(-8*s,-13*s,5*s);g.fillStyle(0x3b82f6,.95);g.fillCircle(8*s,-13*s,5*s);
+   }else if(type==="airport"){
+    g.fillStyle(0x334155,1);g.fillRoundedRect(-29*s,8*s,58*s,25*s,5*s);
+    g.fillStyle(0x0ea5e9,1);g.fillRect(-29*s,26*s,58*s,7*s);
+    g.lineStyle(6*s,0xe2e8f0,1);g.beginPath();g.moveTo(-20*s,3*s);g.lineTo(22*s,-13*s);g.strokePath();
+    g.fillStyle(0xe2e8f0,1);g.fillTriangle(22*s,-13*s,9*s,-15*s,17*s,-4*s);
+   }else if(type==="beach"){
+    g.fillStyle(0xf5d98b,1);g.fillEllipse(0,12*s,58*s,27*s);
+    g.fillStyle(0x22d3ee,.9);g.fillEllipse(10*s,20*s,48*s,12*s);
+    g.fillStyle(0xf43f5e,1);g.fillTriangle(-17*s,8*s,-5*s,-14*s,7*s,8*s);
+    g.lineStyle(2*s,0x7c4a21,1);g.beginPath();g.moveTo(-5*s,-13*s);g.lineTo(-5*s,22*s);g.strokePath();
+   }else if(type==="start"){
+    g.fillStyle(0x22c55e,1);g.fillRoundedRect(-26*s,-3*s,52*s,35*s,7*s);
+    c.add(this.add.text(0,14*s,"GO",{fontFamily:"Arial",fontSize:(compact?13:18)+"px",fontStyle:"bold",color:"#ffffff"}).setOrigin(.5));
+   }else return null;
+   c.setDepth(y+20);return c;
+  }
   renderSnapshot(){
    if(!this.dynamic)return;
    this.dynamic.removeAll(true);
@@ -120,7 +151,8 @@
     g.lineStyle(owner!==null&&owner!==undefined?4:3,color,1);g.strokeRoundedRect(x-tw/2,y-th/2,tw,th,compact?7:9);
     // top highlight / bottom shade reinforces elevation
     g.lineStyle(2,0xffffff,.28);g.beginPath();g.moveTo(x-tw/2+7,y-th/2+3);g.lineTo(x+tw/2-7,y-th/2+3);g.strokePath();
-    if(owner!==null&&owner!==undefined||space.type==="property")this.dynamic.add(this.makeBuilding(x,y,color,space.level||0));
+    if(space.type==="property")this.dynamic.add(this.makeBuilding(x,y,color,space.level||0));
+    const special=this.makeSpecialAsset(space.type,x,y,color);if(special)this.dynamic.add(special);
     const mark=icon(space.type);
     if(mark)this.dynamic.add(this.add.text(x,y,mark,{fontFamily:"Arial",fontSize:compact?"13px":"17px",fontStyle:"bold",color:space.type==="property"?"#0f172a":"#0f172a"}).setOrigin(.5));
     // labels are deliberately sparse to keep the board readable
