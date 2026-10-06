@@ -316,7 +316,7 @@ function scheduleAI(delay=420){
 const names=[
 'DÉPART','Paris','Lyon','Marseille','Événement','Nice','Plage Azur','Toulouse','Bordeaux','Banque',
 'Nantes','Lille','Événement mondial','Strasbourg','Montpellier','Plage Atlantique','Rennes','Reims','Prison','Le Havre',
-'Saint-Étienne','Toulon','Événement','Grenoble','Dijon','Plage Manche','Angers','Aéroport','Banque','Villeurbanne',
+'Saint-Étienne','Toulon','Événement','Grenoble','Dijon','Plage Manche','Angers','Aéroport','Rouen','Villeurbanne',
 'Clermont-Ferrand','Aix-en-Provence','Événement mondial','Brest','Plage Méditerranée','Caen'];
 const types=names.map((n,i)=> i===0?'start': n.includes('Plage')?'beach': n==='Prison'?'jail': n==='Aéroport'?'airport': n==='Banque'?'bank': n==='Événement'?'event': n==='Événement mondial'?'global':'property');
 const ECONOMY_VALUE_BOOST=1.15;
@@ -398,7 +398,7 @@ const wonderDistricts=[
  {name:'Quartier Luxe',label:'Luxe',emoji:'💎',color:'#e11d48',ids:[5,8,31]},
  {name:'Quartier Port',label:'Port',emoji:'⚓',color:'#0f766e',ids:[3,19,33]},
  {name:'Quartier Culture',label:'Culture',emoji:'🎭',color:'#c2410c',ids:[2,13,14]},
- {name:'Quartier Nature',label:'Nature',emoji:'🌿',color:'#15803d',ids:[10,16,30]},
+ {name:'Quartier Nature',label:'Nature',emoji:'🌿',color:'#15803d',ids:[10,16,28,30]},
  {name:'Quartier Business',label:'Business',emoji:'💼',color:'#0369a1',ids:[7,11,17]},
  {name:'Quartier Gourmet',label:'Gourmet',emoji:'🍷',color:'#7f1d1d',ids:[24,26]},
  {name:'Quartier Tourisme',label:'Tourisme',emoji:'📸',color:'#d97706',ids:[20,21,35]}
