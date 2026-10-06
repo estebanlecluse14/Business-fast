@@ -49,7 +49,10 @@
     city_2:"assets/phaser/city_2.png",city_3:"assets/phaser/city_3.png",
     bank:"assets/phaser/bank.png",jail:"assets/phaser/jail.png",
     airport:"assets/phaser/airport.png",beach:"assets/phaser/beach.png",
-    forest:"assets/phaser/forest.png",mountain:"assets/phaser/mountain.png"
+    forest:"assets/phaser/forest.png",mountain:"assets/phaser/mountain.png",
+    village:"assets/phaser/village.png",field:"assets/phaser/field.png",
+    lake:"assets/phaser/lake.png",lighthouse:"assets/phaser/lighthouse.png",
+    station:"assets/phaser/station.png",stadium:"assets/phaser/stadium.png"
    };
    this.spriteKeys=new Set();
    Object.entries(sprites).forEach(([key,url])=>{
@@ -92,6 +95,14 @@
    g.fillStyle(0x7a9a4d,.28);g.fillEllipse(610,250,230,105);g.fillEllipse(455,455,180,90);
    g.fillStyle(0xd0ad63,.22);
    [[470,365,95,38],[720,315,110,42],[565,500,90,34]].forEach(([x,y,w,h])=>g.fillEllipse(x,y,w,h));
+   // Sprite terrain layer: independent assets replace procedural scenery as they land.
+   const scenery=[
+    ["forest",455,270,.38],["forest",520,450,.34],["forest",735,305,.36],
+    ["mountain",815,255,.44],["mountain",850,295,.36],
+    ["village",500,390,.32],["village",700,455,.30],
+    ["field",535,315,.34],["field",690,390,.34],["lake",705,350,.34]
+   ];
+   scenery.forEach(([key,x,y,s])=>{const a=this.sprite(key,x,y,s);if(a){a.setDepth(y-100);this.world.add(a)}});
    // readable regional scenery: sparse enough to preserve city labels
    const tree=(x,y,s=1)=>{g.fillStyle(0x102a20,.35);g.fillEllipse(x+6*s,y+8*s,20*s,8*s);g.fillStyle(0x173d2b,1);g.fillTriangle(x-10*s,y+7*s,x,y-18*s,x+10*s,y+7*s);g.fillStyle(0x245c3b,1);g.fillTriangle(x-8*s,y,x,y-24*s,x+8*s,y)};
    [[430,250,.8],[470,280,1],[560,450,.9],[720,300,.8],[760,430,1],[650,250,.7]].forEach(p=>tree(...p));
@@ -232,6 +243,15 @@
        fontFamily:"Arial",fontSize:"10px",fontStyle:"bold",color:"#ffffff",stroke:"#06101b",strokeThickness:3
       }).setOrigin(.5,.5).setDepth(y+2100);
       this.dynamic.add(title);this.dynamic.add(ptxt);
+      if(owner!==null&&owner!==undefined){
+       const og=this.add.graphics().setDepth(y+2090);
+       og.fillStyle(hex(space.ownerColor),1);og.fillCircle(x-tw/2+9,y-th/2+9,5);
+       this.dynamic.add(og);
+      }
+      if(level>0){
+       const badge=this.add.text(x+tw/2-8,y-th/2+8,"N"+level,{fontFamily:"Arial",fontSize:"8px",fontStyle:"bold",color:"#ffffff",backgroundColor:"#071525",padding:{x:3,y:2}}).setOrigin(.5).setDepth(y+2110);
+       this.dynamic.add(badge);
+      }
     }
     if(space.type==="beach"){
       const price=Number(space.price||0);
