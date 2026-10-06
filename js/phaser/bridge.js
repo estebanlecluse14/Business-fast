@@ -5,12 +5,24 @@
  const state={enabled:false,game:null,scene:null,snapshot:null,revision:0};
  const isCompact=()=>window.innerWidth<760;
  const W=1280,H=720;
- const ROUTE=[
-  [380,92],[458,74],[540,66],[624,64],[708,70],[790,82],[868,104],[938,136],[998,178],
-  [1044,230],[1074,288],[1088,350],[1084,414],[1062,476],[1024,532],[972,578],[910,612],
-  [842,636],[770,650],[696,656],[620,654],[546,646],[474,630],[406,604],[346,570],[294,526],
-  [254,474],[226,416],[212,354],[216,292],[234,234],[266,184],[310,144],[344,116],[362,104]
+ const ROUTE_ANCHORS=[
+  [380,92],[540,66],[708,70],[868,104],[998,178],[1074,288],[1084,414],[1024,532],[910,612],
+  [770,650],[620,654],[474,630],[346,570],[254,474],[212,354],[234,234],[310,144]
  ];
+ function buildEvenRoute(points,count){
+  const seg=[],cum=[0];let total=0;
+  for(let i=0;i<points.length;i++){
+   const a=points[i],b=points[(i+1)%points.length],d=Math.hypot(b[0]-a[0],b[1]-a[1]);
+   seg.push(d);total+=d;cum.push(total);
+  }
+  return Array.from({length:count},(_,n)=>{
+   const target=total*n/count;
+   let i=0;while(i<seg.length-1&&cum[i+1]<target)i++;
+   const a=points[i],b=points[(i+1)%points.length],t=(target-cum[i])/seg[i];
+   return [a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t];
+  });
+ }
+ const ROUTE=buildEvenRoute(ROUTE_ANCHORS,36);
  const FRANCE=[
   [500,74],[566,88],[620,72],[684,98],[748,92],[820,132],[858,184],[922,216],[940,286],
   [918,340],[934,402],[890,450],[860,520],[792,548],[742,610],[674,620],[624,660],[558,628],
