@@ -4,6 +4,7 @@
  if(typeof window==="undefined")return;
  const state={enabled:false,game:null,scene:null,snapshot:null,revision:0};
  const isCompact=()=>window.innerWidth<760;
+ const ISO_SKEW=.28, ISO_LIFT=16;
  const W=1280,H=720;
  const ROUTE_ANCHORS=[
   [380,92],[540,66],[708,70],[868,104],[998,178],[1074,288],[1084,414],[1024,532],[910,612],
@@ -51,11 +52,16 @@
    for(let y=70;y<700;y+=42){g.beginPath();g.moveTo(70,y);g.lineTo(1210,y+12);g.strokePath()}
    // France shadow + land mass
    g.fillStyle(0x020617,.34);g.fillPoints(FRANCE.map(([x,y])=>new Phaser.Geom.Point(x+13,y+18)),true);
+   // extruded land edge: first visible depth, then top surface
+   g.fillStyle(0x102d23,1);g.fillPoints(FRANCE.map(([x,y])=>new Phaser.Geom.Point(x,y+ISO_LIFT)),true);
+   g.lineStyle(4,0x0a2019,.9);g.strokePoints(FRANCE.map(([x,y])=>new Phaser.Geom.Point(x,y+ISO_LIFT)),true);
    g.fillStyle(0x244d36,1);g.fillPoints(FRANCE.map(([x,y])=>new Phaser.Geom.Point(x,y)),true);
    g.lineStyle(5,0x78a879,.8);g.strokePoints(FRANCE.map(([x,y])=>new Phaser.Geom.Point(x,y)),true);
    // simple terrain patches
    g.fillStyle(0x315f3f,.75);g.fillEllipse(520,300,330,230);g.fillEllipse(690,390,300,230);
    g.fillStyle(0x465d45,.55);g.fillTriangle(770,185,808,122,846,190);g.fillTriangle(804,205,846,142,884,214);
+   // raised route: dark lower edge creates a readable 2.5D slab
+   g.lineStyle(32,0x050b12,.65);g.strokePoints(ROUTE.map(([x,y])=>new Phaser.Geom.Point(x+7,y+11)),true);
    // route
    g.lineStyle(28,0x111827,.72);g.strokePoints(ROUTE.map(p=>new Phaser.Geom.Point(...p)),true);
    g.lineStyle(18,0xd7dee7,1);g.strokePoints(ROUTE.map(p=>new Phaser.Geom.Point(...p)),true);
@@ -65,12 +71,31 @@
    this.add.text(606,332,"BUSINESS\nFAST",{fontFamily:"Arial",fontSize:"36px",fontStyle:"bold",align:"center",color:"#ffffff",stroke:"#071525",strokeThickness:8}).setOrigin(.5).setAlpha(.16);
   }
   makeBuilding(x,y,color,level=0){
-   const c=this.add.container(x,y-25),g=this.add.graphics();c.add(g);
-   const compact=isCompact(),floors=level+1,h=(compact?8:12)+floors*(compact?5:7);
-   g.fillStyle(0x0b1220,.25);g.fillEllipse(0,compact?14:22,compact?24:36,compact?8:12);
-   g.fillStyle(color,.92);g.fillRoundedRect(compact?-9:-13,-h,compact?18:26,h,4);
-   g.fillStyle(0xffffff,.28);g.fillRect(compact?-6:-8,-h+5,compact?3:5,compact?3:5);g.fillRect(compact?2:3,-h+5,compact?3:5,compact?3:5);
-   if(level>0){g.fillStyle(0xf8fafc,.88);g.fillTriangle(-10,-h,-1,-h-10,8,-h)}
+   const compact=isCompact(),c=this.add.container(x,y-20),g=this.add.graphics();c.add(g);
+   const w=compact?18:27,d=compact?8:12,h=(compact?13:20)+(level||0)*(compact?5:8);
+   // cast shadow
+   g.fillStyle(0x020617,.30);g.fillPoints([
+    new Phaser.Geom.Point(-w/2+8,8),new Phaser.Geom.Point(w/2+15,8),
+    new Phaser.Geom.Point(w/2+25,16),new Phaser.Geom.Point(-w/2+14,16)
+   ],true);
+   // front face
+   g.fillStyle(color,.94);g.fillPoints([
+    new Phaser.Geom.Point(-w/2,-h),new Phaser.Geom.Point(w/2,-h+d),
+    new Phaser.Geom.Point(w/2,d),new Phaser.Geom.Point(-w/2,0)
+   ],true);
+   // darker side face
+   g.fillStyle(0x0b1724,.48);g.fillPoints([
+    new Phaser.Geom.Point(w/2,-h+d),new Phaser.Geom.Point(w/2+d,-h),
+    new Phaser.Geom.Point(w/2+d,0),new Phaser.Geom.Point(w/2,d)
+   ],true);
+   // bright roof
+   g.fillStyle(0xe8f2f5,.95);g.fillPoints([
+    new Phaser.Geom.Point(-w/2,-h),new Phaser.Geom.Point(-w/2+d,-h-d),
+    new Phaser.Geom.Point(w/2+d,-h),new Phaser.Geom.Point(w/2,-h+d)
+   ],true);
+   // windows on the front plane
+   g.fillStyle(0xbcecff,.72);
+   for(let yy=-h+8;yy<-3;yy+=8){g.fillRect(-w/2+4,yy,4,3);if(w>20)g.fillRect(2,yy+2,4,3)}
    return c;
   }
   renderSnapshot(){
@@ -81,10 +106,13 @@
     const [x,y]=ROUTE[i%ROUTE.length],owner=space.owner;
     const color=owner!==null&&owner!==undefined?hex(space.ownerColor):specialColor(space.type,space.themeColor);
     const compact=isCompact(),g=this.add.graphics();this.dynamic.add(g);
-    g.fillStyle(0x020617,.34);const tw=compact?42:58,th=compact?28:36;
-    g.fillRoundedRect(x-tw/2,y-th/2+5,tw,th,compact?7:9);
+    const tw=compact?42:58,th=compact?25:32,depth=compact?5:8;
+    // tile thickness + top plate
+    g.fillStyle(0x07111c,.72);g.fillRoundedRect(x-tw/2+4,y-th/2+depth,tw,th,compact?7:9);
     g.fillStyle(owner!==null&&owner!==undefined?color:0xf8fafc,1);g.fillRoundedRect(x-tw/2,y-th/2,tw,th,compact?7:9);
     g.lineStyle(owner!==null&&owner!==undefined?4:3,color,1);g.strokeRoundedRect(x-tw/2,y-th/2,tw,th,compact?7:9);
+    // top highlight / bottom shade reinforces elevation
+    g.lineStyle(2,0xffffff,.28);g.beginPath();g.moveTo(x-tw/2+7,y-th/2+3);g.lineTo(x+tw/2-7,y-th/2+3);g.strokePath();
     if(owner!==null&&owner!==undefined||space.type==="property")this.dynamic.add(this.makeBuilding(x,y,color,space.level||0));
     const mark=icon(space.type);
     if(mark)this.dynamic.add(this.add.text(x,y,mark,{fontFamily:"Arial",fontSize:compact?"13px":"17px",fontStyle:"bold",color:space.type==="property"?"#0f172a":"#0f172a"}).setOrigin(.5));
