@@ -8295,3 +8295,16 @@ html.phaser-france .phaser-mount canvas{width:100%!important;height:100%!importa
 @media(max-width:1180px){
  html.phaser-france .phaser-mount{width:1040px}
 }
+
+@media(max-width:760px){
+ html.phaser-france .board-stage{padding:14px 0 72px;overflow:hidden}
+ html.phaser-france .phaser-mount{
+   width:100vw;
+   min-width:0;
+   aspect-ratio:16/9;
+   border-width:2px;
+   border-radius:0;
+   box-shadow:0 18px 35px rgba(0,0,0,.45);
+ }
+ html.phaser-france .board{display:none}
+}
