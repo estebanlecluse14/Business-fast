@@ -617,7 +617,10 @@ function syncPhaserBoard(){
    spaces:spaces.map(s=>({
      id:s.id,name:s.name,type:s.type,owner:s.owner,level:s.level||0,
      ownerColor:s.owner!==null?colors[s.owner]:null,
-     themeColor:s.theme?.color||'#64748b'
+     themeColor:s.theme?.color||'#64748b',
+     price:['property','beach'].includes(s.type)?purchasePrice(s):0,
+     rent:['property','beach'].includes(s.type)?currentRent(s):0,
+     value:['property','beach'].includes(s.type)?parcelValue(s):0
    })),
    players:players.map((p,i)=>({
      index:i,name:p.name,pos:p.pos||0,active:!!p.active,money:p.money,
