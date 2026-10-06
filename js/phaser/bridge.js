@@ -178,20 +178,35 @@
     const routePrev=ROUTE[(i+35)%36],routeNext=ROUTE[(i+1)%36];
     const color=owner!==null&&owner!==undefined?hex(space.ownerColor):specialColor(space.type,space.themeColor);
     const compact=isCompact(),g=this.add.graphics();this.dynamic.add(g);
-    const tw=compact?38:50,th=compact?15:20,depth=compact?4:6;
-    // subdued land plot: buildings and city names are now the visual priority
-    g.fillStyle(0x020617,.40);g.fillEllipse(x+4,y+depth+5,tw+8,th+7);
-    g.fillStyle(owner!==null&&owner!==undefined?color:0x94a3b8,.30);g.fillRoundedRect(x-tw/2,y-th/2,tw,th,6);
-    g.lineStyle(owner!==null&&owner!==undefined?3:2,color,.82);g.strokeRoundedRect(x-tw/2,y-th/2,tw,th,6);
+    // PC property card: chunky 2.5D tile inspired by a physical board-game deed space.
+    const isProp=space.type==="property",tw=isProp?82:58,th=isProp?48:34,depth=isProp?10:7;
+    const tileColor=isProp?(space.themeColor?hex(space.themeColor):color):color;
+    g.fillStyle(0x020617,.38);g.fillEllipse(x+7,y+depth+13,tw+20,18);
+    // dark extruded side
+    g.fillStyle(0x07111c,.96);g.fillRoundedRect(x-tw/2+5,y-th/2+depth,tw,th,9);
+    // coloured top face
+    g.fillStyle(isProp?tileColor:0xf1f5f9,1);g.fillRoundedRect(x-tw/2,y-th/2,tw,th,9);
+    g.lineStyle(3,isProp?0xffffff:tileColor,.34);g.strokeRoundedRect(x-tw/2,y-th/2,tw,th,9);
+    g.lineStyle(2,0xffffff,.30);g.beginPath();g.moveTo(x-tw/2+9,y-th/2+5);g.lineTo(x+tw/2-9,y-th/2+5);g.strokePath();
     if(space.type==="property"){
-      const b=this.makeBuilding(x,y,color,space.level||0,i);b.setDepth(y+50);this.dynamic.add(b);
+      const b=this.makeBuilding(x,y-18,color,space.level||0,i);b.setDepth(y+50);this.dynamic.add(b);
+      const price=Number(space.price||space.cost||space.value||0);
+      const title=this.add.text(x,y-4,space.name.toUpperCase(),{
+       fontFamily:"Arial",fontSize:"11px",fontStyle:"bold",color:"#ffffff",
+       align:"center",wordWrap:{width:74}
+      }).setOrigin(.5,.5).setDepth(y+2100);
+      const priceTxt=price?price.toLocaleString("fr-FR")+" €":"";
+      const ptxt=this.add.text(x,y+13,priceTxt,{
+       fontFamily:"Arial",fontSize:"9px",fontStyle:"bold",color:"#f8fafc"
+      }).setOrigin(.5,.5).setDepth(y+2100);
+      this.dynamic.add(title);this.dynamic.add(ptxt);
     }
     const special=this.makeSpecialAsset(space.type,x,y,color);if(special){special.setDepth(y+80);this.dynamic.add(special);}
     const mark=icon(space.type);
     if(mark)this.dynamic.add(this.add.text(x,y,mark,{fontFamily:"Arial",fontSize:compact?"13px":"17px",fontStyle:"bold",color:space.type==="property"?"#0f172a":"#0f172a"}).setOrigin(.5));
     // Every property keeps its city name visible; secondary data stays out of the map.
     const isCity=space.type==="property",important=["start","bank","jail","airport","beach"].includes(space.type);
-    if(isCity||important){
+    if((!isCity)&&important){
       // Put labels toward the inside of the loop so edge labels are never clipped.
       const cx=640,cy=360,dx=cx-x,dy=cy-y,len=Math.max(1,Math.hypot(dx,dy));
       const inwardX=dx/len,inwardY=dy/len;
