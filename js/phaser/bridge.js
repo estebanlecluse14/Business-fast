@@ -78,37 +78,56 @@
    this.add.text(606,332,"BUSINESS\nFAST",{fontFamily:"Arial",fontSize:"36px",fontStyle:"bold",align:"center",color:"#ffffff",stroke:"#071525",strokeThickness:8}).setOrigin(.5).setAlpha(.16);
   }
   makeBuilding(x,y,color,level=0,variant=0){
-   const compact=isCompact(),c=this.add.container(x,y-20),g=this.add.graphics();c.add(g);
-   const w=compact?27:38,d=compact?11:16,h=(compact?23:32)+(level||0)*(compact?10:15);
-   // cast shadow
-   g.fillStyle(0x020617,.30);g.fillPoints([
-    new Phaser.Geom.Point(-w/2+8,8),new Phaser.Geom.Point(w/2+15,8),
-    new Phaser.Geom.Point(w/2+25,16),new Phaser.Geom.Point(-w/2+14,16)
-   ],true);
-   // front face
-   g.fillStyle(color,.94);g.fillPoints([
+   const c=this.add.container(x,y-22),g=this.add.graphics();c.add(g);
+   const lvl=Math.max(0,Math.min(3,level||0)),kind=variant%4;
+   const w=42+lvl*5,d=15+lvl*2,h=34+lvl*19;
+   // long soft shadow anchors every city to the board
+   g.fillStyle(0x020617,.34);g.fillEllipse(10,13,w+30,15);
+   // podium appears from level 1
+   if(lvl>0){g.fillStyle(0x172033,.92);g.fillPoints([
+    new Phaser.Geom.Point(-w/2-5,2),new Phaser.Geom.Point(w/2+8,8),
+    new Phaser.Geom.Point(w/2+17,16),new Phaser.Geom.Point(-w/2+3,10)
+   ],true)}
+   // main front / side
+   g.fillStyle(color,.96);g.fillPoints([
     new Phaser.Geom.Point(-w/2,-h),new Phaser.Geom.Point(w/2,-h+d),
     new Phaser.Geom.Point(w/2,d),new Phaser.Geom.Point(-w/2,0)
    ],true);
-   // darker side face
-   g.fillStyle(0x0b1724,.48);g.fillPoints([
+   g.fillStyle(0x08111f,.42);g.fillPoints([
     new Phaser.Geom.Point(w/2,-h+d),new Phaser.Geom.Point(w/2+d,-h),
     new Phaser.Geom.Point(w/2+d,0),new Phaser.Geom.Point(w/2,d)
    ],true);
-   // bright roof
-   g.fillStyle(0xe8f2f5,.95);g.fillPoints([
-    new Phaser.Geom.Point(-w/2,-h),new Phaser.Geom.Point(-w/2+d,-h-d),
-    new Phaser.Geom.Point(w/2+d,-h),new Phaser.Geom.Point(w/2,-h+d)
-   ],true);
-   // windows on the front plane
-   g.fillStyle(0xbcecff,.72);
-   for(let yy=-h+8;yy<-3;yy+=8){g.fillRect(-w/2+4,yy,4,3);if(w>20)g.fillRect(2,yy+2,4,3)}
-   // Distinct silhouettes make neighbouring cities easier to identify.
-   if(variant%3===1){g.fillStyle(0xcbd5e1,.95);g.fillTriangle(-w/2,-h,-w/2+d/2,-h-d-9,w/2+d,-h)}
-   if(variant%3===2){g.fillStyle(0x0f172a,.65);g.fillRect(-w/2+3,-h-5,w-4,5)}
-   // rooftop accent grows with property level
-   if(level>=2){g.fillStyle(0xf8fafc,.9);g.fillRect(-2,-h-d-5,4,6)}
-   if(level>=3){g.lineStyle(2,0xbcecff,.8);g.beginPath();g.moveTo(w/2+d,-h);g.lineTo(w/2+d+7,-h-7);g.strokePath()}
+   // roof family: residential, office, tower, landmark
+   if(kind===0){
+    g.fillStyle(0xeaf2f5,1);g.fillPoints([
+     new Phaser.Geom.Point(-w/2,-h),new Phaser.Geom.Point(-4,-h-d-10),
+     new Phaser.Geom.Point(w/2+d,-h),new Phaser.Geom.Point(w/2,-h+d)
+    ],true);
+   }else if(kind===1){
+    g.fillStyle(0xdbeafe,1);g.fillPoints([
+     new Phaser.Geom.Point(-w/2,-h),new Phaser.Geom.Point(-w/2+d,-h-d),
+     new Phaser.Geom.Point(w/2+d,-h),new Phaser.Geom.Point(w/2,-h+d)
+    ],true);
+    g.fillStyle(0x0f172a,.55);g.fillRect(-w/2+4,-h-6,w-5,6);
+   }else if(kind===2){
+    g.fillStyle(0xcbd5e1,1);g.fillTriangle(-w/2,-h,2,-h-d-13,w/2+d,-h);
+   }else{
+    g.fillStyle(0xf8fafc,1);g.fillPoints([
+     new Phaser.Geom.Point(-w/2,-h),new Phaser.Geom.Point(0,-h-d-8),
+     new Phaser.Geom.Point(w/2+d,-h),new Phaser.Geom.Point(w/2,-h+d)
+    ],true);
+    if(lvl>=2){g.fillStyle(0x38bdf8,.9);g.fillRect(-4,-h-d-17,8,12)}
+   }
+   // window grid scales with development level
+   const rows=2+lvl*2;g.fillStyle(0xc9f1ff,.82);
+   for(let r=0;r<rows;r++){
+    const yy=-h+9+r*9;if(yy>-3)break;
+    for(let xx=-w/2+6;xx<w/2-3;xx+=11)g.fillRect(xx,yy,5,4);
+   }
+   // visible progression markers
+   if(lvl>=1){g.fillStyle(0x22c55e,.9);g.fillRect(-w/2-4,1,9,5)}
+   if(lvl>=2){g.fillStyle(0xf8fafc,.95);g.fillRect(-2,-h-d-7,4,8)}
+   if(lvl>=3){g.lineStyle(2,0x7dd3fc,.95);g.beginPath();g.moveTo(0,-h-d-8);g.lineTo(0,-h-d-27);g.strokePath();g.fillStyle(0xfbbf24,1);g.fillCircle(0,-h-d-29,3)}
    return c;
   }
   makeSpecialAsset(type,x,y,color){
