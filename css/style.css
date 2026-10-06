@@ -8360,3 +8360,47 @@ html.phaser-france .phaser-mount canvas{width:100%!important;height:100%!importa
  }
  html.phaser-france .sidebar .utility-panel{margin-bottom:28px!important}
 }
+
+
+/* === PHASER PC FULL VIEWPORT — authoritative desktop override === */
+@media(min-width:761px){
+ html.phaser-france,
+ html.phaser-france body,
+ html.phaser-france #gameScreen,
+ html.phaser-france #gameScreen .board-wrap,
+ html.phaser-france #gameScreen .board-stage{
+   width:100%!important;
+   max-width:none!important;
+   min-width:0!important;
+   height:100%!important;
+   min-height:100vh!important;
+   margin:0!important;
+   padding:0!important;
+ }
+ html.phaser-france #gameScreen .board-stage{
+   position:fixed!important;
+   inset:0!important;
+   display:block!important;
+   overflow:hidden!important;
+ }
+ html.phaser-france .phaser-mount{
+   position:absolute!important;
+   inset:0!important;
+   width:100vw!important;
+   height:100vh!important;
+   max-width:none!important;
+   min-width:0!important;
+   margin:0!important;
+   border:0!important;
+   border-radius:0!important;
+   box-shadow:none!important;
+ }
+ html.phaser-france .phaser-mount canvas{
+   display:block!important;
+   width:100vw!important;
+   height:100vh!important;
+ }
+ html.phaser-france .sidebar{pointer-events:none!important}
+ html.phaser-france .sidebar > *,
+ html.phaser-france #devToggle{pointer-events:auto!important}
+}
