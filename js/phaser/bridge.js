@@ -3,6 +3,7 @@
 (function(){
  if(typeof window==="undefined")return;
  const state={enabled:false,game:null,scene:null,snapshot:null,revision:0};
+ const isCompact=()=>window.innerWidth<760;
  const W=1280,H=720;
  const ROUTE=[
   [382,92],[468,72],[558,66],[650,70],[742,76],[832,94],[918,126],[992,170],[1048,226],
@@ -53,10 +54,10 @@
   }
   makeBuilding(x,y,color,level=0){
    const c=this.add.container(x,y-25),g=this.add.graphics();c.add(g);
-   const floors=level+1,h=12+floors*7;
-   g.fillStyle(0x0b1220,.25);g.fillEllipse(0,22,36,12);
-   g.fillStyle(color,.92);g.fillRoundedRect(-13,-h,26,h,4);
-   g.fillStyle(0xffffff,.28);g.fillRect(-8,-h+5,5,5);g.fillRect(3,-h+5,5,5);
+   const compact=isCompact(),floors=level+1,h=(compact?8:12)+floors*(compact?5:7);
+   g.fillStyle(0x0b1220,.25);g.fillEllipse(0,compact?14:22,compact?24:36,compact?8:12);
+   g.fillStyle(color,.92);g.fillRoundedRect(compact?-9:-13,-h,compact?18:26,h,4);
+   g.fillStyle(0xffffff,.28);g.fillRect(compact?-6:-8,-h+5,compact?3:5,compact?3:5);g.fillRect(compact?2:3,-h+5,compact?3:5,compact?3:5);
    if(level>0){g.fillStyle(0xf8fafc,.88);g.fillTriangle(-10,-h,-1,-h-10,8,-h)}
    return c;
   }
@@ -67,16 +68,18 @@
    s.spaces.forEach((space,i)=>{
     const [x,y]=ROUTE[i%ROUTE.length],owner=space.owner;
     const color=owner!==null&&owner!==undefined?hex(space.ownerColor):specialColor(space.type,space.themeColor);
-    const g=this.add.graphics();this.dynamic.add(g);
-    g.fillStyle(0x020617,.34);g.fillRoundedRect(x-29,y-18+7,58,36,9);
-    g.fillStyle(owner!==null&&owner!==undefined?color:0xf8fafc,1);g.fillRoundedRect(x-29,y-18,58,36,9);
-    g.lineStyle(owner!==null&&owner!==undefined?4:3,color,1);g.strokeRoundedRect(x-29,y-18,58,36,9);
+    const compact=isCompact(),g=this.add.graphics();this.dynamic.add(g);
+    g.fillStyle(0x020617,.34);const tw=compact?42:58,th=compact?28:36;
+    g.fillRoundedRect(x-tw/2,y-th/2+5,tw,th,compact?7:9);
+    g.fillStyle(owner!==null&&owner!==undefined?color:0xf8fafc,1);g.fillRoundedRect(x-tw/2,y-th/2,tw,th,compact?7:9);
+    g.lineStyle(owner!==null&&owner!==undefined?4:3,color,1);g.strokeRoundedRect(x-tw/2,y-th/2,tw,th,compact?7:9);
     if(owner!==null&&owner!==undefined||space.type==="property")this.dynamic.add(this.makeBuilding(x,y,color,space.level||0));
     const mark=icon(space.type);
-    if(mark)this.dynamic.add(this.add.text(x,y,mark,{fontFamily:"Arial",fontSize:"17px",fontStyle:"bold",color:space.type==="property"?"#0f172a":"#0f172a"}).setOrigin(.5));
+    if(mark)this.dynamic.add(this.add.text(x,y,mark,{fontFamily:"Arial",fontSize:compact?"13px":"17px",fontStyle:"bold",color:space.type==="property"?"#0f172a":"#0f172a"}).setOrigin(.5));
     // labels are deliberately sparse to keep the board readable
-    if(space.type!=="property"||i%4===1){
-      const label=this.add.text(x,y+25,space.name,{fontFamily:"Arial",fontSize:"11px",fontStyle:"bold",color:"#f8fafc",backgroundColor:"#071525",padding:{x:5,y:3}}).setOrigin(.5,0);
+    const important=["start","bank","jail","airport"].includes(space.type);
+    if((compact&&important)||(!compact&&(space.type!=="property"||i%4===1))){
+      const label=this.add.text(x,y+25,space.name,{fontFamily:"Arial",fontSize:compact?"9px":"11px",fontStyle:"bold",color:"#f8fafc",backgroundColor:"#071525",padding:{x:5,y:3}}).setOrigin(.5,0);
       this.dynamic.add(label);
     }
    });
