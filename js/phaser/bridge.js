@@ -142,6 +142,7 @@
    [...s.spaces].sort((a,b)=>ROUTE[a.id][1]-ROUTE[b.id][1]).forEach((space)=>{
     const i=space.id;
     const [x,y]=ROUTE[i%ROUTE.length],owner=space.owner;
+    const routePrev=ROUTE[(i+35)%36],routeNext=ROUTE[(i+1)%36];
     const color=owner!==null&&owner!==undefined?hex(space.ownerColor):specialColor(space.type,space.themeColor);
     const compact=isCompact(),g=this.add.graphics();this.dynamic.add(g);
     const tw=compact?38:50,th=compact?15:20,depth=compact?4:6;
@@ -149,8 +150,10 @@
     g.fillStyle(0x020617,.40);g.fillEllipse(x+4,y+depth+5,tw+8,th+7);
     g.fillStyle(owner!==null&&owner!==undefined?color:0x94a3b8,.30);g.fillRoundedRect(x-tw/2,y-th/2,tw,th,6);
     g.lineStyle(owner!==null&&owner!==undefined?3:2,color,.82);g.strokeRoundedRect(x-tw/2,y-th/2,tw,th,6);
-    if(space.type==="property")this.dynamic.add(this.makeBuilding(x,y,color,space.level||0));
-    const special=this.makeSpecialAsset(space.type,x,y,color);if(special)this.dynamic.add(special);
+    if(space.type==="property"){
+      const b=this.makeBuilding(x,y,color,space.level||0);b.setDepth(y+50);this.dynamic.add(b);
+    }
+    const special=this.makeSpecialAsset(space.type,x,y,color);if(special){special.setDepth(y+80);this.dynamic.add(special);}
     const mark=icon(space.type);
     if(mark)this.dynamic.add(this.add.text(x,y,mark,{fontFamily:"Arial",fontSize:compact?"13px":"17px",fontStyle:"bold",color:space.type==="property"?"#0f172a":"#0f172a"}).setOrigin(.5));
     // Every property keeps its city name visible; secondary data stays out of the map.
