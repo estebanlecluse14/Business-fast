@@ -6,8 +6,8 @@
  const isCompact=()=>window.innerWidth<760;
  const ISO_SKEW=.28, ISO_LIFT=16;
  const isoPoint=([x,y])=>{
-  const compact=isCompact(),sx=compact?.96:1.12,sy=compact?.76:.86;
-  return [640+(x-640)*sx,360+(y-360)*sy+(x-640)*(compact?.055:.045)];
+  const compact=isCompact(),sx=compact?.96:1.02,sy=compact?.76:.82;
+  return [640+(x-640)*sx,360+(y-360)*sy+(x-640)*(compact?.055:.04)];
  };
  const W=1280,H=720;
  const ROUTE_ANCHORS=[
@@ -67,6 +67,11 @@
    // simple terrain patches
    g.fillStyle(0x315f3f,.75);g.fillEllipse(520,320,330,170);g.fillEllipse(690,390,300,170);
    g.fillStyle(0x465d45,.55);g.fillTriangle(770,185,808,122,846,190);g.fillTriangle(804,205,846,142,884,214);
+   // richer illustrated terrain, while keeping the centre gameplay-safe
+   g.fillStyle(0x3b6b3d,.48);g.fillEllipse(500,330,270,150);g.fillEllipse(710,420,310,170);
+   g.fillStyle(0x7a9a4d,.28);g.fillEllipse(610,250,230,105);g.fillEllipse(455,455,180,90);
+   g.fillStyle(0xd0ad63,.22);
+   [[470,365,95,38],[720,315,110,42],[565,500,90,34]].forEach(([x,y,w,h])=>g.fillEllipse(x,y,w,h));
    // readable regional scenery: sparse enough to preserve city labels
    const tree=(x,y,s=1)=>{g.fillStyle(0x102a20,.35);g.fillEllipse(x+6*s,y+8*s,20*s,8*s);g.fillStyle(0x173d2b,1);g.fillTriangle(x-10*s,y+7*s,x,y-18*s,x+10*s,y+7*s);g.fillStyle(0x245c3b,1);g.fillTriangle(x-8*s,y,x,y-24*s,x+8*s,y)};
    [[430,250,.8],[470,280,1],[560,450,.9],[720,300,.8],[760,430,1],[650,250,.7]].forEach(p=>tree(...p));
@@ -139,7 +144,7 @@
   }
   makeSpecialAsset(type,x,y,color){
    const compact=isCompact(),c=this.add.container(x,y-22),g=this.add.graphics();c.add(g);
-   const s=compact?1.02:1.28;
+   const s=compact?1.02:1.48;
    g.fillStyle(0x020617,.28);g.fillEllipse(8*s,18*s,54*s,14*s);
    if(type==="bank"){
     g.fillStyle(0xe2e8f0,1);g.fillPoints([[-26,0],[0,-18],[26,0]].map(p=>new Phaser.Geom.Point(p[0]*s,p[1]*s)),true);
