@@ -8316,3 +8316,47 @@ html.phaser-france .phaser-mount canvas{width:100%!important;height:100%!importa
  }
  html.phaser-france .board{display:none}
 }
+
+
+/* === PHASER DESKTOP LAYOUT FIX ===
+   Keep the map dominant; floating controls no longer reserve giant dead zones. */
+@media(min-width:1181px){
+ html.phaser-france #gameScreen .board-wrap{
+   padding:0!important;
+   width:100vw!important;
+   min-height:100vh!important;
+   overflow:hidden!important;
+ }
+ html.phaser-france .board-stage{
+   width:100vw!important;
+   min-height:100vh!important;
+   padding:10px 10px 22px!important;
+   align-items:center!important;
+   justify-content:center!important;
+ }
+ html.phaser-france .phaser-mount{
+   width:calc(100vw - 28px)!important;
+   height:calc(100vh - 34px)!important;
+   min-width:0!important;
+   max-width:none!important;
+   margin:0 auto!important;
+ }
+ html.phaser-france .sidebar .player-panel{
+   left:18px!important;top:18px!important;width:220px!important;
+ }
+ html.phaser-france .sidebar .utility-panel{
+   right:22px!important;top:76px!important;width:224px!important;
+ }
+ html.phaser-france .sidebar .action-panel{
+   right:22px!important;bottom:22px!important;width:292px!important;
+   max-height:52vh!important;
+ }
+ html.phaser-france #devToggle{
+   right:22px!important;top:18px!important;
+ }
+ html.phaser-france .sidebar .utility-panel,
+ html.phaser-france .sidebar .action-panel{
+   box-shadow:0 18px 45px rgba(2,8,23,.32)!important;
+ }
+ html.phaser-france .sidebar .utility-panel{margin-bottom:28px!important}
+}
