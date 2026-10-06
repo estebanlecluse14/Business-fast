@@ -8224,3 +8224,42 @@ html.phaser-ready .phaser-mount{opacity:1}
 .bank-cursor{position:absolute;top:3px;bottom:3px;width:4px;background:#fff;border-radius:4px;transform:translateX(-2px)}
 .bank-robbery-hint{font-size:12px;color:#475569;text-align:center;min-height:18px}
 @media(max-width:650px){.bank2-grid{grid-template-columns:1fr}.bank2-card{min-height:0}.bank-robbery-head{grid-template-columns:1fr}}
+
+/* V0.51.1 · Fix lisibilité modale propriété */
+.modal.modal-property .box,
+.modal.modal-property #modalTitle,
+.modal.modal-property #modalBody,
+.modal.modal-property .property-card,
+.modal.modal-property .property-card *{
+  color:#111827 !important;
+}
+.modal.modal-property .hero-title{
+  color:#0f172a !important;
+  font-weight:900;
+}
+.modal.modal-property .hero-sub,
+.modal.modal-property .modal-eyebrow,
+.modal.modal-property .property-stat .k,
+.modal.modal-property .upgrade-note,
+.modal.modal-property small{
+  color:#475569 !important;
+}
+.modal.modal-property .property-stat .v,
+.modal.modal-property .upgrade-box b,
+.modal.modal-property .property-market-status,
+.modal.modal-property .decision-balance strong{
+  color:#111827 !important;
+}
+.modal.modal-property .property-stat,
+.modal.modal-property .upgrade-box,
+.modal.modal-property .property-market-status,
+.modal.modal-property .hero{
+  background:#ffffff !important;
+}
+.modal.modal-property .level-dot{background:#cbd5e1}
+.modal.modal-property .level-dot.on{background:#334155}
+.modal.modal-property .row .primary{
+  background:#22c55e;
+  color:#111827 !important;
+  font-weight:800;
+}
