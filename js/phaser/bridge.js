@@ -5,6 +5,7 @@
  const state={enabled:false,game:null,scene:null,snapshot:null,revision:0};
  const isCompact=()=>window.innerWidth<760;
  const ISO_SKEW=.28, ISO_LIFT=16;
+ const isoPoint=([x,y])=>[640+(x-640)*.96,360+(y-360)*.76+(x-640)*.055];
  const W=1280,H=720;
  const ROUTE_ANCHORS=[
   [380,92],[540,66],[708,70],[868,104],[998,178],[1074,288],[1084,414],[1024,532],[910,612],
@@ -23,13 +24,14 @@
    return [a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t];
   });
  }
- const ROUTE=buildEvenRoute(ROUTE_ANCHORS,36);
- const FRANCE=[
+ const ROUTE=buildEvenRoute(ROUTE_ANCHORS,36).map(isoPoint);
+ const FRANCE_RAW=[
   [500,74],[566,88],[620,72],[684,98],[748,92],[820,132],[858,184],[922,216],[940,286],
   [918,340],[934,402],[890,450],[860,520],[792,548],[742,610],[674,620],[624,660],[558,628],
   [494,640],[446,594],[390,578],[358,520],[304,488],[300,420],[264,372],[286,310],[270,252],
   [322,210],[340,152],[406,136],[448,94]
  ];
+ const FRANCE=FRANCE_RAW.map(isoPoint);
  function hex(v,f=0x64748b){if(typeof v!=="string")return f;const h=v.replace("#","");return /^[0-9a-f]{6}$/i.test(h)?parseInt(h,16):f}
  function specialColor(type,theme){
   return {start:0x22c55e,event:0xf59e0b,global:0xef4444,bank:0x38bdf8,jail:0xa78bfa,airport:0x0ea5e9,beach:0x06b6d4}[type]||hex(theme,0x64748b);
@@ -40,6 +42,7 @@
   create(){
    state.scene=this;this.cameras.main.setBackgroundColor("#071525");
    this.world=this.add.container(0,0);
+   this.cameras.main.setZoom(isCompact()?1.03:1.0);
    this.drawBase();
    this.dynamic=this.add.container(0,0);
    this.renderSnapshot();
@@ -58,7 +61,7 @@
    g.fillStyle(0x244d36,1);g.fillPoints(FRANCE.map(([x,y])=>new Phaser.Geom.Point(x,y)),true);
    g.lineStyle(5,0x78a879,.8);g.strokePoints(FRANCE.map(([x,y])=>new Phaser.Geom.Point(x,y)),true);
    // simple terrain patches
-   g.fillStyle(0x315f3f,.75);g.fillEllipse(520,300,330,230);g.fillEllipse(690,390,300,230);
+   g.fillStyle(0x315f3f,.75);g.fillEllipse(520,320,330,170);g.fillEllipse(690,390,300,170);
    g.fillStyle(0x465d45,.55);g.fillTriangle(770,185,808,122,846,190);g.fillTriangle(804,205,846,142,884,214);
    // raised route: dark lower edge creates a readable 2.5D slab
    g.lineStyle(32,0x050b12,.65);g.strokePoints(ROUTE.map(([x,y])=>new Phaser.Geom.Point(x+7,y+11)),true);
@@ -72,7 +75,7 @@
   }
   makeBuilding(x,y,color,level=0){
    const compact=isCompact(),c=this.add.container(x,y-20),g=this.add.graphics();c.add(g);
-   const w=compact?18:27,d=compact?8:12,h=(compact?13:20)+(level||0)*(compact?5:8);
+   const w=compact?18:27,d=compact?8:12,h=(compact?15:23)+(level||0)*(compact?8:12);
    // cast shadow
    g.fillStyle(0x020617,.30);g.fillPoints([
     new Phaser.Geom.Point(-w/2+8,8),new Phaser.Geom.Point(w/2+15,8),
@@ -96,13 +99,17 @@
    // windows on the front plane
    g.fillStyle(0xbcecff,.72);
    for(let yy=-h+8;yy<-3;yy+=8){g.fillRect(-w/2+4,yy,4,3);if(w>20)g.fillRect(2,yy+2,4,3)}
+   // rooftop accent grows with property level
+   if(level>=2){g.fillStyle(0xf8fafc,.9);g.fillRect(-2,-h-d-5,4,6)}
+   if(level>=3){g.lineStyle(2,0xbcecff,.8);g.beginPath();g.moveTo(w/2+d,-h);g.lineTo(w/2+d+7,-h-7);g.strokePath()}
    return c;
   }
   renderSnapshot(){
    if(!this.dynamic)return;
    this.dynamic.removeAll(true);
    const s=state.snapshot;if(!s?.spaces)return;
-   s.spaces.forEach((space,i)=>{
+   [...s.spaces].sort((a,b)=>ROUTE[a.id][1]-ROUTE[b.id][1]).forEach((space)=>{
+    const i=space.id;
     const [x,y]=ROUTE[i%ROUTE.length],owner=space.owner;
     const color=owner!==null&&owner!==undefined?hex(space.ownerColor):specialColor(space.type,space.themeColor);
     const compact=isCompact(),g=this.add.graphics();this.dynamic.add(g);
@@ -130,6 +137,7 @@
     g.fillStyle(0x020617,.28);g.fillEllipse(2,17,18,7);
     g.fillStyle(color,1);g.fillCircle(0,0,7);g.fillRoundedRect(-6,6,12,15,5);
     if(p.index===s.current){g.lineStyle(3,0xffffff,.9);g.strokeCircle(0,3,13);this.tweens.add({targets:pawn,y:pawn.y-5,duration:650,yoyo:true,repeat:-1,ease:"Sine.easeInOut"})}
+    pawn.setDepth(y+1000);
     this.dynamic.add(pawn);
    });
   }
