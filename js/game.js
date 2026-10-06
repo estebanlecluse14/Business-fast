@@ -467,7 +467,7 @@ let pendingDebt=null,debtQueue=[],zonePressure={},roundNumber=1;
 let devMode=false,devTimer=null;
 let devStats={startedAt:0,rolls:0,turns:0,purchases:0,upgrades:0,rentPayments:0,rentPaid:0,buyouts:0,emergencySales:0,bankruptcies:0,events:0,globalEvents:0,bankVisits:0,jailVisits:0,jailBails:0,jailEscapeAttempts:0,jailEscapes:0,jailBladeBreaks:0,jailWaits:0,airportVisits:0,airportDirect:0,airportStandby:0,debtCases:0,moneyInjected:0,moneyRemoved:0,scheduledCharges:0,propertyTaxes:0,wondersStarted:0,wonderWins:0};
 function resetDevStats(){
- devStats={startedAt:performance.now(),rolls:0,turns:0,purchases:0,upgrades:0,rentPayments:0,rentPaid:0,buyouts:0,emergencySales:0,bankruptcies:0,events:0,globalEvents:0,bankVisits:0,jailVisits:0,debtCases:0,moneyInjected:0,moneyRemoved:0,scheduledCharges:0,propertyTaxes:0,wondersStarted:0,wonderWins:0};
+ devStats={startedAt:performance.now(),rolls:0,turns:0,purchases:0,upgrades:0,rentPayments:0,rentPaid:0,buyouts:0,emergencySales:0,bankruptcies:0,events:0,globalEvents:0,bankVisits:0,jailVisits:0,jailBails:0,jailEscapeAttempts:0,jailEscapes:0,jailBladeBreaks:0,jailWaits:0,airportVisits:0,airportDirect:0,airportStandby:0,debtCases:0,moneyInjected:0,moneyRemoved:0,scheduledCharges:0,propertyTaxes:0,wondersStarted:0,wonderWins:0};
 }
 function stat(name,amount=1){if(Object.prototype.hasOwnProperty.call(devStats,name))devStats[name]+=amount;refreshDevStats()}
 function elapsedText(){
@@ -2140,8 +2140,17 @@ function simOneGame(profile='current'){
    }
    else if(s.type==='airport'){
      const hubs=[1,5,11,13,33,35];
-     if(p.money>=35000+55000){p.money-=35000;move(pi,hubs[Math.floor(Math.random()*hubs.length)])}
-     else p.pos=hubs[Math.floor(Math.random()*hubs.length)];
+     const destination=hubs[Math.floor(Math.random()*hubs.length)];
+     if(p.money>=35000+55000)p.money-=35000;
+     p.pos=destination;
+     const dest=ss[destination];
+     if(dest.type==='property'||dest.type==='beach'){
+       if(dest.owner===null){
+         if(p.money>=dest.price+45000){p.money-=dest.price;dest.owner=pi;p.props.push(destination);if(dest.type==='beach')p.beaches++;purchases++}
+       }else if(dest.owner!==pi&&ps[dest.owner]?.active){
+         rentsPaid++;pay(pi,simRent(dest),dest.owner);
+       }
+     }
    }
    else if(s.type==='event')event(pi);
    else if(s.type==='global'){
