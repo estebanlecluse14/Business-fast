@@ -8199,3 +8199,28 @@ html.phaser-ready .phaser-mount{opacity:1}
 .jail-fail-ok{width:100%;min-height:42px;border:0;border-radius:11px;background:#dc2626;color:#fff;font-size:10px;font-weight:1000;letter-spacing:.05em;cursor:pointer}
 @keyframes jailAlarmPulse{0%,100%{opacity:.65;transform:translateX(-50%) scale(.96)}50%{opacity:1;transform:translateX(-50%) scale(1.04)}}
 @media(max-width:700px){.jail-fail-penalties{grid-template-columns:1fr}.jail-fail-visual{height:125px}}
+
+/* V0.51 · Banque 2.0 */
+.modal.modal-bank .box,.modal.modal-bank-robbery .box{max-width:760px}
+.bank2-shell{display:grid;gap:14px}
+.bank2-payout{padding:12px 14px;border:1px solid #86efac;background:#f0fdf4;border-radius:14px;font-weight:800;color:#166534}
+.bank2-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.bank2-card{min-height:168px;border:1px solid #d9dee8;border-radius:16px;background:#fff;padding:15px;text-align:left;display:flex;flex-direction:column;gap:7px;cursor:pointer;color:#111827}
+.bank2-card>span{font-size:28px}.bank2-card>b{font-size:15px}.bank2-card>strong{font-size:18px}.bank2-card>small{font-size:11px;line-height:1.45;color:#64748b}
+.bank2-card.safe{border-color:#bbf7d0}.bank2-card.invest{border-color:#bfdbfe}.bank2-card.robbery{border-color:#fecaca}
+.bank2-card:disabled{opacity:.42;cursor:not-allowed}
+.bank-robbery{display:grid;gap:12px}
+.bank-robbery-head{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.bank-robbery-head>div{padding:11px 13px;border:1px solid #e5e7eb;border-radius:12px;background:#f8fafc;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.bank-robbery-head span,.bank-alarm-line span{font-size:10px;font-weight:900;letter-spacing:.12em;color:#64748b}
+.bank-robbery-head strong{font-size:17px}
+.bank-alarm-line{display:flex;justify-content:space-between;align-items:center}
+.bank-alarm{height:12px;background:#e5e7eb;border-radius:999px;overflow:hidden}
+.bank-alarm i{display:block;height:100%;width:0;background:#dc2626;transition:width .08s linear}
+.bank-vault{padding:20px 16px;text-align:center;border:1px solid #d1d5db;border-radius:16px;background:#f8fafc;font-size:38px}
+.bank-vault-title{font-size:16px;font-weight:950;margin-top:7px}.bank-vault small{display:block;font-size:11px;color:#64748b;margin-top:3px}
+.bank-skillbar{height:44px;position:relative;background:#111827;border-radius:12px;overflow:hidden;border:1px solid #374151}
+.bank-target{position:absolute;top:0;bottom:0;background:#22c55e55;border-left:2px solid #4ade80;border-right:2px solid #4ade80}
+.bank-cursor{position:absolute;top:3px;bottom:3px;width:4px;background:#fff;border-radius:4px;transform:translateX(-2px)}
+.bank-robbery-hint{font-size:12px;color:#475569;text-align:center;min-height:18px}
+@media(max-width:650px){.bank2-grid{grid-template-columns:1fr}.bank2-card{min-height:0}.bank-robbery-head{grid-template-columns:1fr}}
