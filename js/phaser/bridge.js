@@ -79,6 +79,11 @@
    [[790,238,34],[825,250,27],[855,266,22]].forEach(([x,y,s])=>{g.fillStyle(0x324b43,.9);g.fillTriangle(x-s,y+s,x,y-s,x+s,y+s);g.fillStyle(0xdde8e5,.72);g.fillTriangle(x-10,y-5,x,y-s,x+10,y-5)});
    // subtle river ribbon
    g.lineStyle(5,0x38bdf8,.24);g.beginPath();g.moveTo(610,180);g.lineTo(625,245);g.lineTo(600,315);g.lineTo(635,390);g.lineTo(620,500);g.strokePath();
+   // villages, fields and lakes make the centre feel like a miniature France
+   const house=(x,y,s=1)=>{g.fillStyle(0xf3e7ce,1);g.fillRect(x-7*s,y-3*s,14*s,10*s);g.fillStyle(0xb4532a,1);g.fillTriangle(x-9*s,y-3*s,x,y-11*s,x+9*s,y-3*s);g.fillStyle(0x7c4a2b,1);g.fillRect(x-2*s,y+1*s,4*s,6*s)};
+   [[470,390,.75],[505,410,.65],[690,270,.7],[730,455,.75],[545,255,.65]].forEach(p=>house(...p));
+   g.fillStyle(0x4ab6d8,.32);g.fillEllipse(705,350,86,35);g.fillEllipse(510,305,58,24);
+   g.lineStyle(2,0xd8c17b,.28);[[430,340,520,365],[670,470,770,445],[520,500,600,470]].forEach(([x1,y1,x2,y2])=>{g.beginPath();g.moveTo(x1,y1);g.lineTo(x2,y2);g.strokePath()});
    // raised route: dark lower edge creates a readable 2.5D slab
    g.lineStyle(32,0x050b12,.65);g.strokePoints(ROUTE.map(([x,y])=>new Phaser.Geom.Point(x+7,y+11)),true);
    // route
@@ -87,7 +92,6 @@
    g.lineStyle(3,0xffffff,.22);g.strokePoints(ROUTE.map(p=>new Phaser.Geom.Point(...p)),true);
    this.add.text(118,596,"OCÉAN\nATLANTIQUE",{fontFamily:"Arial",fontSize:"18px",fontStyle:"bold",color:"#4cc9f0",align:"center"}).setAlpha(.62);
    this.add.text(910,626,"MÉDITERRANÉE",{fontFamily:"Arial",fontSize:"18px",fontStyle:"bold",color:"#4cc9f0"}).setAlpha(.62);
-   this.add.text(606,332,"BUSINESS\nFAST",{fontFamily:"Arial",fontSize:"36px",fontStyle:"bold",align:"center",color:"#ffffff",stroke:"#071525",strokeThickness:8}).setOrigin(.5).setAlpha(.16);
   }
   makeBuilding(x,y,color,level=0,variant=0){
    const c=this.add.container(x,y-22),g=this.add.graphics();c.add(g);
@@ -184,14 +188,14 @@
     const color=owner!==null&&owner!==undefined?hex(space.ownerColor):specialColor(space.type,space.themeColor);
     const compact=isCompact(),g=this.add.graphics();this.dynamic.add(g);
     // PC property card: chunky 2.5D tile inspired by a physical board-game deed space.
-    const isProp=space.type==="property",tw=isProp?82:58,th=isProp?48:34,depth=isProp?10:7;
-    const tileColor=isProp?(space.themeColor?hex(space.themeColor):color):color;
+    const isProp=space.type==="property",isPriced=isProp||space.type==="beach",tw=isPriced?82:58,th=isPriced?48:34,depth=isPriced?10:7;
+    const tileColor=isProp?(space.themeColor?hex(space.themeColor):color):(space.type==="beach"?0x08bde8:color);
     g.fillStyle(0x020617,.38);g.fillEllipse(x+7,y+depth+13,tw+20,18);
     // dark extruded side
     g.fillStyle(0x07111c,.96);g.fillRoundedRect(x-tw/2+5,y-th/2+depth,tw,th,9);
     // coloured top face
-    g.fillStyle(isProp?tileColor:0xf1f5f9,1);g.fillRoundedRect(x-tw/2,y-th/2,tw,th,9);
-    g.lineStyle(3,isProp?0xffffff:tileColor,.34);g.strokeRoundedRect(x-tw/2,y-th/2,tw,th,9);
+    g.fillStyle(isPriced?tileColor:0xf1f5f9,1);g.fillRoundedRect(x-tw/2,y-th/2,tw,th,9);
+    g.lineStyle(3,isPriced?0xffffff:tileColor,.34);g.strokeRoundedRect(x-tw/2,y-th/2,tw,th,9);
     g.lineStyle(2,0xffffff,.30);g.beginPath();g.moveTo(x-tw/2+9,y-th/2+5);g.lineTo(x+tw/2-9,y-th/2+5);g.strokePath();
     if(space.type==="property"){
       const b=this.makeBuilding(x,y-18,color,space.level||0,i);b.setDepth(y+50);this.dynamic.add(b);
@@ -206,11 +210,17 @@
       }).setOrigin(.5,.5).setDepth(y+2100);
       this.dynamic.add(title);this.dynamic.add(ptxt);
     }
-    const special=this.makeSpecialAsset(space.type,x,y,color);if(special){special.setDepth(y+80);this.dynamic.add(special);}
+    if(space.type==="beach"){
+      const price=Number(space.price||0);
+      const bt=this.add.text(x,y-5,space.name.toUpperCase(),{fontFamily:"Arial",fontSize:"10px",fontStyle:"bold",color:"#ffffff",stroke:"#06435a",strokeThickness:3,align:"center",wordWrap:{width:76}}).setOrigin(.5).setDepth(y+2100);
+      const bp=this.add.text(x,y+13,price?price.toLocaleString("fr-FR")+" €":"",{fontFamily:"Arial",fontSize:"10px",fontStyle:"bold",color:"#ffffff",stroke:"#06435a",strokeThickness:3}).setOrigin(.5).setDepth(y+2100);
+      this.dynamic.add(bt);this.dynamic.add(bp);
+    }
+    const special=this.makeSpecialAsset(space.type,x,y-20,color);if(special){special.setDepth(y+80);this.dynamic.add(special);}
     const mark=icon(space.type);
     if(mark)this.dynamic.add(this.add.text(x,y,mark,{fontFamily:"Arial",fontSize:compact?"13px":"17px",fontStyle:"bold",color:space.type==="property"?"#0f172a":"#0f172a"}).setOrigin(.5));
     // Every property keeps its city name visible; secondary data stays out of the map.
-    const isCity=space.type==="property",important=["start","bank","jail","airport","beach"].includes(space.type);
+    const isCity=space.type==="property",important=["start","bank","jail","airport"].includes(space.type);
     if((!isCity)&&important){
       // Put labels toward the inside of the loop so edge labels are never clipped.
       const cx=640,cy=360,dx=cx-x,dy=cy-y,len=Math.max(1,Math.hypot(dx,dy));
@@ -235,7 +245,9 @@
     const pawn=this.add.container(x+(slot-1.5)*8,y-31);
     const g=this.add.graphics();pawn.add(g);
     g.fillStyle(0x020617,.28);g.fillEllipse(2,17,18,7);
-    g.fillStyle(color,1);g.fillCircle(0,0,7);g.fillRoundedRect(-6,6,12,15,5);
+    g.fillStyle(0xffffff,.32);g.fillCircle(-2,-2,8);
+    g.fillStyle(color,1);g.fillCircle(0,0,7);g.fillRoundedRect(-7,6,14,16,6);
+    g.fillStyle(0xffffff,.22);g.fillRoundedRect(-4,8,3,10,2);
     if(p.index===s.current){g.lineStyle(3,0xffffff,.9);g.strokeCircle(0,3,13);this.tweens.add({targets:pawn,y:pawn.y-5,duration:650,yoyo:true,repeat:-1,ease:"Sine.easeInOut"})}
     pawn.setDepth(y+1000);
     this.dynamic.add(pawn);
