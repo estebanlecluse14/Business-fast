@@ -246,9 +246,23 @@
    const seed=((space?.id||0)*17+(space?.level||0)*11+slot*7)%4;
    return seed;
   }
+  makeLegoGround(space){
+   const compact=isCompact(),g=this.add.graphics();
+   const variant=(space.id||0)%4,w=compact?48:58,h=compact?24:29;
+   const fills=[0x6fa84f,0x78a95a,0x6b9c52,0x83ad5f],edges=[0x365d35,0x3f6840,0x31583a,0x456b3e];
+   g.fillStyle(0x020617,.28);g.fillEllipse(4,7,w+12,h+9);
+   g.fillStyle(edges[variant],1);
+   g.fillPoints([new Phaser.Geom.Point(-w/2,2),new Phaser.Geom.Point(0,h/2+8),new Phaser.Geom.Point(w/2,2),new Phaser.Geom.Point(0,-h/2+8)],true);
+   g.fillStyle(fills[variant],1);
+   g.fillPoints([new Phaser.Geom.Point(-w/2,-4),new Phaser.Geom.Point(0,h/2+2),new Phaser.Geom.Point(w/2,-4),new Phaser.Geom.Point(0,-h/2+2)],true);
+   g.lineStyle(1,0xd9efb7,.45);g.strokePoints([new Phaser.Geom.Point(-w/2,-4),new Phaser.Geom.Point(0,h/2+2),new Phaser.Geom.Point(w/2,-4),new Phaser.Geom.Point(0,-h/2+2)],true);
+   g.setData("legoPart","ground");g.setData("variant",variant);
+   return g;
+  }
   addLegoCity(space,x,y,color){
    const compact=isCompact(),level=Math.max(0,Math.min(3,space.level||0));
    const root=this.add.container(x,y).setDepth(y+50);
+   const ground=this.makeLegoGround(space);ground.setDepth(-20);root.add(ground);
    const cx=640,cy=360,dx=cx-x,dy=cy-y,len=Math.max(1,Math.hypot(dx,dy));
    const inwardX=dx/len,inwardY=dy/len;
    const count=[1,2,2,3][level],spread=compact?13:18;
