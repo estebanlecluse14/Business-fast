@@ -241,6 +241,31 @@
    }else return null;
    c.setDepth(y+20);return c;
   }
+  // LEGO V2: deterministic modular composition for every property.
+  cityVariant(space,slot=0){
+   const seed=((space?.id||0)*17+(space?.level||0)*11+slot*7)%4;
+   return seed;
+  }
+  addLegoCity(space,x,y,color){
+   const compact=isCompact(),level=Math.max(0,Math.min(3,space.level||0));
+   const root=this.add.container(x,y).setDepth(y+50);
+   const cx=640,cy=360,dx=cx-x,dy=cy-y,len=Math.max(1,Math.hypot(dx,dy));
+   const inwardX=dx/len,inwardY=dy/len;
+   const count=[1,2,2,3][level],spread=compact?13:18;
+   for(let n=0;n<count;n++){
+    const tangentX=-inwardY,tangentY=inwardX;
+    const offset=(n-(count-1)/2)*spread;
+    const bx=tangentX*offset+inwardX*(compact?10:17);
+    const by=tangentY*offset+inwardY*(compact?10:17);
+    const key="city_"+level;
+    const scale=(window.BusinessFastAssetPipeline?.cityScale?.[level]||.32)*(count>1?.82:1);
+    const asset=this.sprite(key,bx,by-(compact?18:25),scale);
+    const part=asset||this.makeBuilding(bx,by-22,color,level,this.cityVariant(space,n));
+    if(part){part.setDepth(n);root.add(part)}
+   }
+   root.setData("lego",true);root.setData("spaceId",space.id);root.setData("level",level);
+   return root;
+  }
   renderSnapshot(){
    if(!this.dynamic)return;
    this.dynamic.removeAll(true);
@@ -283,11 +308,8 @@
     this.dynamic.add(hit);
     if(space.type==="property"){
       const level=Math.max(0,Math.min(3,space.level||0));
-      const scale=window.BusinessFastAssetPipeline?.cityScale?.[level]||.48;
-      const cx=640,cy=360,bdx=cx-x,bdy=cy-y,bl=Math.max(1,Math.hypot(bdx,bdy));
-      const bx=x+(bdx/bl)*(compact?15:27),by=y+(bdy/bl)*(compact?15:27);
-      const b=this.sprite("city_"+level,bx,by-(compact?25:34),scale)||this.makeBuilding(bx,by-31,color,level,i);
-      b.setDepth(y+50);this.dynamic.add(b);
+      const b=this.addLegoCity(space,x,y,color);
+      this.dynamic.add(b);
       const price=Number(space.price||0);
       const title=this.add.text(x,y+9,space.name.toUpperCase(),{
        fontFamily:"Arial",fontSize:compact?"9px":"10px",fontStyle:"bold",color:"#111827",
