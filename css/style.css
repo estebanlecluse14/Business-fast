@@ -8423,3 +8423,12 @@ html.phaser-france .phaser-mount canvas{width:100%!important;height:100%!importa
    max-height:24vh!important;overflow:auto!important;
  }
 }
+
+/* Phaser preview hard gate — legacy board must never cover the new renderer. */
+html.phaser-preview #gameScreen .board{opacity:0!important;visibility:hidden!important;pointer-events:none!important}
+html.phaser-preview #gameScreen .phaser-mount{opacity:1!important;visibility:visible!important}
+html.phaser-preview.phaser-load-error #gameScreen .phaser-mount:before{
+ content:"Chargement du nouveau plateau Phaser…";
+ position:absolute;inset:0;display:grid;place-items:center;
+ background:#071525;color:#fff;font:800 18px Arial,sans-serif;z-index:20
+}
