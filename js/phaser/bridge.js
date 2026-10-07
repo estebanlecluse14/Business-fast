@@ -119,6 +119,16 @@
    g.lineStyle(28,0x111827,.72);g.strokePoints(ROUTE.map(p=>new Phaser.Geom.Point(...p)),true);
    g.lineStyle(18,0xd7dee7,1);g.strokePoints(ROUTE.map(p=>new Phaser.Geom.Point(...p)),true);
    g.lineStyle(3,0xffffff,.22);g.strokePoints(ROUTE.map(p=>new Phaser.Geom.Point(...p)),true);
+   // Central landmarks make France feel inhabited without obscuring the route.
+   const landmarks=[
+    ["forest",505,300,.72],["forest",552,326,.58],["mountain",690,250,.70],
+    ["mountain",736,276,.56],["village",612,390,.66],["field",704,420,.62],
+    ["lake",535,445,.70],["station",782,365,.58],["stadium",662,505,.58]
+   ];
+   landmarks.forEach(([key,x,y,scale])=>{const a=this.sprite(key,x,y,scale);if(a){a.setDepth(y-120);this.world.add(a)}});
+   // Fine internal roads visually connect the landscape.
+   g.lineStyle(4,0xe8dcc1,.32);
+   [[470,345,610,390],[610,390,775,365],[610,390,665,505],[535,445,610,390]].forEach(([x1,y1,x2,y2])=>{g.beginPath();g.moveTo(x1,y1);g.lineTo(x2,y2);g.strokePath()});
    this.add.text(118,596,"OCÉAN\nATLANTIQUE",{fontFamily:"Arial",fontSize:"18px",fontStyle:"bold",color:"#4cc9f0",align:"center"}).setAlpha(.62);
    this.add.text(910,626,"MÉDITERRANÉE",{fontFamily:"Arial",fontSize:"18px",fontStyle:"bold",color:"#4cc9f0"}).setAlpha(.62);
   }
