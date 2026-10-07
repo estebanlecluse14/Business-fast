@@ -4,6 +4,7 @@ window.BusinessFastAssetPipeline={
  version:5,
  format:"png",
  quality:"hd",
+ boardBackground:"assets/phaser/v2/board_environment_v2.png",
  fallback:true,
  sprites:{
   city_0:"assets/phaser/png/city_0.png",
