@@ -1,7 +1,7 @@
 /* Business Fast — V2 HD sprite pipeline
    Phaser is the compositor/animation engine. Major artwork lives in transparent PNG assets. */
 window.BusinessFastAssetPipeline={
- version:5,
+ version:6,
  format:"png",
  quality:"hd",
  boardBackground:"assets/phaser/v2/board_environment_v2.png",
@@ -27,5 +27,7 @@ window.BusinessFastAssetPipeline={
  cityScale:[.34,.36,.38,.40],
  specialScale:.36,
  sceneryScale:1,
+ assetPolicy:"sprite-first",
+ cacheVersion:"v2-6",
  artDirection:"premium-25d"
 };
