@@ -45,9 +45,7 @@
   preload(){
    // Real sprite pipeline. Missing files never block the board: coded assets remain the fallback.
    const sprites={
-    // City and special-space external textures are intentionally disabled.
-    // Some WebGL/browser combinations rendered their transparent bounds as black rectangles.
-    // Native Phaser vector assets below are the safe fallback until raster PNG sprites replace them.
+    ...(window.BusinessFastAssetPipeline?.sprites||{}),
     forest:"assets/phaser/forest.png",mountain:"assets/phaser/mountain.png",
     village:"assets/phaser/village.png",field:"assets/phaser/field.png",
     lake:"assets/phaser/lake.png",lighthouse:"assets/phaser/lighthouse.png",
@@ -243,7 +241,8 @@
     this.dynamic.add(hit);
     if(space.type==="property"){
       const level=Math.max(0,Math.min(3,space.level||0));
-      const b=this.makeBuilding(x,y-18,color,level,i);
+      const scale=window.BusinessFastAssetPipeline?.cityScale?.[level]||.48;
+      const b=this.sprite("city_"+level,x,y-10,scale)||this.makeBuilding(x,y-18,color,level,i);
       b.setDepth(y+50);this.dynamic.add(b);
       const price=Number(space.price||0);
       const title=this.add.text(x,y-4,space.name.toUpperCase(),{
@@ -271,7 +270,8 @@
       const bp=this.add.text(x,y+13,price?price.toLocaleString("fr-FR")+" €":"",{fontFamily:"Arial",fontSize:"10px",fontStyle:"bold",color:"#ffffff",stroke:"#06435a",strokeThickness:3}).setOrigin(.5).setDepth(y+2100);
       this.dynamic.add(bt);this.dynamic.add(bp);
     }
-    const special=this.makeSpecialAsset(space.type,x,y-20,color);
+    const spriteKey={bank:"bank",jail:"jail",airport:"airport",beach:"beach"}[space.type];
+    const special=(spriteKey&&this.sprite(spriteKey,x,y-12,window.BusinessFastAssetPipeline?.specialScale||.48))||this.makeSpecialAsset(space.type,x,y-20,color);
     if(special){special.setDepth(y+80);this.dynamic.add(special);}
     const mark=icon(space.type);
     if(mark)this.dynamic.add(this.add.text(x,y,mark,{fontFamily:"Arial",fontSize:compact?"13px":"17px",fontStyle:"bold",color:space.type==="property"?"#0f172a":"#0f172a"}).setOrigin(.5));
