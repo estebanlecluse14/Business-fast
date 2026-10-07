@@ -9,7 +9,7 @@
  const isCompact=()=>window.innerWidth<760;
  const ISO_SKEW=.28, ISO_LIFT=16;
  const isoPoint=([x,y])=>{
-  const compact=isCompact(),sx=compact?.96:1.02,sy=compact?.76:.82;
+  const compact=isCompact(),sx=compact?.90:1.08,sy=compact?.70:.86;
   return [640+(x-640)*sx,360+(y-360)*sy+(x-640)*(compact?.055:.04)];
  };
  const W=1280,H=720;
@@ -116,6 +116,12 @@
    [[470,390,.75],[505,410,.65],[690,270,.7],[730,455,.75],[545,255,.65]].forEach(p=>house(...p));
    g.fillStyle(0x4ab6d8,.32);g.fillEllipse(705,350,86,35);g.fillEllipse(510,305,58,24);
    g.lineStyle(2,0xd8c17b,.28);[[430,340,520,365],[670,470,770,445],[520,500,600,470]].forEach(([x1,y1,x2,y2])=>{g.beginPath();g.moveTo(x1,y1);g.lineTo(x2,y2);g.strokePath()});
+   // premium miniature-France details
+   g.lineStyle(3,0xf4e7c1,.42);
+   [[405,225,545,285],[545,285,650,355],[650,355,790,300],[650,355,735,470],[545,285,475,455],[475,455,610,520]].forEach(([x1,y1,x2,y2])=>{g.beginPath();g.moveTo(x1,y1);g.lineTo(x2,y2);g.strokePath()});
+   g.lineStyle(1,0xffffff,.18);
+   [[430,325,72,34],[555,230,82,36],[735,390,92,38],[570,470,78,34]].forEach(([x,y,w,h])=>g.strokeRoundedRect(x-w/2,y-h/2,w,h,8));
+   [[430,325],[555,230],[735,390],[570,470],[675,305]].forEach(([x,y],n)=>{g.fillStyle(n%2?0xf3d38a:0xe9c46a,.72);g.fillCircle(x,y,3)});
    // raised route: dark lower edge creates a readable 2.5D slab
    g.lineStyle(32,0x050b12,.65);g.strokePoints(ROUTE.map(([x,y])=>new Phaser.Geom.Point(x+7,y+11)),true);
    // route
@@ -232,7 +238,7 @@
     const color=owner!==null&&owner!==undefined?hex(space.ownerColor):specialColor(space.type,space.themeColor);
     const compact=isCompact(),g=this.add.graphics();this.dynamic.add(g);
     // PC property card: chunky 2.5D tile inspired by a physical board-game deed space.
-    const isProp=space.type==="property",isPriced=isProp||space.type==="beach",tw=isPriced?88:62,th=isPriced?52:38,depth=isPriced?12:8;
+    const isProp=space.type==="property",isPriced=isProp||space.type==="beach",tw=isPriced?(compact?82:94):(compact?58:66),th=isPriced?(compact?50:56):(compact?36:40),depth=isPriced?13:9;
     const tileColor=isProp?(space.themeColor?hex(space.themeColor):color):(space.type==="beach"?0x08bde8:color);
     g.fillStyle(0x020617,.38);g.fillEllipse(x+7,y+depth+13,tw+20,18);
     // dark extruded side
@@ -257,7 +263,7 @@
     if(space.type==="property"){
       const level=Math.max(0,Math.min(3,space.level||0));
       const scale=window.BusinessFastAssetPipeline?.cityScale?.[level]||.48;
-      const b=this.sprite("city_"+level,x,y-10,scale)||this.makeBuilding(x,y-18,color,level,i);
+      const b=this.sprite("city_"+level,x,y-(compact?20:27),scale)||this.makeBuilding(x,y-24,color,level,i);
       b.setDepth(y+50);this.dynamic.add(b);
       const price=Number(space.price||0);
       const title=this.add.text(x,y-4,space.name.toUpperCase(),{
@@ -286,7 +292,7 @@
       this.dynamic.add(bt);this.dynamic.add(bp);
     }
     const spriteKey={bank:"bank",jail:"jail",airport:"airport",beach:"beach"}[space.type];
-    const special=(spriteKey&&this.sprite(spriteKey,x,y-12,window.BusinessFastAssetPipeline?.specialScale||.48))||this.makeSpecialAsset(space.type,x,y-20,color);
+    const special=(spriteKey&&this.sprite(spriteKey,x,y-(compact?19:25),window.BusinessFastAssetPipeline?.specialScale||.32))||this.makeSpecialAsset(space.type,x,y-20,color);
     if(special){special.setDepth(y+80);this.dynamic.add(special);}
     const mark=icon(space.type);
     if(mark)this.dynamic.add(this.add.text(x,y,mark,{fontFamily:"Arial",fontSize:compact?"13px":"17px",fontStyle:"bold",color:space.type==="property"?"#0f172a":"#0f172a"}).setOrigin(.5));
