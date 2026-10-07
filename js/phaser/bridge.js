@@ -122,6 +122,13 @@
    g.lineStyle(1,0xffffff,.18);
    [[430,325,72,34],[555,230,82,36],[735,390,92,38],[570,470,78,34]].forEach(([x,y,w,h])=>g.strokeRoundedRect(x-w/2,y-h/2,w,h,8));
    [[430,325],[555,230],[735,390],[570,470],[675,305]].forEach(([x,y],n)=>{g.fillStyle(n%2?0xf3d38a:0xe9c46a,.72);g.fillCircle(x,y,3)});
+   // premium inner-board vignette: subtle depth and inhabited-France accents
+   g.lineStyle(2,0x071525,.18);
+   [[455,210,36],[805,330,42],[610,445,34],[515,520,30]].forEach(([x,y,r])=>g.strokeCircle(x,y,r));
+   [[445,215],[462,222],[790,335],[812,326],[600,448],[620,438],[505,520],[526,512]].forEach(([x,y],n)=>{
+     g.fillStyle(n%3===0?0x183d2b:0x2f6a43,.9);g.fillCircle(x,y,5);g.fillStyle(0x102a20,.8);g.fillRect(x-1,y+4,2,5);
+   });
+   g.fillStyle(0x071525,.16);g.fillEllipse(640,548,190,28);
    // raised route: dark lower edge creates a readable 2.5D slab
    g.lineStyle(32,0x050b12,.65);g.strokePoints(ROUTE.map(([x,y])=>new Phaser.Geom.Point(x+7,y+11)),true);
    // route
@@ -245,7 +252,8 @@
     g.fillStyle(0x050b12,.98);g.fillRoundedRect(x-tw/2+6,y-th/2+depth,tw,th,10);
     g.fillStyle(0x0b1725,.72);g.fillRoundedRect(x-tw/2+3,y-th/2+5,tw,th+depth-2,10);
     // coloured top face
-    g.fillStyle(isPriced?tileColor:0xf1f5f9,1);g.fillRoundedRect(x-tw/2,y-th/2,tw,th,10);
+    g.fillStyle(isPriced?tileColor:0xf8fafc,1);g.fillRoundedRect(x-tw/2,y-th/2,tw,th,10);
+    if(!isPriced){g.fillStyle(tileColor,.18);g.fillRoundedRect(x-tw/2+4,y-th/2+4,tw-8,th-8,7);}
     if(isPriced){g.fillStyle(0x071525,.30);g.fillRoundedRect(x-tw/2+4,y+3,tw-8,th/2-7,6);}
     g.lineStyle(3,isPriced?0xffffff:tileColor,.34);g.strokeRoundedRect(x-tw/2,y-th/2,tw,th,9);
     g.lineStyle(2,0xffffff,.30);g.beginPath();g.moveTo(x-tw/2+9,y-th/2+5);g.lineTo(x+tw/2-9,y-th/2+5);g.strokePath();
@@ -327,7 +335,9 @@
     const g=this.add.graphics();pawn.add(g);
     g.fillStyle(0x020617,.28);g.fillEllipse(2,17,18,7);
     g.fillStyle(0xffffff,.32);g.fillCircle(-2,-2,8);
-    g.fillStyle(color,1);g.fillCircle(0,0,7);g.fillRoundedRect(-7,6,14,16,6);
+    g.fillStyle(0x020617,.38);g.fillEllipse(2,19,22,8);
+    g.fillStyle(color,1);g.fillCircle(0,-1,7);g.fillRoundedRect(-7,6,14,16,6);
+    g.lineStyle(2,0xffffff,.65);g.strokeCircle(0,-1,7);
     g.fillStyle(0xffffff,.22);g.fillRoundedRect(-4,8,3,10,2);
     if(p.index===s.current){g.lineStyle(3,0xffffff,.9);g.strokeCircle(0,3,13);this.tweens.add({targets:pawn,y:pawn.y-5,duration:650,yoyo:true,repeat:-1,ease:"Sine.easeInOut"})}
     pawn.setDepth(y+1000);
