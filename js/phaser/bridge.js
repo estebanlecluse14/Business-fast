@@ -327,6 +327,19 @@
    root.setData("lego",true);root.setData("spaceId",space.id);root.setData("specialType",type);
    return root;
   }
+  playLegoFx(target,type){
+   if(!target)return;
+   if(type==="select"){
+    this.tweens.add({targets:target,scaleX:1.06,scaleY:1.06,duration:170,yoyo:true,ease:"Sine.easeOut"});
+   }else if(type==="build"){
+    target.setScale(.72);target.setAlpha(.35);
+    this.tweens.add({targets:target,scaleX:1,scaleY:1,alpha:1,duration:420,ease:"Back.easeOut"});
+   }else if(type==="bank"){
+    this.tweens.add({targets:target,alpha:.72,duration:520,yoyo:true,repeat:-1,ease:"Sine.easeInOut"});
+   }else if(type==="jail"){
+    this.tweens.add({targets:target,x:target.x+2,duration:75,yoyo:true,repeat:3,ease:"Sine.easeInOut"});
+   }
+  }
   renderSnapshot(){
    if(!this.dynamic)return;
    this.dynamic.removeAll(true);
@@ -371,6 +384,8 @@
       const level=Math.max(0,Math.min(3,space.level||0));
       const b=this.addLegoCity(space,x,y,color);
       this.dynamic.add(b);
+      if(this.selectedSpace===i)this.playLegoFx(b,"select");
+      if(space.level>0)this.playLegoFx(b,"build");
       const price=Number(space.price||0);
       const title=this.add.text(x,y+9,space.name.toUpperCase(),{
        fontFamily:"Arial",fontSize:compact?"9px":"10px",fontStyle:"bold",color:"#111827",
@@ -400,7 +415,10 @@
     if(["bank","jail","airport","beach"].includes(space.type)){
       const scx=640,scy=360,sdx=scx-x,sdy=scy-y,sl=Math.max(1,Math.hypot(sdx,sdy));
       const sx=x+(sdx/sl)*(compact?12:22),sy=y+(sdy/sl)*(compact?12:22);
-      this.dynamic.add(this.addLegoSpecial(space,sx,sy,color));
+      const legoSpecial=this.addLegoSpecial(space,sx,sy,color);
+      this.dynamic.add(legoSpecial);
+      if(space.type==="bank")this.playLegoFx(legoSpecial,"bank");
+      if(space.type==="jail"&&this.selectedSpace===i)this.playLegoFx(legoSpecial,"jail");
     }
     const mark=icon(space.type);
     if(mark)this.dynamic.add(this.add.text(x,y,mark,{fontFamily:"Arial",fontSize:compact?"13px":"17px",fontStyle:"bold",color:space.type==="property"?"#0f172a":"#0f172a"}).setOrigin(.5));
