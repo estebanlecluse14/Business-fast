@@ -74,6 +74,10 @@
    this.dynamic=this.add.container(0,0);
    this.fx=this.add.container(0,0);
    this.renderSnapshot();
+   this.add.text(W-18,18,"V2 LEGO • 2.5D",{
+    fontFamily:"Arial, sans-serif",fontSize:"15px",fontStyle:"bold",
+    color:"#ffffff",backgroundColor:"#0f172acc",padding:{x:10,y:6}
+   }).setOrigin(1,0).setDepth(5000);
   }
   drawBase(){
    // Modular V2 only: no preassembled board artwork. Procedural terrain is the safe fallback while LEGO PNGs land.\n   const g=this.add.graphics();this.world.add(g);
@@ -240,7 +244,7 @@
   }
   makeLegoGround(space){
    const compact=isCompact(),g=this.add.graphics();
-   const variant=(space.id||0)%4,w=compact?48:58,h=compact?24:29;
+   const variant=(space.id||0)%4,w=compact?56:68,h=compact?28:34;
    const fills=[0x6fa84f,0x78a95a,0x6b9c52,0x83ad5f],edges=[0x365d35,0x3f6840,0x31583a,0x456b3e];
    g.fillStyle(0x020617,.28);g.fillEllipse(4,7,w+12,h+9);
    g.fillStyle(edges[variant],1);
@@ -286,14 +290,14 @@
    this.addLegoProps(root,space,compact);
    const cx=640,cy=360,dx=cx-x,dy=cy-y,len=Math.max(1,Math.hypot(dx,dy));
    const inwardX=dx/len,inwardY=dy/len;
-   const count=[1,2,2,3][level],spread=compact?13:18;
+   const count=[1,2,3,4][level],spread=compact?15:21;
    for(let n=0;n<count;n++){
     const tangentX=-inwardY,tangentY=inwardX;
     const offset=(n-(count-1)/2)*spread;
     const bx=tangentX*offset+inwardX*(compact?10:17);
     const by=tangentY*offset+inwardY*(compact?10:17);
     const variants=window.BusinessFastAssetPipeline?.buildingVariants?.[level]||[];\n    const key=variants.length?variants[this.cityVariant(space,n)%variants.length]:"city_"+level;
-    const scale=(window.BusinessFastAssetPipeline?.cityScale?.[level]||.32)*(count>1?.82:1);
+    const scale=(window.BusinessFastAssetPipeline?.cityScale?.[level]||.32)*(count>1?.88:1);
     const asset=this.sprite(key,bx,by-(compact?18:25),scale);
     const part=asset||this.makeBuilding(bx,by-22,color,level,this.cityVariant(space,n));
     if(part){part.setDepth(n);root.add(part)}
