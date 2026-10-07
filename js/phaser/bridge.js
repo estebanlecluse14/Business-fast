@@ -77,19 +77,19 @@
   }
   drawBase(){
    const g=this.add.graphics();this.world.add(g);
-   g.fillStyle(0x08243a,1);g.fillRect(0,0,W,H);
+   g.fillStyle(0x087aa4,1);g.fillRect(0,0,W,H);g.fillStyle(0x0b95bd,.42);g.fillEllipse(640,350,1160,610);
    // restrained water lines
-   g.lineStyle(1,0x1e6b8e,.16);
+   g.lineStyle(1,0xbcecf5,.18);
    for(let y=70;y<700;y+=42){g.beginPath();g.moveTo(70,y);g.lineTo(1210,y+12);g.strokePath()}
    // France shadow + land mass
    g.fillStyle(0x020617,.34);g.fillPoints(FRANCE.map(([x,y])=>new Phaser.Geom.Point(x+13,y+18)),true);
    // extruded land edge: first visible depth, then top surface
    g.fillStyle(0x102d23,1);g.fillPoints(FRANCE.map(([x,y])=>new Phaser.Geom.Point(x,y+ISO_LIFT)),true);
    g.lineStyle(4,0x0a2019,.9);g.strokePoints(FRANCE.map(([x,y])=>new Phaser.Geom.Point(x,y+ISO_LIFT)),true);
-   g.fillStyle(0x244d36,1);g.fillPoints(FRANCE.map(([x,y])=>new Phaser.Geom.Point(x,y)),true);
+   g.fillStyle(0x67a94f,1);g.fillPoints(FRANCE.map(([x,y])=>new Phaser.Geom.Point(x,y)),true);
    g.lineStyle(7,0x78a879,.78);g.strokePoints(FRANCE.map(([x,y])=>new Phaser.Geom.Point(x,y)),true);g.lineStyle(2,0xb9d89f,.65);g.strokePoints(FRANCE.map(([x,y])=>new Phaser.Geom.Point(x,y-2)),true);
    // simple terrain patches
-   g.fillStyle(0x315f3f,.75);g.fillEllipse(520,320,330,170);g.fillEllipse(690,390,300,170);
+   g.fillStyle(0x4f8d43,.72);g.fillEllipse(520,320,330,170);g.fillEllipse(690,390,300,170);
    g.fillStyle(0x465d45,.55);g.fillTriangle(770,185,808,122,846,190);g.fillTriangle(804,205,846,142,884,214);
    // richer illustrated terrain, while keeping the centre gameplay-safe
    g.fillStyle(0x3b6b3d,.48);g.fillEllipse(500,330,270,150);g.fillEllipse(710,420,310,170);
@@ -245,7 +245,7 @@
     const color=owner!==null&&owner!==undefined?hex(space.ownerColor):specialColor(space.type,space.themeColor);
     const compact=isCompact(),g=this.add.graphics();this.dynamic.add(g);
     // PC property card: chunky 2.5D tile inspired by a physical board-game deed space.
-    const isProp=space.type==="property",isPriced=isProp||space.type==="beach",tw=isPriced?(compact?78:82):(compact?56:62),th=isPriced?(compact?48:52):(compact?34:38),depth=isPriced?13:9;
+    const isProp=space.type==="property",isPriced=isProp||space.type==="beach",tw=isPriced?(compact?78:84):(compact?58:66),th=isPriced?(compact?54:62):(compact?40:48),depth=isPriced?14:10;
     const tileColor=isProp?(space.themeColor?hex(space.themeColor):color):(space.type==="beach"?0x08bde8:color);
     g.fillStyle(0x020617,.38);g.fillEllipse(x+7,y+depth+13,tw+20,18);
     // dark extruded side
@@ -253,8 +253,13 @@
     g.fillStyle(0x0b1725,.72);g.fillRoundedRect(x-tw/2+3,y-th/2+5,tw,th+depth-2,10);
     // coloured top face
     g.fillStyle(isPriced?tileColor:0xf8fafc,1);g.fillRoundedRect(x-tw/2,y-th/2,tw,th,10);
-    if(!isPriced){g.fillStyle(tileColor,.18);g.fillRoundedRect(x-tw/2+4,y-th/2+4,tw-8,th-8,7);}
-    if(isPriced){g.fillStyle(0x071525,.30);g.fillRoundedRect(x-tw/2+4,y+3,tw-8,th/2-7,6);}
+    if(!isPriced){g.fillStyle(tileColor,.20);g.fillRoundedRect(x-tw/2+4,y-th/2+4,tw-8,th-8,7);}
+    // Premium deed layout: coloured illustrated upper deck + clean white name/price plaque.
+    if(isPriced){
+      const plaqueH=compact?23:27;
+      g.fillStyle(0xf8fafc,1);g.fillRoundedRect(x-tw/2+3,y+th/2-plaqueH-3,tw-6,plaqueH,6);
+      g.lineStyle(1,0x0f172a,.16);g.beginPath();g.moveTo(x-tw/2+7,y+th/2-plaqueH-3);g.lineTo(x+tw/2-7,y+th/2-plaqueH-3);g.strokePath();
+    }
     g.lineStyle(3,isPriced?0xffffff:tileColor,.34);g.strokeRoundedRect(x-tw/2,y-th/2,tw,th,9);
     g.lineStyle(2,0xffffff,.30);g.beginPath();g.moveTo(x-tw/2+9,y-th/2+5);g.lineTo(x+tw/2-9,y-th/2+5);g.strokePath();
     // Interactive hit area stays invisible until hover/selection.
@@ -272,17 +277,17 @@
       const level=Math.max(0,Math.min(3,space.level||0));
       const scale=window.BusinessFastAssetPipeline?.cityScale?.[level]||.48;
       const cx=640,cy=360,bdx=cx-x,bdy=cy-y,bl=Math.max(1,Math.hypot(bdx,bdy));
-      const bx=x+(bdx/bl)*(compact?13:24),by=y+(bdy/bl)*(compact?13:24);
-      const b=this.sprite("city_"+level,bx,by-(compact?18:25),scale)||this.makeBuilding(bx,by-22,color,level,i);
+      const bx=x+(bdx/bl)*(compact?15:27),by=y+(bdy/bl)*(compact?15:27);
+      const b=this.sprite("city_"+level,bx,by-(compact?25:34),scale)||this.makeBuilding(bx,by-31,color,level,i);
       b.setDepth(y+50);this.dynamic.add(b);
       const price=Number(space.price||0);
-      const title=this.add.text(x,y-4,space.name.toUpperCase(),{
-       fontFamily:"Arial",fontSize:"12px",fontStyle:"bold",color:"#ffffff",stroke:"#06101b",strokeThickness:4,
+      const title=this.add.text(x,y+9,space.name.toUpperCase(),{
+       fontFamily:"Arial",fontSize:compact?"9px":"10px",fontStyle:"bold",color:"#111827",
        align:"center",wordWrap:{width:74}
       }).setOrigin(.5,.5).setDepth(y+2100);
       const priceTxt=price?price.toLocaleString("fr-FR")+" €":"";
-      const ptxt=this.add.text(x,y+13,priceTxt,{
-       fontFamily:"Arial",fontSize:"11px",fontStyle:"bold",color:"#ffffff",stroke:"#06101b",strokeThickness:3
+      const ptxt=this.add.text(x,y+22,priceTxt,{
+       fontFamily:"Arial",fontSize:compact?"8px":"9px",fontStyle:"bold",color:"#111827"
       }).setOrigin(.5,.5).setDepth(y+2100);
       this.dynamic.add(title);this.dynamic.add(ptxt);
       if(owner!==null&&owner!==undefined){
@@ -297,8 +302,8 @@
     }
     if(space.type==="beach"){
       const price=Number(space.price||0);
-      const bt=this.add.text(x,y-5,space.name.toUpperCase(),{fontFamily:"Arial",fontSize:"10px",fontStyle:"bold",color:"#ffffff",stroke:"#06435a",strokeThickness:3,align:"center",wordWrap:{width:76}}).setOrigin(.5).setDepth(y+2100);
-      const bp=this.add.text(x,y+13,price?price.toLocaleString("fr-FR")+" €":"",{fontFamily:"Arial",fontSize:"10px",fontStyle:"bold",color:"#ffffff",stroke:"#06435a",strokeThickness:3}).setOrigin(.5).setDepth(y+2100);
+      const bt=this.add.text(x,y+9,space.name.toUpperCase(),{fontFamily:"Arial",fontSize:"9px",fontStyle:"bold",color:"#111827",align:"center",wordWrap:{width:76}}).setOrigin(.5).setDepth(y+2100);
+      const bp=this.add.text(x,y+22,price?price.toLocaleString("fr-FR")+" €":"",{fontFamily:"Arial",fontSize:"9px",fontStyle:"bold",color:"#111827"}).setOrigin(.5).setDepth(y+2100);
       this.dynamic.add(bt);this.dynamic.add(bp);
     }
     const spriteKey={bank:"bank",jail:"jail",airport:"airport",beach:"beach"}[space.type];
