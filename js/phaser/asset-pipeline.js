@@ -1,6 +1,6 @@
 /* Business Fast PNG asset pipeline */
 window.BusinessFastAssetPipeline={
- version:2,
+ version:3,
  format:"png",
  fallback:true,
  sprites:{
@@ -13,6 +13,6 @@ window.BusinessFastAssetPipeline={
   airport:"assets/phaser/png/airport.png",
   beach:"assets/phaser/png/beach.png"
  },
- cityScale:[.46,.48,.50,.52],
- specialScale:.48
+ cityScale:[.28,.30,.32,.34],
+ specialScale:.31
 };
