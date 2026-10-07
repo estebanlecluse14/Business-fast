@@ -259,10 +259,39 @@
    g.setData("legoPart","ground");g.setData("variant",variant);
    return g;
   }
+  makeLegoProp(kind,x,y,scale=1){
+   const c=this.add.container(x,y),g=this.add.graphics();c.add(g);
+   if(kind==="tree"){
+    g.fillStyle(0x4b3621,1);g.fillRect(-2*scale,0,4*scale,9*scale);
+    g.fillStyle(0x183d2b,1);g.fillCircle(0,-4*scale,8*scale);
+    g.fillStyle(0x2f7a45,1);g.fillCircle(-3*scale,-8*scale,5*scale);
+   }else if(kind==="bush"){
+    g.fillStyle(0x245c3b,1);g.fillCircle(-4*scale,1,5*scale);g.fillCircle(3*scale,0,6*scale);
+    g.fillStyle(0x4b9b50,1);g.fillCircle(0,-3*scale,5*scale);
+   }else if(kind==="lamp"){
+    g.lineStyle(2*scale,0x273444,1);g.beginPath();g.moveTo(0,6*scale);g.lineTo(0,-9*scale);g.strokePath();
+    g.fillStyle(0xffe8a3,1);g.fillCircle(0,-11*scale,3*scale);
+   }
+   c.setData("legoPart","prop");c.setData("kind",kind);return c;
+  }
+  addLegoProps(root,space,compact){
+   const variant=(space.id||0)%4;
+   const layouts=[
+    [["tree",-22,2,.72],["bush",20,5,.65]],
+    [["bush",-21,4,.7],["lamp",21,2,.72]],
+    [["tree",22,3,.66],["lamp",-20,3,.68]],
+    [["bush",-22,4,.62],["bush",21,4,.62],["lamp",0,10,.62]]
+   ];
+   layouts[variant].forEach(([kind,x,y,scale],i)=>{
+    const p=this.makeLegoProp(kind,x*(compact?.82:1),y,scale*(compact?.86:1));
+    p.setDepth(-10+i);root.add(p);
+   });
+  }
   addLegoCity(space,x,y,color){
    const compact=isCompact(),level=Math.max(0,Math.min(3,space.level||0));
    const root=this.add.container(x,y).setDepth(y+50);
    const ground=this.makeLegoGround(space);ground.setDepth(-20);root.add(ground);
+   this.addLegoProps(root,space,compact);
    const cx=640,cy=360,dx=cx-x,dy=cy-y,len=Math.max(1,Math.hypot(dx,dy));
    const inwardX=dx/len,inwardY=dy/len;
    const count=[1,2,2,3][level],spread=compact?13:18;
