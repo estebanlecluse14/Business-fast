@@ -55,8 +55,6 @@
     station:"assets/phaser/station.png",stadium:"assets/phaser/stadium.png"
    };
    this.spriteKeys=new Set();
-   const boardBackground=window.BusinessFastAssetPipeline?.boardBackground;
-   if(boardBackground){this.load.image("board_environment_v2",boardBackground);this.spriteKeys.add("board_environment_v2");}
    Object.entries(sprites).forEach(([key,url])=>{
     this.load.image(key,url);this.spriteKeys.add(key);
    });
@@ -78,13 +76,7 @@
    this.renderSnapshot();
   }
   drawBase(){
-   // V2 artwork is the primary board layer. Procedural terrain below remains a safe fallback/overlay.
-   if(this.hasSprite("board_environment_v2")){
-    const bg=this.add.image(W/2,H/2,"board_environment_v2").setDisplaySize(W,H).setDepth(-1000);
-    this.world.add(bg);
-   }
-   const g=this.add.graphics();this.world.add(g);
-   if(this.hasSprite("board_environment_v2")) g.setAlpha(.16);
+   // Modular V2 only: no preassembled board artwork. Procedural terrain is the safe fallback while LEGO PNGs land.\n   const g=this.add.graphics();this.world.add(g);
    g.fillStyle(0x087aa4,1);g.fillRect(0,0,W,H);g.fillStyle(0x0b95bd,.42);g.fillEllipse(640,350,1160,610);
    // restrained water lines
    g.lineStyle(1,0xbcecf5,.18);
@@ -300,7 +292,7 @@
     const offset=(n-(count-1)/2)*spread;
     const bx=tangentX*offset+inwardX*(compact?10:17);
     const by=tangentY*offset+inwardY*(compact?10:17);
-    const key="city_"+level;
+    const variants=window.BusinessFastAssetPipeline?.buildingVariants?.[level]||[];\n    const key=variants.length?variants[this.cityVariant(space,n)%variants.length]:"city_"+level;
     const scale=(window.BusinessFastAssetPipeline?.cityScale?.[level]||.32)*(count>1?.82:1);
     const asset=this.sprite(key,bx,by-(compact?18:25),scale);
     const part=asset||this.makeBuilding(bx,by-22,color,level,this.cityVariant(space,n));
