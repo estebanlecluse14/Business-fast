@@ -309,6 +309,24 @@
    root.setData("lego",true);root.setData("spaceId",space.id);root.setData("level",level);
    return root;
   }
+  addLegoSpecial(space,x,y,color){
+   const compact=isCompact(),root=this.add.container(x,y).setDepth(y+80);
+   const g=this.add.graphics();root.add(g);
+   const type=space.type,w=compact?48:58,h=compact?23:28;
+   const groundColor={bank:0x7dd3fc,jail:0xc4b5fd,airport:0x93c5fd,beach:0xf6d98b}[type]||color;
+   g.fillStyle(0x020617,.30);g.fillEllipse(4,9,w+14,h+9);
+   g.fillStyle(0x203044,1);g.fillPoints([[-w/2,2],[0,h/2+8],[w/2,2],[0,-h/2+8]].map(p=>new Phaser.Geom.Point(...p)),true);
+   g.fillStyle(groundColor,1);g.fillPoints([[-w/2,-4],[0,h/2+2],[w/2,-4],[0,-h/2+2]].map(p=>new Phaser.Geom.Point(...p)),true);
+   g.setData("legoPart","special-ground");
+   const key={bank:"bank",jail:"jail",airport:"airport",beach:"beach"}[type];
+   const asset=key&&this.sprite(key,0,-(compact?15:21),window.BusinessFastAssetPipeline?.specialScale||.32);
+   const landmark=asset||this.makeSpecialAsset(type,0,-16,color);
+   if(landmark){landmark.setDepth(10);landmark.setData("legoPart","landmark");root.add(landmark)}
+   const fx=this.add.container(0,0).setDepth(20).setName("fx");
+   fx.setData("legoPart","fx");fx.setData("fxType",type);root.add(fx);
+   root.setData("lego",true);root.setData("spaceId",space.id);root.setData("specialType",type);
+   return root;
+  }
   renderSnapshot(){
    if(!this.dynamic)return;
    this.dynamic.removeAll(true);
@@ -379,11 +397,11 @@
       const bp=this.add.text(x,y+22,price?price.toLocaleString("fr-FR")+" €":"",{fontFamily:"Arial",fontSize:"9px",fontStyle:"bold",color:"#111827"}).setOrigin(.5).setDepth(y+2100);
       this.dynamic.add(bt);this.dynamic.add(bp);
     }
-    const spriteKey={bank:"bank",jail:"jail",airport:"airport",beach:"beach"}[space.type];
-    const scx=640,scy=360,sdx=scx-x,sdy=scy-y,sl=Math.max(1,Math.hypot(sdx,sdy));
-    const sx=x+(sdx/sl)*(compact?12:22),sy=y+(sdy/sl)*(compact?12:22);
-    const special=(spriteKey&&this.sprite(spriteKey,sx,sy-(compact?18:24),window.BusinessFastAssetPipeline?.specialScale||.32))||this.makeSpecialAsset(space.type,sx,sy-18,color);
-    if(special){special.setDepth(y+80);this.dynamic.add(special);}
+    if(["bank","jail","airport","beach"].includes(space.type)){
+      const scx=640,scy=360,sdx=scx-x,sdy=scy-y,sl=Math.max(1,Math.hypot(sdx,sdy));
+      const sx=x+(sdx/sl)*(compact?12:22),sy=y+(sdy/sl)*(compact?12:22);
+      this.dynamic.add(this.addLegoSpecial(space,sx,sy,color));
+    }
     const mark=icon(space.type);
     if(mark)this.dynamic.add(this.add.text(x,y,mark,{fontFamily:"Arial",fontSize:compact?"13px":"17px",fontStyle:"bold",color:space.type==="property"?"#0f172a":"#0f172a"}).setOrigin(.5));
     // Every property keeps its city name visible; secondary data stays out of the map.
