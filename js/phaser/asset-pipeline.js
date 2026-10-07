@@ -1,7 +1,9 @@
-/* Business Fast PNG asset pipeline */
+/* Business Fast — V2 HD sprite pipeline
+   Phaser is the compositor/animation engine. Major artwork lives in transparent PNG assets. */
 window.BusinessFastAssetPipeline={
- version:4,
+ version:5,
  format:"png",
+ quality:"hd",
  fallback:true,
  sprites:{
   city_0:"assets/phaser/png/city_0.png",
@@ -11,8 +13,18 @@ window.BusinessFastAssetPipeline={
   bank:"assets/phaser/png/bank.png",
   jail:"assets/phaser/png/jail.png",
   airport:"assets/phaser/png/airport.png",
-  beach:"assets/phaser/png/beach.png"
+  beach:"assets/phaser/png/beach.png",
+  forest:"assets/phaser/forest.png",
+  mountain:"assets/phaser/mountain.png",
+  village:"assets/phaser/village.png",
+  field:"assets/phaser/field.png",
+  lake:"assets/phaser/lake.png",
+  lighthouse:"assets/phaser/lighthouse.png",
+  station:"assets/phaser/station.png",
+  stadium:"assets/phaser/stadium.png"
  },
- cityScale:[.23,.25,.27,.29],
- specialScale:.27
+ cityScale:[.34,.36,.38,.40],
+ specialScale:.36,
+ sceneryScale:1,
+ artDirection:"premium-25d"
 };
