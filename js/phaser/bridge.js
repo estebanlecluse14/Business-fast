@@ -9,7 +9,7 @@
  const isCompact=()=>window.innerWidth<760;
  const ISO_SKEW=.28, ISO_LIFT=16;
  const isoPoint=([x,y])=>{
-  const compact=isCompact(),sx=compact?.90:1.08,sy=compact?.70:.86;
+  const compact=isCompact(),sx=compact?.88:1.16,sy=compact?.68:.91;
   return [640+(x-640)*sx,360+(y-360)*sy+(x-640)*(compact?.055:.04)];
  };
  const W=1280,H=720;
@@ -263,7 +263,9 @@
     if(space.type==="property"){
       const level=Math.max(0,Math.min(3,space.level||0));
       const scale=window.BusinessFastAssetPipeline?.cityScale?.[level]||.48;
-      const b=this.sprite("city_"+level,x,y-(compact?20:27),scale)||this.makeBuilding(x,y-24,color,level,i);
+      const cx=640,cy=360,bdx=cx-x,bdy=cy-y,bl=Math.max(1,Math.hypot(bdx,bdy));
+      const bx=x+(bdx/bl)*(compact?13:24),by=y+(bdy/bl)*(compact?13:24);
+      const b=this.sprite("city_"+level,bx,by-(compact?18:25),scale)||this.makeBuilding(bx,by-22,color,level,i);
       b.setDepth(y+50);this.dynamic.add(b);
       const price=Number(space.price||0);
       const title=this.add.text(x,y-4,space.name.toUpperCase(),{
@@ -292,7 +294,9 @@
       this.dynamic.add(bt);this.dynamic.add(bp);
     }
     const spriteKey={bank:"bank",jail:"jail",airport:"airport",beach:"beach"}[space.type];
-    const special=(spriteKey&&this.sprite(spriteKey,x,y-(compact?19:25),window.BusinessFastAssetPipeline?.specialScale||.32))||this.makeSpecialAsset(space.type,x,y-20,color);
+    const scx=640,scy=360,sdx=scx-x,sdy=scy-y,sl=Math.max(1,Math.hypot(sdx,sdy));
+    const sx=x+(sdx/sl)*(compact?12:22),sy=y+(sdy/sl)*(compact?12:22);
+    const special=(spriteKey&&this.sprite(spriteKey,sx,sy-(compact?18:24),window.BusinessFastAssetPipeline?.specialScale||.32))||this.makeSpecialAsset(space.type,sx,sy-18,color);
     if(special){special.setDepth(y+80);this.dynamic.add(special);}
     const mark=icon(space.type);
     if(mark)this.dynamic.add(this.add.text(x,y,mark,{fontFamily:"Arial",fontSize:compact?"13px":"17px",fontStyle:"bold",color:space.type==="property"?"#0f172a":"#0f172a"}).setOrigin(.5));
