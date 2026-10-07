@@ -219,13 +219,15 @@
     const color=owner!==null&&owner!==undefined?hex(space.ownerColor):specialColor(space.type,space.themeColor);
     const compact=isCompact(),g=this.add.graphics();this.dynamic.add(g);
     // PC property card: chunky 2.5D tile inspired by a physical board-game deed space.
-    const isProp=space.type==="property",isPriced=isProp||space.type==="beach",tw=isPriced?82:58,th=isPriced?48:34,depth=isPriced?10:7;
+    const isProp=space.type==="property",isPriced=isProp||space.type==="beach",tw=isPriced?88:62,th=isPriced?52:38,depth=isPriced?12:8;
     const tileColor=isProp?(space.themeColor?hex(space.themeColor):color):(space.type==="beach"?0x08bde8:color);
     g.fillStyle(0x020617,.38);g.fillEllipse(x+7,y+depth+13,tw+20,18);
     // dark extruded side
-    g.fillStyle(0x07111c,.96);g.fillRoundedRect(x-tw/2+5,y-th/2+depth,tw,th,9);
+    g.fillStyle(0x050b12,.98);g.fillRoundedRect(x-tw/2+6,y-th/2+depth,tw,th,10);
+    g.fillStyle(0x0b1725,.72);g.fillRoundedRect(x-tw/2+3,y-th/2+5,tw,th+depth-2,10);
     // coloured top face
-    g.fillStyle(isPriced?tileColor:0xf1f5f9,1);g.fillRoundedRect(x-tw/2,y-th/2,tw,th,9);
+    g.fillStyle(isPriced?tileColor:0xf1f5f9,1);g.fillRoundedRect(x-tw/2,y-th/2,tw,th,10);
+    if(isPriced){g.fillStyle(0x071525,.30);g.fillRoundedRect(x-tw/2+4,y+3,tw-8,th/2-7,6);}
     g.lineStyle(3,isPriced?0xffffff:tileColor,.34);g.strokeRoundedRect(x-tw/2,y-th/2,tw,th,9);
     g.lineStyle(2,0xffffff,.30);g.beginPath();g.moveTo(x-tw/2+9,y-th/2+5);g.lineTo(x+tw/2-9,y-th/2+5);g.strokePath();
     // Interactive hit area stays invisible until hover/selection.
@@ -246,12 +248,12 @@
       b.setDepth(y+50);this.dynamic.add(b);
       const price=Number(space.price||0);
       const title=this.add.text(x,y-4,space.name.toUpperCase(),{
-       fontFamily:"Arial",fontSize:"11px",fontStyle:"bold",color:"#ffffff",stroke:"#06101b",strokeThickness:3,
+       fontFamily:"Arial",fontSize:"12px",fontStyle:"bold",color:"#ffffff",stroke:"#06101b",strokeThickness:4,
        align:"center",wordWrap:{width:74}
       }).setOrigin(.5,.5).setDepth(y+2100);
       const priceTxt=price?price.toLocaleString("fr-FR")+" €":"";
       const ptxt=this.add.text(x,y+13,priceTxt,{
-       fontFamily:"Arial",fontSize:"10px",fontStyle:"bold",color:"#ffffff",stroke:"#06101b",strokeThickness:3
+       fontFamily:"Arial",fontSize:"11px",fontStyle:"bold",color:"#ffffff",stroke:"#06101b",strokeThickness:3
       }).setOrigin(.5,.5).setDepth(y+2100);
       this.dynamic.add(title);this.dynamic.add(ptxt);
       if(owner!==null&&owner!==undefined){
