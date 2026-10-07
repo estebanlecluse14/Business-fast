@@ -9,7 +9,7 @@
  const isCompact=()=>window.innerWidth<760;
  const ISO_SKEW=.28, ISO_LIFT=16;
  const isoPoint=([x,y])=>{
-  const compact=isCompact(),sx=compact?.88:1.16,sy=compact?.68:.91;
+  const compact=isCompact(),sx=compact?.86:1.25,sy=compact?.66:.98;
   return [640+(x-640)*sx,360+(y-360)*sy+(x-640)*(compact?.055:.04)];
  };
  const W=1280,H=720;
@@ -68,7 +68,7 @@
   create(){
    state.scene=this;this.cameras.main.setBackgroundColor("#071525");
    this.world=this.add.container(0,0);
-   this.cameras.main.setZoom(1);
+   this.cameras.main.setZoom(isCompact()?.94:1);
    this.cameras.main.centerOn(W/2,H/2);
       this.drawBase();
    this.dynamic=this.add.container(0,0);
@@ -87,7 +87,7 @@
    g.fillStyle(0x102d23,1);g.fillPoints(FRANCE.map(([x,y])=>new Phaser.Geom.Point(x,y+ISO_LIFT)),true);
    g.lineStyle(4,0x0a2019,.9);g.strokePoints(FRANCE.map(([x,y])=>new Phaser.Geom.Point(x,y+ISO_LIFT)),true);
    g.fillStyle(0x244d36,1);g.fillPoints(FRANCE.map(([x,y])=>new Phaser.Geom.Point(x,y)),true);
-   g.lineStyle(5,0x78a879,.8);g.strokePoints(FRANCE.map(([x,y])=>new Phaser.Geom.Point(x,y)),true);
+   g.lineStyle(7,0x78a879,.78);g.strokePoints(FRANCE.map(([x,y])=>new Phaser.Geom.Point(x,y)),true);g.lineStyle(2,0xb9d89f,.65);g.strokePoints(FRANCE.map(([x,y])=>new Phaser.Geom.Point(x,y-2)),true);
    // simple terrain patches
    g.fillStyle(0x315f3f,.75);g.fillEllipse(520,320,330,170);g.fillEllipse(690,390,300,170);
    g.fillStyle(0x465d45,.55);g.fillTriangle(770,185,808,122,846,190);g.fillTriangle(804,205,846,142,884,214);
@@ -238,7 +238,7 @@
     const color=owner!==null&&owner!==undefined?hex(space.ownerColor):specialColor(space.type,space.themeColor);
     const compact=isCompact(),g=this.add.graphics();this.dynamic.add(g);
     // PC property card: chunky 2.5D tile inspired by a physical board-game deed space.
-    const isProp=space.type==="property",isPriced=isProp||space.type==="beach",tw=isPriced?(compact?82:94):(compact?58:66),th=isPriced?(compact?50:56):(compact?36:40),depth=isPriced?13:9;
+    const isProp=space.type==="property",isPriced=isProp||space.type==="beach",tw=isPriced?(compact?78:82):(compact?56:62),th=isPriced?(compact?48:52):(compact?34:38),depth=isPriced?13:9;
     const tileColor=isProp?(space.themeColor?hex(space.themeColor):color):(space.type==="beach"?0x08bde8:color);
     g.fillStyle(0x020617,.38);g.fillEllipse(x+7,y+depth+13,tw+20,18);
     // dark extruded side
