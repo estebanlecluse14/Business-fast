@@ -2,6 +2,9 @@
    Gameplay remains in game.js. Phaser renders the new readable 2.5D France board. */
 (function(){
  if(typeof window==="undefined")return;
+ // This branch is a Phaser-first preview: switch the board shell immediately,
+ // even before WebGL finishes booting, so the legacy DOM board can never cover it.
+ document.documentElement.classList.add("phaser-preview","phaser-france");
  const state={enabled:false,game:null,scene:null,snapshot:null,revision:0};
  const isCompact=()=>window.innerWidth<760;
  const ISO_SKEW=.28, ISO_LIFT=16;
@@ -326,7 +329,8 @@
   update(){if(this.lastRevision!==state.revision){this.lastRevision=state.revision;this.renderSnapshot()}}
  }
  function boot(){
-  if(state.game||typeof Phaser==="undefined"||!document.getElementById("phaserMount"))return;
+  if(state.game||!document.getElementById("phaserMount"))return;
+  if(typeof Phaser==="undefined"){document.documentElement.classList.add("phaser-load-error");return;}
   state.game=new Phaser.Game({type:Phaser.WEBGL,parent:"phaserMount",width:W,height:H,transparent:true,backgroundColor:"rgba(0,0,0,0)",
    render:{antialias:true,pixelArt:false,roundPixels:true,powerPreference:"high-performance",premultipliedAlpha:true},
    scale:{mode:Phaser.Scale.FIT,autoCenter:Phaser.Scale.CENTER_BOTH},scene:[FranceBoard]});
