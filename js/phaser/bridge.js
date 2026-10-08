@@ -291,6 +291,8 @@
    const cx=640,cy=360,dx=cx-x,dy=cy-y,len=Math.max(1,Math.hypot(dx,dy));
    const inwardX=dx/len,inwardY=dy/len;
    const count=[1,2,3,4][level],spread=compact?15:21;
+   // Stable per-property composition: buildings can be individually animated or replaced.
+   root.setData("buildingCount",count);
    for(let n=0;n<count;n++){
     const tangentX=-inwardY,tangentY=inwardX;
     const offset=(n-(count-1)/2)*spread;
