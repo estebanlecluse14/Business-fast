@@ -606,6 +606,29 @@ function buildingVisual(s){
    <span class="district-mark">${(s.theme?.label||'Q').slice(0,1)}</span>
   </div>`;
 }
+function syncPhaserBoard(){
+ const bridge=window.BusinessFastPhaser;
+ if(!bridge?.sync)return;
+ bridge.sync({
+   current,
+   roundNumber,
+   rolled,
+   gameOver,
+   spaces:spaces.map(s=>({
+     id:s.id,name:s.name,type:s.type,owner:s.owner,level:s.level||0,
+     ownerColor:s.owner!==null?colors[s.owner]:null,
+     themeColor:s.theme?.color||'#64748b',
+     price:['property','beach'].includes(s.type)?purchasePrice(s):0,
+     rent:['property','beach'].includes(s.type)?currentRent(s):0,
+     value:['property','beach'].includes(s.type)?parcelValue(s):0
+   })),
+   players:players.map((p,i)=>({
+     index:i,name:p.name,pos:p.pos||0,active:!!p.active,money:p.money,
+     color:colors[i%colors.length],jailed:!!p.jailed
+   }))
+ });
+}
+
 function drawBoard(){
   board.querySelectorAll('.space').forEach(e=>e.remove());
   spaces.forEach(s=>{
@@ -688,6 +711,7 @@ function drawBoard(){
     </div>`;
     board.appendChild(d);
   });
+  syncPhaserBoard();
 }
 
 function renderWonderSite(){
@@ -762,6 +786,7 @@ function renderPlayers(){
    }).join('');
  }
  renderWonderSite();
+ syncPhaserBoard();
 }
 
 function addLog(msg){const d=document.createElement('div'); d.innerHTML=msg; logBox.prepend(d)}

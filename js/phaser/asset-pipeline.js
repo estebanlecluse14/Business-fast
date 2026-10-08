@@ -1,0 +1,39 @@
+/* Business Fast — V2 HD sprite pipeline
+   Phaser is the compositor/animation engine. Major artwork lives in transparent PNG assets. */
+window.BusinessFastAssetPipeline={
+ version:7,
+ format:"png",
+ quality:"hd",
+ fallback:true,
+ sprites:{
+  city_0:"assets/phaser/png/city_0.png",
+  city_1:"assets/phaser/png/city_1.png",
+  city_2:"assets/phaser/png/city_2.png",
+  city_3:"assets/phaser/png/city_3.png",
+  bank:"assets/phaser/png/bank.png",
+  jail:"assets/phaser/png/jail.png",
+  airport:"assets/phaser/png/airport.png",
+  beach:"assets/phaser/png/beach.png",
+  forest:"assets/phaser/forest.png",
+  mountain:"assets/phaser/mountain.png",
+  village:"assets/phaser/village.png",
+  field:"assets/phaser/field.png",
+  lake:"assets/phaser/lake.png",
+  lighthouse:"assets/phaser/lighthouse.png",
+  station:"assets/phaser/station.png",
+  stadium:"assets/phaser/stadium.png"
+ },
+ cityScale:[.34,.36,.38,.40],
+ specialScale:.36,
+ sceneryScale:1,
+ assetPolicy:"modular-lego",
+ cacheVersion:"v2-7",
+ artDirection:"premium-25d",
+ buildingVariants:{
+  0:["city_0"],
+  1:["city_1"],
+  2:["city_2"],
+  3:["city_3"]
+ },
+ legoLayers:["ground","props","buildings","landmark","fx"]
+};
