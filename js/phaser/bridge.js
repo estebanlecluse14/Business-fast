@@ -301,6 +301,7 @@
     const variants=window.BusinessFastAssetPipeline?.buildingVariants?.[level]||[];\n    const key=variants.length?variants[this.cityVariant(space,n)%variants.length]:"city_"+level;
     const scale=(window.BusinessFastAssetPipeline?.cityScale?.[level]||.32)*(count>1?.88:1);
     const asset=this.sprite(key,bx,by-(compact?18:25),scale);
+    if(asset){asset.setData("legoPart","building");asset.setData("variant",this.cityVariant(space,n));asset.setData("buildingSlot",n);asset.setName("building-"+n);}
     const part=asset||this.makeBuilding(bx,by-22,color,level,this.cityVariant(space,n));
     if(part){part.setDepth(n);root.add(part)}
    }
