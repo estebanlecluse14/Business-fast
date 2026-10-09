@@ -2886,11 +2886,14 @@ document.querySelectorAll('[data-character-card]').forEach(card=>{
  });
 });
 refreshLobbyCharacterGallery();
+document.querySelectorAll('[data-character-select]').forEach(el=>el.dispatchEvent(new Event('change')));
 document.querySelectorAll('[data-character-select]').forEach(select=>{
  select.addEventListener('change',()=>{
   const slot=select.dataset.characterSelect;
   const preview=document.querySelector('[data-character-preview="'+slot+'"]');
   if(preview){preview.src='assets/characters/'+select.value+'.svg';preview.alt=characterNames[characterIds.indexOf(select.value)]||'Personnage'}
+  const hint=select.closest('.slot-main')?.querySelector('.character-hint');
+  if(hint){const trait=characterTrait({characterId:select.value});hint.textContent=trait?('✓ '+trait[1]+' · ⚠ '+trait[2]):'Compétences standard'}
   refreshLobbyCharacterGallery();
  });
 });
