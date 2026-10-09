@@ -8291,3 +8291,59 @@ html.phaser-ready .phaser-mount{opacity:1}
 .space.side-top .case-economy-sub,.space.side-bottom .case-economy-sub{font-size:8px!important}
 .space.side-top .case-city,.space.side-bottom .case-city{font-size:10px!important;min-height:26px!important}
 @media(max-width:700px){.board{height:850px!important;min-height:850px!important}}
+
+/* V0.52.1 — property upgrades visible ABOVE rent overlay on horizontal tiles */
+.space.side-top .bf-evolving-plot,
+.space.side-bottom .bf-evolving-plot{
+  bottom:auto!important;
+  top:0!important;
+  height:calc(100% - 77px)!important;
+  min-height:72px!important;
+  overflow:hidden!important;
+  border-radius:12px 12px 5px 5px!important;
+}
+.space.side-top .bf-evolving-plot .level-building-art,
+.space.side-bottom .bf-evolving-plot .level-building-art{
+  top:18px!important;
+  bottom:0!important;
+  left:0!important;
+  right:0!important;
+  width:100%!important;
+  height:calc(100% - 18px)!important;
+  object-fit:contain!important;
+  object-position:center bottom!important;
+  z-index:5!important;
+}
+.space.side-top .bf-evolving-plot .property-level-badge,
+.space.side-bottom .bf-evolving-plot .property-level-badge{
+  position:absolute!important;
+  top:24px!important;
+  right:4px!important;
+  bottom:auto!important;
+  left:auto!important;
+  z-index:15!important;
+  width:auto!important;
+  max-width:90%!important;
+  padding:3px 5px!important;
+  border-radius:6px!important;
+  background:#163d32!important;
+  color:white!important;
+  font-size:9px!important;
+  line-height:1!important;
+  font-weight:900!important;
+  transform:none!important;
+}
+.space.side-top .case-economy,
+.space.side-bottom .case-economy{
+  top:auto!important;
+  bottom:23px!important;
+  min-height:0!important;
+  height:51px!important;
+  padding:3px 5px!important;
+  margin:0!important;
+  z-index:11!important;
+}
+.space.side-top .case-economy .property-level-badge,
+.space.side-bottom .case-economy .property-level-badge{display:none!important}
+.space.side-top .bf-evolving-plot .case-art-gloss,
+.space.side-bottom .bf-evolving-plot .case-art-gloss{pointer-events:none!important}
