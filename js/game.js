@@ -602,6 +602,7 @@ function buildingVisual(s){
     <div class="bf-plot-ground"><span class="bf-plot-path"></span><span class="bf-plot-grass"></span></div>
     ${level>0?`<img class="level-building-art level-${level}" src="assets/buildings/level${level}.svg" alt="" loading="eager">`:''}
     <div class="case-art-gloss"></div>
+    ${level>0?houseVisual(level):''}
     <span class="district-mark">${(s.theme?.label||'Q').slice(0,1)}</span>
    </div>`;
  }
@@ -641,7 +642,7 @@ function drawBoard(){
         : `<div class="case-owner-band available" style="--band:${s.theme?.color||'#94a3b8'}"><span class="owner-swatch"></span><span>À VENDRE</span></div>`;
       const districtReady=districtState&&districtState.owned===districtState.total?'<span class="district-ready">M</span>':'';
       const stressBadge=mp.level?`<div class="case-stress">${mp.label}</div>`:'';
-      const houses=s.type==='property'&&s.level>0?houseVisual(s.level):'<div class="houses clean-houses"></div>';
+      const houses=s.type==='property'&&s.level>0?houseVisual(s.level):'';
 
       d.innerHTML=`<div class="tile-face property-layout">
         <div class="case-pawn-slot">${tokensHtml}</div>
@@ -652,7 +653,6 @@ function drawBoard(){
           <div class="case-economy-value">${economyValue}</div>
           <div class="case-economy-sub">${valueLine}</div>
           ${stressBadge}
-          ${houses}
         </div>
         <div class="case-city"><span>${s.name}</span>${districtReady}</div>
       </div>`;
