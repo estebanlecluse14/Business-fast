@@ -8514,3 +8514,26 @@ html.phaser-ready .phaser-mount{opacity:1}
 /* V0.56.1: modal dialogs must stack ABOVE the fixed main menu (z-index:9990). */
 #updatesModal.updates-modal,#settingsModal.settings-modal{z-index:10020!important}
 #updatesModal .updates-box,#settingsModal .settings-box{position:relative;z-index:1}
+
+/* V0.57 — online waiting room */
+.bf-online-entry{display:flex;justify-content:center;margin-top:18px}
+.bf-online-launch{display:flex;flex-direction:column;align-items:center;gap:3px;width:min(450px,100%);padding:14px 20px;border:2px solid #277ea4;border-radius:14px;background:linear-gradient(#75d3ec,#2f9cc7);color:#103d55;font-weight:1000;font-size:17px;cursor:pointer;box-shadow:0 5px 0 #247596}
+.bf-online-launch small{font-size:12px;font-weight:700;color:#19516a}
+.bf-online-overlay[hidden],.bf-online-box [hidden]{display:none!important}
+.bf-online-overlay{position:fixed;inset:0;z-index:11000;display:flex;justify-content:center;align-items:center;background:#152b35b8;padding:18px}
+.bf-online-box{position:relative;width:min(620px,100%);max-height:90vh;overflow:auto;background:linear-gradient(#fff9eb,#ffe8bd);border:7px solid #e4a044;border-radius:24px;padding:28px;color:#633818;box-shadow:0 10px 0 #976022,0 25px 60px #0005}
+.bf-online-box h2{margin:14px 0 4px;font-size:28px;color:#713b12}
+.bf-online-intro{margin-bottom:20px;color:#8a5a30}
+.bf-online-close{position:absolute;top:12px;right:12px;background:#fff5e4;border:2px solid #dfb57d;border-radius:10px;padding:8px 12px;cursor:pointer;color:#704018}
+.bf-online-box label{display:block;font-weight:900;margin-bottom:8px}
+.bf-online-box input{width:100%;min-width:0;padding:13px;border:2px solid #deb480;border-radius:11px;background:#fffefa;color:#553719;font-size:16px}
+.bf-online-actions{display:grid;grid-template-columns:1fr auto 110px auto;gap:9px;align-items:center;margin-top:16px}
+.bf-online-actions button,#onlineCopyBtn,#onlineLeaveBtn{padding:13px 12px;border:2px solid #2b8c50;border-radius:11px;background:#43b665;color:#fff;font-weight:900;cursor:pointer}
+.bf-online-actions span{font-size:12px;font-weight:900}
+.bf-online-status{min-height:24px;color:#34774b;font-weight:800}
+.bf-online-status.error{color:#af382f}
+.bf-online-disclaimer{font-size:12px;color:#916c48;border-top:1px solid #eacb9f;padding-top:12px}
+.bf-online-members{display:grid;gap:8px;margin:15px 0}
+.bf-online-members>div{padding:12px;background:#fff7e9;border:1px solid #e7c49b;border-radius:9px;font-weight:800}
+#onlineRoomCodeDisplay{font-size:24px;letter-spacing:3px}
+@media(max-width:620px){.bf-online-actions{grid-template-columns:1fr 1fr}.bf-online-actions span{text-align:center}.bf-online-box{padding:20px 14px}}
