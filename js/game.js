@@ -1,3 +1,23 @@
+const mainMenuScreen=document.getElementById('mainMenuScreen');
+const mainLobbyScreen=document.getElementById('startScreen');
+function openMainLobby(){
+ mainMenuScreen?.classList.add('bf-menu-hidden');
+ mainLobbyScreen?.classList.add('active');
+ refreshLobbySetup();
+}
+function backToMainMenu(){
+ mainLobbyScreen?.classList.remove('active');
+ mainMenuScreen?.classList.remove('bf-menu-hidden');
+}
+document.getElementById('mainPlayBtn')?.addEventListener('click',openMainLobby);
+document.getElementById('lobbyBackToMenu')?.addEventListener('click',backToMainMenu);
+document.getElementById('mainSettingsBtn')?.addEventListener('click',()=>{
+ document.getElementById('settingsModal')?.classList.add('open');
+ document.getElementById('settingsModal')?.setAttribute('aria-hidden','false');
+});
+document.getElementById('mainUpdatesBtn')?.addEventListener('click',()=>{
+ document.getElementById('updatesBtn')?.click();
+});
 const updatesModal=document.getElementById('updatesModal');
 document.getElementById('updatesBtn').addEventListener('click',()=>{
   updatesModal.classList.add('open');
