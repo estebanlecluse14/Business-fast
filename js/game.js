@@ -373,7 +373,8 @@ function rentForPrice(price,level=0,type='property'){
 function upgradeCost(s,nextLevel){
   if(!s||s.type!=='property'||nextLevel<1||nextLevel>3)return 0;
   const rates=[0,.25,.35,.50];
-  return roundPriceStep(Math.round(s.price*rates[nextLevel]));
+  const owner=typeof players!=='undefined'&&s.owner!==null?players[s.owner]:null;
+  return roundPriceStep(Math.round(s.price*rates[nextLevel]*(owner?.characterId==='architecte'?.92:1)));
 }
 const rents=basePrices.map((p,i)=>p?rentForPrice(p,0,types[i]):0);
 function baseParcelValue(s){
@@ -408,7 +409,8 @@ function currentRent(s){
   const owner=s.owner!==null?players[s.owner]:null;
   if(owner?.floodTurnsLeft>0)return 0;
   const quakeMultiplier=((s.repairTurnsLeft||0)>0)?0.25:1;
-  return roundRentStep(raw*(1-m.rentPenalty)*wonderMultiplier*quakeMultiplier);
+  const multiplier={magnat:1.06,stratege:.95,aventuriere:.96,rebelle:.93}[owner?.characterId]||1;
+  return roundRentStep(raw*(1-m.rentPenalty)*wonderMultiplier*quakeMultiplier*multiplier);
 }
 function parcelValue(s){
   const raw=baseParcelValue(s);
@@ -799,7 +801,7 @@ function renderWonderSite(){
  </div>`;
 }
 function renderPlayers(){
- playerBox.innerHTML=players.map((p,i)=>`<div class="player ${i===current&&p.active?'active':''}">${pawnVisual(i,p.name,'panel-pawn')}<div class="pmeta"><div class="pname">${p.name}${p.isAI?' <span class="ai-player-badge">IA</span>':''}${!p.active?' 💀':''}</div><div class="pmoney">${moneyFmt(p.money)} · ${p.props.length} biens · ${p.beaches} plage(s)</div>${p.jailed&&p.active?`<div class="jail-player-status">PRISON · ${p.jailTurnsLeft} tour(s)</div>`:''}${p.wonderMode&&p.active?`<div class="wonder-progress">🏛️ ${p.wonderLine} · ${p.wonderTurnsLeft} tour(s) · ${p.wonderMode==='communist'?'collective':'accélérée'}</div>`:''}</div></div>`).join('');
+ playerBox.innerHTML=players.map((p,i)=>`<div class="player ${i===current&&p.active?'active':''}">${pawnVisual(i,p.name,'panel-pawn')}<div class="pmeta"><div class="pname">${p.name}${p.isAI?' <span class="ai-player-badge">IA</span>':''}${!p.active?' 💀':''}</div><div class="character-trait-line">${characterTrait(p)?.join(' · ')||''}</div><div class="pmoney">${moneyFmt(p.money)} · ${p.props.length} biens · ${p.beaches} plage(s)</div>${p.jailed&&p.active?`<div class="jail-player-status">PRISON · ${p.jailTurnsLeft} tour(s)</div>`:''}${p.wonderMode&&p.active?`<div class="wonder-progress">🏛️ ${p.wonderLine} · ${p.wonderTurnsLeft} tour(s) · ${p.wonderMode==='communist'?'collective':'accélérée'}</div>`:''}</div></div>`).join('');
  const activeWonder=players.find(p=>p.active&&p.wonderMode&&p.wonderTurnsLeft>0);
  document.getElementById('turnText').innerHTML=gameOver?'Partie terminée':`<span class="turn-player-name">${players[current]?.name||''}</span><small class="turn-round">Tour de table ${roundNumber}</small>${communistWonderActive()?'<div class="global-rent-alert">☭ Construction collective : tous les loyers -65 %</div>':activeWonder?`<div class="wonder-banner">🏛️ ${activeWonder.name} · Merveille dans ${activeWonder.wonderTurnsLeft} tour(s)</div>`:''}`;
  const centerTokens=document.getElementById('centerTokens');
@@ -1062,7 +1064,10 @@ function updateActions(){
  }
  renderWonderSite();
 }
-function passStart(p,steps){if(p.pos+steps>=36){p.money+=30000;stat('moneyInjected',30000);addLog(`💰 <b>${p.name}</b> passe par DÉPART : +${moneyFmt(30000)}`);showCinematic('start','PASSAGE DÉPART','+30 000 €',`${p.name} reçoit son bonus de tour.`,1450);pulsePlayerCard(players.indexOf(p),'positive')}}
+const CHARACTER_TRAITS={magnat:['Le Magnat','Loyers +6 %','Départ -3 000 €'],architecte:["L'Architecte",'Constructions -8 %','Départ -2 000 €'],banquiere:['La Banquière','Placement Banque +8 %','Départ -2 000 €'],stratege:['Le Stratège','Départ +5 000 €','Loyers -5 %'],aventuriere:["L'Aventurière",'Départ +4 000 €','Loyers -4 %'],rebelle:['Le Rebelle','Départ +7 000 €','Loyers -7 %']};
+function characterTrait(p){return CHARACTER_TRAITS[p?.characterId]||null}
+function characterStartAdjustment(p){return {magnat:-3000,architecte:-2000,banquiere:-2000,stratege:5000,aventuriere:4000,rebelle:7000}[p?.characterId]||0}
+function passStart(p,steps){if(p.pos+steps>=36){const amount=30000+characterStartAdjustment(p);p.money+=amount;stat('moneyInjected',amount);addLog(`💰 <b>${p.name}</b> passe par DÉPART : +${moneyFmt(amount)}`);showCinematic('start','PASSAGE DÉPART','+'+moneyFmt(amount),`${p.name} reçoit son bonus de tour.`,1450);pulsePlayerCard(players.indexOf(p),'positive')}}
 function sleep(ms){return new Promise(r=>setTimeout(r,ms))}
 async function animateDice(finalRoll){
  const dice=document.getElementById('dice');
@@ -1446,7 +1451,7 @@ function bankCloseModal(){
 function collectBankInvestment(playerIndex){
  const p=players[playerIndex];
  if(!p?.bankInvestment)return 0;
- const amount=p.bankInvestment;
+ const amount=p.characterId==='banquiere'?Math.round(p.bankInvestment*1.08):p.bankInvestment;
  p.money+=amount;
  p.bankInvestment=0;
  p.bankInvestmentSkip=false;
