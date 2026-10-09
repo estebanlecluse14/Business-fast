@@ -1,9 +1,9 @@
-// Configuration publique Firebase Web. Remplacer les champs depuis Firebase Console.
-// Ne jamais placer de clé de compte de service ou de secret administrateur ici.
+// Configuration publique Firebase Web (aucune clé de compte de service).
+// Renseigner databaseURL après création de Realtime Database.
 window.BUSINESS_FAST_FIREBASE_CONFIG = {
-  apiKey: "",
-  authDomain: "",
+  apiKey: "AIzaSyDMNExine48CO9eELohEfr2IlryZiUk14k",
+  authDomain: "business-fast.firebaseapp.com",
   databaseURL: "",
-  projectId: "",
-  appId: ""
+  projectId: "business-fast",
+  appId: "1:320266633430:web:11f86290d94211da520977"
 };
