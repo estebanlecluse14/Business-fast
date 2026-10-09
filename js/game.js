@@ -612,6 +612,41 @@ function buildingVisual(s){
    <span class="district-mark">${(s.theme?.label||'Q').slice(0,1)}</span>
   </div>`;
 }
+function positionBoardPawns(){
+ const boardRect=board.getBoundingClientRect();
+ board.querySelectorAll('.board-edge-pawns').forEach(el=>el.remove());
+ board.querySelectorAll('.space').forEach(space=>{
+  const pawns=[...space.querySelectorAll('.case-pawn-slot .board-pawn, .special-layout > .tokens .board-pawn')];
+  if(!pawns.length)return;
+  const rect=space.getBoundingClientRect();
+  const top=space.classList.contains('side-top');
+  const bottom=space.classList.contains('side-bottom');
+  const left=space.classList.contains('side-left');
+  const right=space.classList.contains('side-right');
+  const corner=space.classList.contains('corner');
+  const layer=document.createElement('div');
+  layer.className='board-edge-pawns';
+  layer.style.position='absolute';
+  layer.style.display='flex';
+  layer.style.alignItems='center';
+  layer.style.justifyContent='center';
+  layer.style.gap='0px';
+  layer.style.pointerEvents='none';
+  layer.style.zIndex='999';
+  layer.style.width='max-content';
+  layer.style.height='40px';
+  let x=(rect.left+rect.right)/2-boardRect.left;
+  let y=rect.top-boardRect.top-22;
+  if(bottom){y=rect.bottom-boardRect.top+19;}
+  else if(left&&!corner){x=rect.left-boardRect.left-18;y=(rect.top+rect.bottom)/2-boardRect.top;}
+  else if(right&&!corner){x=rect.right-boardRect.left+18;y=(rect.top+rect.bottom)/2-boardRect.top;}
+  layer.style.left=x+'px';
+  layer.style.top=y+'px';
+  layer.style.transform='translate(-50%,-50%)';
+  pawns.forEach(pawn=>layer.appendChild(pawn));
+  board.appendChild(layer);
+ });
+}
 function drawBoard(){
   board.querySelectorAll('.space').forEach(e=>e.remove());
   spaces.forEach(s=>{
@@ -693,6 +728,7 @@ function drawBoard(){
     </div>`;
     board.appendChild(d);
   });
+  positionBoardPawns();
 }
 
 function renderWonderSite(){
