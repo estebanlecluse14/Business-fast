@@ -8376,3 +8376,10 @@ html.phaser-ready .phaser-mount{opacity:1}
  .space.side-top .case-pawn-slot{top:-34px!important}
  .space.side-bottom .case-pawn-slot{bottom:-38px!important}
 }
+
+/* V0.52.3 — independent pawn overlay: never clipped by property art or cards */
+.board{position:relative!important;overflow:visible!important}
+.board-edge-pawns{overflow:visible!important;isolation:isolate}
+.board-edge-pawns .board-pawn{display:block!important;position:relative!important;width:29px!important;height:39px!important;max-width:none!important;max-height:none!important;object-fit:contain!important;opacity:1!important;visibility:visible!important;transform:none!important;filter:none!important;animation:none!important;flex-shrink:0!important;margin:0 -4px!important}
+.board-edge-pawns .board-pawn:first-child{margin-left:0!important}
+.board-edge-pawns .board-pawn:last-child{margin-right:0!important}
