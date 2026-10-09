@@ -8410,3 +8410,52 @@ html.phaser-ready .phaser-mount{opacity:1}
 .player-pawn.panel-pawn{object-fit:contain!important}
 .moving-pawn{object-fit:contain!important}
 @media(max-width:700px){.player-slot .slot-avatar{width:45px!important;min-width:45px!important;height:56px!important}.slot-avatar .character-preview{width:44px!important;height:54px!important}}
+
+/* === V0.53.1 : colorful board-game inspired lobby === */
+#startScreen{background:radial-gradient(circle at 15% 80%,#63b8d8 0%,transparent 32%),radial-gradient(circle at 85% 15%,#93c879 0%,transparent 33%),linear-gradient(135deg,#a5d5dc,#ebd6a2 48%,#88bc93)!important;color:#402914!important;overflow-y:auto!important}
+#startScreen .start-backdrop{opacity:.3!important;filter:blur(35px)!important;pointer-events:none!important}
+#startScreen .start-wrap{position:relative!important;width:min(1400px,calc(100% - 32px))!important;max-width:1400px!important;margin:22px auto 40px!important;padding:20px 26px 28px!important;border:9px solid #e4a13b!important;border-radius:34px!important;background:linear-gradient(155deg,#fff7e8 0%,#fff0d6 60%,#ffe1a8 100%)!important;box-shadow:0 9px 0 #a86b28,0 30px 70px rgba(65,51,24,.36)!important;min-height:0!important}
+#startScreen .lobby-badge{display:inline-flex!important;background:#f7d19a!important;color:#82441e!important;border:1px solid #e5a45a!important;border-radius:12px!important;padding:6px 12px!important;font-weight:900!important;box-shadow:none!important}
+#startScreen .lobby-logo{font-size:clamp(32px,4vw,60px)!important;color:#69340f!important;text-shadow:0 3px 0 #efc27a!important;letter-spacing:-1px!important}
+#startScreen .lobby-logo span{color:#239653!important}
+#startScreen .subtitle{color:#875d34!important;font-weight:650!important}
+#startScreen .lobby-shell{display:grid!important;grid-template-columns:minmax(0,1fr) 260px!important;gap:18px!important;align-items:start!important;background:transparent!important;border:0!important;box-shadow:none!important;padding:0!important;overflow:visible!important}
+#startScreen .lobby-main,#startScreen .lobby-side{background:transparent!important;border:0!important;box-shadow:none!important;min-width:0!important}
+#startScreen .lobby-section-head{background:linear-gradient(100deg,#f5c989,#f9e2b9)!important;border:1px solid #edbd7e!important;border-radius:16px!important;padding:12px 16px!important;margin-bottom:14px!important}
+#startScreen .lobby-section-head h2{color:#70390f!important;font-size:24px!important}
+#startScreen .eyebrow,#startScreen .lobby-music{color:#90501f!important}
+#startScreen .setup-grid{background:#fce5c5!important;border:1px solid #edc18d!important;border-radius:16px!important;padding:14px!important;box-shadow:inset 0 2px 5px #b67c3020!important}
+#startScreen .field label{color:#854719!important;font-weight:900!important}
+#startScreen .field select,#startScreen .slot-main input,#startScreen .character-select{background:#fffaf0!important;border:2px solid #e7bf8d!important;color:#422c1c!important;border-radius:10px!important;min-height:38px!important;box-shadow:none!important}
+#startScreen .lobby-section-title{display:flex;justify-content:space-between;align-items:center;gap:8px;color:#8a4215;font-weight:1000;font-size:15px;margin:16px 2px 9px}
+#startScreen .lobby-section-title small{font-size:11px;color:#9a744b;font-weight:600}
+#startScreen .lobby-character-gallery{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;background:#fbe5c5;border:1px solid #efc38c;border-radius:18px;padding:10px}
+#startScreen .lobby-character-card{display:flex;flex-direction:column;align-items:center;justify-content:end;gap:4px;min-width:0;min-height:142px;padding:7px 4px 8px;border:2px solid #e9c29a;border-radius:13px;background:linear-gradient(#c9e7fc,#f6f6df);cursor:pointer;box-shadow:0 4px 0 #c5a276;transition:transform .12s ease,border-color .12s ease}
+#startScreen .lobby-character-card:nth-child(2){background:linear-gradient(#ffddbf,#fff1d8)}
+#startScreen .lobby-character-card:nth-child(3){background:linear-gradient(#d9f6c5,#f8f2d9)}
+#startScreen .lobby-character-card:nth-child(4){background:linear-gradient(#d4d7ff,#fff2dc)}
+#startScreen .lobby-character-card:nth-child(5){background:linear-gradient(#f5d5fc,#fff1df)}
+#startScreen .lobby-character-card:nth-child(6){background:linear-gradient(#ffdec1,#fff0db)}
+#startScreen .lobby-character-card img{height:105px;max-width:100%;object-fit:contain;filter:drop-shadow(0 3px 2px #68452655)}
+#startScreen .lobby-character-card span{display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#513018;background:#fff9ee;border-radius:6px;padding:4px;font-size:11px;font-weight:900}
+#startScreen .lobby-character-card.selected{border-color:#2698ed!important;box-shadow:0 0 0 3px #69c4ff88,0 4px 0 #2775ae!important;transform:translateY(-2px)}
+#startScreen .player-slots{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px!important}
+#startScreen .player-slot{display:flex!important;align-items:center!important;gap:9px!important;min-width:0!important;padding:10px!important;background:#fff5e6!important;border:2px solid #e7c49c!important;border-radius:15px!important;box-shadow:0 3px 0 #e6bc83!important;color:#422c1c!important}
+#startScreen .player-slot.character-target{border-color:#2a9de8!important;box-shadow:0 0 0 2px #8cdbff,0 3px 0 #3688b2!important}
+#startScreen .player-slot.slot-hidden{display:none!important}
+#startScreen .slot-index{background:#259be4!important;color:white!important;border-radius:10px!important}
+#startScreen .slot-main{min-width:0!important;flex:1!important}
+#startScreen .slot-main label,#startScreen .character-field-label{color:#74451d!important}
+#startScreen .character-hint{color:#9c754c!important}
+#startScreen .slot-avatar{background:linear-gradient(#d9f4fe,#ffeac8)!important}
+#startScreen .player-type-toggle{background:linear-gradient(#3ea7ef,#1874c5)!important;color:white!important;border:0!important;border-radius:10px!important;min-width:90px!important;box-shadow:0 3px 0 #17558d!important}
+#startScreen .player-type-toggle.ai{background:linear-gradient(#67bd5e,#2d9148)!important;box-shadow:0 3px 0 #246a35!important}
+#startScreen .player-type-toggle b,#startScreen .player-type-toggle small{color:white!important}
+#startScreen .lobby-note{background:#e7f3d8!important;color:#41612d!important;border:1px solid #b4d595!important;border-radius:13px!important;margin-top:16px!important}
+#startScreen .lobby-note b,#startScreen .lobby-note small{color:#41612d!important}
+#startScreen .lobby-side-card{background:linear-gradient(145deg,#fff9ee,#f7dfb9)!important;border:1px solid #eac18a!important;border-radius:16px!important;color:#553317!important;box-shadow:0 4px 0 #ddb27a!important;margin-bottom:13px!important}
+#startScreen .lobby-side-card strong,#startScreen .lobby-side-card small{color:#553317!important}
+#startScreen .lobby-start{background:linear-gradient(180deg,#72d855,#279b37)!important;color:#fff!important;border:3px solid #287f29!important;border-radius:18px!important;font-size:21px!important;font-weight:1000!important;box-shadow:0 6px 0 #1b702a,0 12px 18px #47773540!important;min-height:65px!important;text-shadow:0 2px 1px #286c2d!important}
+#startScreen .updates-btn{background:#fff2dc!important;color:#75461f!important;border:2px solid #e4b47d!important;border-radius:13px!important}
+@media(max-width:980px){#startScreen .lobby-shell{grid-template-columns:1fr!important}#startScreen .lobby-side{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px!important}#startScreen .lobby-character-card{min-height:120px}#startScreen .lobby-character-card img{height:84px}}
+@media(max-width:640px){#startScreen .start-wrap{width:calc(100% - 12px)!important;padding:12px!important;border-width:5px!important;border-radius:20px!important}#startScreen .lobby-character-gallery{grid-template-columns:repeat(3,minmax(0,1fr))}#startScreen .player-slots{grid-template-columns:1fr!important}#startScreen .lobby-side{grid-template-columns:1fr!important}#startScreen .lobby-section-title{display:block}#startScreen .lobby-section-title small{display:block;margin-top:3px}}
