@@ -648,7 +648,8 @@ function positionBoardPawns(){
  });
 }
 function drawBoard(){
-  board.querySelectorAll('.space').forEach(e=>e.remove());
+  board.querySelectorAll('.space,.board-edge-pawns').forEach(e=>e.remove());
+  const tileBatch=document.createDocumentFragment();
   spaces.forEach(s=>{
     const d=document.createElement('div');
     const p=boardPos(s.id);
@@ -693,7 +694,7 @@ function drawBoard(){
       </div>`;
       d.dataset.clickable='true';
       d.addEventListener('click',()=>openPropertyModal(s.id));
-      board.appendChild(d);
+      tileBatch.appendChild(d);
       return;
     }
 
@@ -726,8 +727,9 @@ function drawBoard(){
       </div>
       <div class="tokens">${tokensHtml}</div>
     </div>`;
-    board.appendChild(d);
+    tileBatch.appendChild(d);
   });
+  board.appendChild(tileBatch);
   positionBoardPawns();
 }
 
@@ -1112,7 +1114,7 @@ async function animateTokenStep(playerIndex,from,to,movingPawn=null){
 async function movePlayer(steps){
  const p=players[current],idx=current,initial=p.pos;
  passStart(p,steps);
- const staticPawns=board.querySelectorAll(`.space[data-space-id="${initial}"] .board-pawn`);
+ const staticPawns=board.querySelectorAll('.board-edge-pawns .board-pawn');
  staticPawns.forEach(el=>el.style.opacity='0');
  let movingPawn=null;
  for(let n=0;n<steps;n++){
