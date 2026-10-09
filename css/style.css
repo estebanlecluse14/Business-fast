@@ -8383,3 +8383,19 @@ html.phaser-ready .phaser-mount{opacity:1}
 .board-edge-pawns .board-pawn{display:block!important;position:relative!important;width:29px!important;height:39px!important;max-width:none!important;max-height:none!important;object-fit:contain!important;opacity:1!important;visibility:visible!important;transform:none!important;filter:none!important;animation:none!important;flex-shrink:0!important;margin:0 -4px!important}
 .board-edge-pawns .board-pawn:first-child{margin-left:0!important}
 .board-edge-pawns .board-pawn:last-child{margin-right:0!important}
+
+/* V0.52.4 — reduce per-tile paint work while keeping the 2D look */
+.performance-lite .bf-evolving-plot,
+.performance-lite .bf-evolving-plot .bf-plot-ground,
+.performance-lite .bf-evolving-plot .level-building-art,
+.performance-lite .board-edge-pawns .board-pawn{
+  backdrop-filter:none!important;
+  -webkit-backdrop-filter:none!important;
+}
+.performance-lite .bf-evolving-plot .level-building-art{filter:none!important}
+.performance-lite .board-edge-pawns .board-pawn{filter:none!important;animation:none!important}
+.performance-lite .space.property:hover,
+.performance-lite .space.beach:hover{box-shadow:none!important;filter:none!important}
+@media(prefers-reduced-motion:reduce){
+ .board-edge-pawns .board-pawn,.bf-evolving-plot .level-building-art{animation:none!important;transition:none!important}
+}
