@@ -8274,3 +8274,20 @@ html.phaser-ready .phaser-mount{opacity:1}
 .bf-evolving-plot.plot-level-1{background:linear-gradient(145deg,#b6d48b,#78ae63)}
 .bf-evolving-plot.plot-level-2{background:linear-gradient(145deg,#b1c4a3,#6c9872)}
 .bf-evolving-plot.plot-level-3{background:linear-gradient(145deg,#a7b4aa,#587f75)}
+
+/* V0.51 — readability: taller top and bottom rows, matching side tiles */
+.board{
+  height:clamp(850px,calc(100vh - 28px),1020px)!important;
+  min-height:850px!important;
+  grid-template-rows:minmax(152px,1.85fr) repeat(8,minmax(0,1fr)) minmax(152px,1.85fr)!important;
+}
+.space.side-top,.space.side-bottom,.space.corner{min-height:0!important}
+.space.side-top .property-layout,.space.side-bottom .property-layout{
+  grid-template-rows:minmax(72px,1.6fr) 19px minmax(42px,.8fr) 26px!important;
+}
+.space.side-top .case-visual,.space.side-bottom .case-visual{min-height:72px!important}
+.space.side-top .case-economy-label,.space.side-bottom .case-economy-label{font-size:8px!important}
+.space.side-top .case-economy-value,.space.side-bottom .case-economy-value{font-size:16px!important}
+.space.side-top .case-economy-sub,.space.side-bottom .case-economy-sub{font-size:8px!important}
+.space.side-top .case-city,.space.side-bottom .case-city{font-size:10px!important;min-height:26px!important}
+@media(max-width:700px){.board{height:850px!important;min-height:850px!important}}
