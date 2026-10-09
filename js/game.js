@@ -586,10 +586,15 @@ function boardPos(i){
 function themeSlug(label=''){
  return String(label).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-');
 }
-const pawnFiles=['pawn-green.svg','pawn-blue.svg','pawn-red.svg','pawn-yellow.svg'];
+const characterIds=['magnat','architecte','banquiere','stratege','aventuriere','rebelle'];
+const characterNames=['Le Magnat',"L'Architecte",'La Banquière','Le Stratège',"L'Aventurière",'Le Rebelle'];
+function characterIdFor(playerIndex){
+ const selected=players[playerIndex]?.characterId;
+ return characterIds.includes(selected)?selected:characterIds[playerIndex%characterIds.length];
+}
+function characterSprite(playerIndex){return 'assets/characters/'+characterIdFor(playerIndex)+'.svg'}
 function pawnVisual(playerIndex,name='',extraClass=''){
- const file=pawnFiles[playerIndex%pawnFiles.length];
- return `<img class="player-pawn ${extraClass}" src="assets/pawns/${file}" alt="" title="${name}" loading="eager">`;
+ return `<img class="player-pawn ${extraClass}" src="${characterSprite(playerIndex)}" alt="" title="${name}" loading="eager">`;
 }
 function houseVisual(level){
  return level>0?`<div class="property-level-badge">NIV. ${level}</div>`:'';
@@ -1085,7 +1090,7 @@ async function animateTokenStep(playerIndex,from,to,movingPawn=null){
  if(!dot){
    dot=document.createElement('img');
    dot.className='moving-token moving-pawn';
-   dot.src='assets/pawns/'+pawnFiles[playerIndex%pawnFiles.length];
+   dot.src=characterSprite(playerIndex);
    dot.alt='';
    board.appendChild(dot);
  }
@@ -2761,7 +2766,7 @@ function startGame(){
      playerName=`Joueur ${i+1}`;
    }
    usedNames.push(playerName);
-   players.push({name:playerName,isAI,aiDifficulty:isAI?'hard':null,money:200000,pos:0,props:[],beaches:0,active:true,fiscalRollsLeft:0,worksInstallmentsLeft:0,wonderMode:null,wonderTurnsLeft:0,wonderLine:null,wonderSkipCountdown:false,floodTurnsLeft:0,floodSkipCountdown:false,doubleChance:false,bankInvestment:0,bankInvestmentSkip:false,jailed:false,jailTurnsLeft:0,jailJustEntered:false,hasEscapedJail:false,jailRecidiveCount:0});
+   players.push({name:playerName,isAI,characterId:document.getElementById('character'+(i+1))?.value||characterIds[i%characterIds.length],aiDifficulty:isAI?'hard':null,money:200000,pos:0,props:[],beaches:0,active:true,fiscalRollsLeft:0,worksInstallmentsLeft:0,wonderMode:null,wonderTurnsLeft:0,wonderLine:null,wonderSkipCountdown:false,floodTurnsLeft:0,floodSkipCountdown:false,doubleChance:false,bankInvestment:0,bankInvestmentSkip:false,jailed:false,jailTurnsLeft:0,jailJustEntered:false,hasEscapedJail:false,jailRecidiveCount:0});
  }
  spaces.forEach(s=>{s.owner=null;s.level=0;s.rent=rents[s.id];s.baseRent=rents[s.id];s.repairTurnsLeft=0;s.repairSkipCountdown=false});
  current=0;rolled=false;gameOver=false;animating=false;initiativeActive=true;initiativeScores=[];logBox.innerHTML='';
@@ -2849,6 +2854,13 @@ document.getElementById('sim100').onclick=()=>runDevSimulation(100);
 document.getElementById('sim1000').onclick=()=>runDevSimulation(1000);
 document.getElementById('simDebug').onclick=()=>runDevAudit(5000);
 
+document.querySelectorAll('[data-character-select]').forEach(select=>{
+ select.addEventListener('change',()=>{
+  const slot=select.dataset.characterSelect;
+  const preview=document.querySelector('[data-character-preview="'+slot+'"]');
+  if(preview){preview.src='assets/characters/'+select.value+'.svg';preview.alt=characterNames[characterIds.indexOf(select.value)]||'Personnage'}
+ });
+});
 const playerCountSelect=document.getElementById('playerCount');
 const lobbyPlayerSummary=document.getElementById('lobbyPlayerSummary');
 const lobbyAiSummary=document.getElementById('lobbyAiSummary');
