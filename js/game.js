@@ -596,12 +596,17 @@ function houseVisual(level){
 }
 function buildingVisual(s){
  const slug=s.type==='beach'?'beach':themeSlug(s.theme?.label||'business');
- const levelOverlay=(s.type==='property'&&s.level>0)
-   ?`<img class="level-building-art level-${s.level}" src="assets/buildings/level${s.level}.svg" alt="" loading="eager">`
-   :'';
+ if(s.type==='property'){
+  const level=Math.max(0,Math.min(3,Number(s.level)||0));
+  return `<div class="case-visual premium-art-card bf-evolving-plot plot-level-${level} theme-${slug}" aria-label="Terrain niveau ${level}">
+    <div class="bf-plot-ground"><span class="bf-plot-path"></span><span class="bf-plot-grass"></span></div>
+    ${level>0?`<img class="level-building-art level-${level}" src="assets/buildings/level${level}.svg" alt="" loading="eager">`:''}
+    <div class="case-art-gloss"></div>
+    <span class="district-mark">${(s.theme?.label||'Q').slice(0,1)}</span>
+   </div>`;
+ }
  return `<div class="case-visual premium-art-card theme-${slug}">
    <img class="case-art" src="assets/tiles/${slug}.svg" alt="" loading="eager">
-   ${levelOverlay}
    <div class="case-art-gloss"></div>
    <span class="district-mark">${(s.theme?.label||'Q').slice(0,1)}</span>
   </div>`;
