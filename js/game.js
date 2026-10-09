@@ -1114,7 +1114,7 @@ async function animateTokenStep(playerIndex,from,to,movingPawn=null){
 async function movePlayer(steps){
  const p=players[current],idx=current,initial=p.pos;
  passStart(p,steps);
- const staticPawns=board.querySelectorAll('.board-edge-pawns .board-pawn');
+ const staticPawns=[...board.querySelectorAll('.board-edge-pawns .board-pawn')].filter(el=>el.getAttribute('title')===p.name);
  staticPawns.forEach(el=>el.style.opacity='0');
  let movingPawn=null;
  for(let n=0;n<steps;n++){
