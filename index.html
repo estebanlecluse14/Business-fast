@@ -3,14 +3,14 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Business Fast V0.53</title>
+<title>Business Fast V0.53.1</title>
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 <section id="startScreen" class="screen active">
   <div class="start-backdrop" aria-hidden="true"><span class="orb o1"></span><span class="orb o2"></span><span class="orb o3"></span></div>
   <div class="start-wrap lobby-v047">
-    <div class="lobby-badge">V0.53 · 6 PERSONNAGES</div>
+    <div class="lobby-badge">V0.53.1 · NOUVEAU SALON</div>
     <h1 class="logo lobby-logo">BUSINESS <span>FAST</span></h1>
     <div class="subtitle">Crée ta table, ajoute des rivaux IA et lance la partie.</div>
 
@@ -26,6 +26,13 @@
           <div class="field"><label>Objectif</label><select id="winMode"><option value="both" selected>Faillite OU 4 plages OU Merveille</option><option value="bankrupt">Faillite des rivaux OU Merveille</option><option value="beaches">4 plages OU Merveille</option></select></div>
         </div>
 
+        <div class="lobby-character-section">
+          <div class="lobby-section-title">CHOISIS TON PERSONNAGE <small>Sélectionne un joueur puis son personnage ci-dessous</small></div>
+          <div class="lobby-character-gallery" id="lobbyCharacterGallery">
+            <button type="button" class="lobby-character-card" data-character-card="magnat" aria-label="Choisir Le Magnat"><img src="assets/characters/magnat.svg" alt=""><span>Le Magnat</span></button><button type="button" class="lobby-character-card" data-character-card="architecte" aria-label="Choisir L'Architecte"><img src="assets/characters/architecte.svg" alt=""><span>L'Architecte</span></button><button type="button" class="lobby-character-card" data-character-card="banquiere" aria-label="Choisir La Banquière"><img src="assets/characters/banquiere.svg" alt=""><span>La Banquière</span></button><button type="button" class="lobby-character-card" data-character-card="stratege" aria-label="Choisir Le Stratège"><img src="assets/characters/stratege.svg" alt=""><span>Le Stratège</span></button><button type="button" class="lobby-character-card" data-character-card="aventuriere" aria-label="Choisir L'Aventurière"><img src="assets/characters/aventuriere.svg" alt=""><span>L'Aventurière</span></button><button type="button" class="lobby-character-card" data-character-card="rebelle" aria-label="Choisir Le Rebelle"><img src="assets/characters/rebelle.svg" alt=""><span>Le Rebelle</span></button>
+          </div>
+        </div>
+        <div class="lobby-section-title lobby-players-title">JOUEURS <small>Clique sur un joueur pour lui attribuer un personnage</small></div>
         <div class="player-slots" id="playerSlots">
           <div class="player-slot" data-player-slot="1">
             <div class="slot-index">1</div>
@@ -306,7 +313,7 @@
       <button id="updatesClose" class="updates-close" type="button" aria-label="Fermer">✕</button>
     </div>
     <div class="updates-list">
-      <article class="update-item current"><div class="update-version">V0.53</div><div class="update-copy"><div class="update-title">Six personnages jouables <span class="update-tag">Personnalisation</span></div><p>Choisis ton personnage au lancement : Magnat, Architecte, Banquière, Stratège, Aventurière ou Rebelle. Chaque personnage possède un nouveau sprite SVG utilisé dans le salon, sur le plateau et pendant les déplacements. Les bonus et malus seront ajoutés dans une prochaine mise à jour.</p><p><strong>Build :</strong> 098300e · 09/10/2026</p></div></article>
+      <article class="update-item current"><div class="update-version">V0.53.1</div><div class="update-copy"><div class="update-title">Refonte du salon de partie <span class="update-tag">Graphismes</span></div><p>Nouveau style chaleureux inspiré du plateau : panneaux crème et bois, boutons colorés, galerie de six personnages et sélection visuelle par joueur. Règles inchangées.</p><p><strong>Build :</strong> V0.53.1 · 09/10/2026</p></div></article><article class="update-item"><div class="update-version">V0.53</div><div class="update-copy"><div class="update-title">Six personnages jouables <span class="update-tag">Personnalisation</span></div><p>Choisis ton personnage au lancement : Magnat, Architecte, Banquière, Stratège, Aventurière ou Rebelle. Chaque personnage possède un nouveau sprite SVG utilisé dans le salon, sur le plateau et pendant les déplacements. Les bonus et malus seront ajoutés dans une prochaine mise à jour.</p><p><strong>Build :</strong> 098300e · 09/10/2026</p></div></article>
       <article class="update-item">
         <div class="update-version">V0.52.5</div><div class="update-copy"><div class="update-title">Initiative plus fluide et Prison 2.0 <span class="update-tag">Gameplay</span></div><p>L'animation du dé de départ utilise maintenant les images d'animation du navigateur. L'évasion ne demande plus d'argent avant le mini-jeu : en cas d'échec, 150 000 € sont dus (100 000 € d'évasion et 50 000 € d'amende), avec vente forcée de biens ou faillite si la dette ne peut pas être réglée.</p><p><strong>Build :</strong> b2e4c27 · 09/10/2026</p></div>
       </article>
