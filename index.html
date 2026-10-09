@@ -3,14 +3,14 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Business Fast V0.52.5</title>
+<title>Business Fast V0.53</title>
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 <section id="startScreen" class="screen active">
   <div class="start-backdrop" aria-hidden="true"><span class="orb o1"></span><span class="orb o2"></span><span class="orb o3"></span></div>
   <div class="start-wrap lobby-v047">
-    <div class="lobby-badge">V0.52.5 · DÉS ET PRISON</div>
+    <div class="lobby-badge">V0.53 · 6 PERSONNAGES</div>
     <h1 class="logo lobby-logo">BUSINESS <span>FAST</span></h1>
     <div class="subtitle">Crée ta table, ajoute des rivaux IA et lance la partie.</div>
 
@@ -29,10 +29,11 @@
         <div class="player-slots" id="playerSlots">
           <div class="player-slot" data-player-slot="1">
             <div class="slot-index">1</div>
-            <div class="slot-avatar slot-avatar-1">👤</div>
+            <div class="slot-avatar slot-avatar-1"><img src="assets/characters/magnat.svg" alt="Le Magnat" class="character-preview" data-character-preview="1"></div>
             <div class="slot-main">
               <label for="p1">Joueur 1</label>
               <input id="p1" value="Esteban">
+              <label class="character-field-label" for="character1">Personnage</label><select id="character1" class="character-select" data-character-select="1"><option value="magnat" selected>Le Magnat</option><option value="architecte">L'Architecte</option><option value="banquiere">La Banquière</option><option value="stratege">Le Stratège</option><option value="aventuriere">L'Aventurière</option><option value="rebelle">Le Rebelle</option></select><small class="character-hint">Compétences à venir · aucun bonus actif</small>
             </div>
             <div class="slot-type">
               <button type="button" class="player-type-toggle human" data-player-type="1" aria-pressed="false">
@@ -41,10 +42,11 @@
             </div>
           </div><div class="player-slot" data-player-slot="2">
             <div class="slot-index">2</div>
-            <div class="slot-avatar slot-avatar-2">◆</div>
+            <div class="slot-avatar slot-avatar-2"><img src="assets/characters/architecte.svg" alt="L'Architecte" class="character-preview" data-character-preview="2"></div>
             <div class="slot-main">
               <label for="p2">Joueur 2</label>
               <input id="p2" value="Joueur 2">
+              <label class="character-field-label" for="character2">Personnage</label><select id="character2" class="character-select" data-character-select="2"><option value="magnat">Le Magnat</option><option value="architecte" selected>L'Architecte</option><option value="banquiere">La Banquière</option><option value="stratege">Le Stratège</option><option value="aventuriere">L'Aventurière</option><option value="rebelle">Le Rebelle</option></select><small class="character-hint">Compétences à venir · aucun bonus actif</small>
             </div>
             <div class="slot-type">
               <button type="button" class="player-type-toggle human" data-player-type="2" aria-pressed="false">
@@ -53,10 +55,11 @@
             </div>
           </div><div class="player-slot" data-player-slot="3">
             <div class="slot-index">3</div>
-            <div class="slot-avatar slot-avatar-3">◆</div>
+            <div class="slot-avatar slot-avatar-3"><img src="assets/characters/banquiere.svg" alt="La Banquière" class="character-preview" data-character-preview="3"></div>
             <div class="slot-main">
               <label for="p3">Joueur 3</label>
               <input id="p3" value="Joueur 3">
+              <label class="character-field-label" for="character3">Personnage</label><select id="character3" class="character-select" data-character-select="3"><option value="magnat">Le Magnat</option><option value="architecte">L'Architecte</option><option value="banquiere" selected>La Banquière</option><option value="stratege">Le Stratège</option><option value="aventuriere">L'Aventurière</option><option value="rebelle">Le Rebelle</option></select><small class="character-hint">Compétences à venir · aucun bonus actif</small>
             </div>
             <div class="slot-type">
               <button type="button" class="player-type-toggle human" data-player-type="3" aria-pressed="false">
@@ -65,10 +68,11 @@
             </div>
           </div><div class="player-slot" data-player-slot="4">
             <div class="slot-index">4</div>
-            <div class="slot-avatar slot-avatar-4">◆</div>
+            <div class="slot-avatar slot-avatar-4"><img src="assets/characters/stratege.svg" alt="Le Stratège" class="character-preview" data-character-preview="4"></div>
             <div class="slot-main">
               <label for="p4">Joueur 4</label>
               <input id="p4" value="Joueur 4">
+              <label class="character-field-label" for="character4">Personnage</label><select id="character4" class="character-select" data-character-select="4"><option value="magnat">Le Magnat</option><option value="architecte">L'Architecte</option><option value="banquiere">La Banquière</option><option value="stratege" selected>Le Stratège</option><option value="aventuriere">L'Aventurière</option><option value="rebelle">Le Rebelle</option></select><small class="character-hint">Compétences à venir · aucun bonus actif</small>
             </div>
             <div class="slot-type">
               <button type="button" class="player-type-toggle human" data-player-type="4" aria-pressed="false">
@@ -302,7 +306,8 @@
       <button id="updatesClose" class="updates-close" type="button" aria-label="Fermer">✕</button>
     </div>
     <div class="updates-list">
-      <article class="update-item current">
+      <article class="update-item current"><div class="update-version">V0.53</div><div class="update-copy"><div class="update-title">Six personnages jouables <span class="update-tag">Personnalisation</span></div><p>Choisis ton personnage au lancement : Magnat, Architecte, Banquière, Stratège, Aventurière ou Rebelle. Chaque personnage possède un nouveau sprite SVG utilisé dans le salon, sur le plateau et pendant les déplacements. Les bonus et malus seront ajoutés dans une prochaine mise à jour.</p><p><strong>Build :</strong> 098300e · 09/10/2026</p></div></article>
+      <article class="update-item">
         <div class="update-version">V0.52.5</div><div class="update-copy"><div class="update-title">Initiative plus fluide et Prison 2.0 <span class="update-tag">Gameplay</span></div><p>L'animation du dé de départ utilise maintenant les images d'animation du navigateur. L'évasion ne demande plus d'argent avant le mini-jeu : en cas d'échec, 150 000 € sont dus (100 000 € d'évasion et 50 000 € d'amende), avec vente forcée de biens ou faillite si la dette ne peut pas être réglée.</p><p><strong>Build :</strong> b2e4c27 · 09/10/2026</p></div>
       </article>
       <article class="update-item">
