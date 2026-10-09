@@ -2886,7 +2886,6 @@ document.querySelectorAll('[data-character-card]').forEach(card=>{
  });
 });
 refreshLobbyCharacterGallery();
-document.querySelectorAll('[data-character-select]').forEach(el=>el.dispatchEvent(new Event('change')));
 document.querySelectorAll('[data-character-select]').forEach(select=>{
  select.addEventListener('change',()=>{
   const slot=select.dataset.characterSelect;
@@ -2897,6 +2896,7 @@ document.querySelectorAll('[data-character-select]').forEach(select=>{
   refreshLobbyCharacterGallery();
  });
 });
+document.querySelectorAll('[data-character-select]').forEach(el=>el.dispatchEvent(new Event('change')));
 const playerCountSelect=document.getElementById('playerCount');
 const lobbyPlayerSummary=document.getElementById('lobbyPlayerSummary');
 const lobbyAiSummary=document.getElementById('lobbyAiSummary');
