@@ -8347,3 +8347,32 @@ html.phaser-ready .phaser-mount{opacity:1}
 .space.side-bottom .case-economy .property-level-badge{display:none!important}
 .space.side-top .bf-evolving-plot .case-art-gloss,
 .space.side-bottom .bf-evolving-plot .case-art-gloss{pointer-events:none!important}
+
+/* V0.52.2 — sharper terrain, lighter rendering and pawns outside board */
+.bf-evolving-plot .case-art-gloss{display:none!important}
+.bf-evolving-plot .bf-plot-ground{filter:none!important;backdrop-filter:none!important}
+.bf-evolving-plot .level-building-art{filter:drop-shadow(0 2px 1px rgba(20,45,28,.22))!important}
+.space.property,.space.beach{backdrop-filter:none!important}
+.space.property:hover,.space.beach:hover{filter:none!important}
+.performance-lite .board-pawn,.performance-lite .player-pawn{animation:none!important}
+.performance-lite .space{transition:none!important}
+.performance-lite .space:hover{transform:none!important}
+.performance-lite .case-art-gloss{backdrop-filter:none!important}
+.space{isolation:auto!important}
+.space .case-pawn-slot{pointer-events:none!important;overflow:visible!important;z-index:90!important}
+.space .case-pawn-slot .board-pawn{max-width:none!important;max-height:none!important;flex-shrink:0!important}
+.space.side-top .case-pawn-slot{top:-38px!important;left:50%!important;transform:translateX(-50%)!important}
+.space.side-bottom .case-pawn-slot{top:auto!important;bottom:-43px!important;left:50%!important;transform:translateX(-50%)!important}
+.space.side-left .case-pawn-slot{top:50%!important;bottom:auto!important;left:-40px!important;right:auto!important;transform:translateY(-50%)!important}
+.space.side-right .case-pawn-slot{top:50%!important;bottom:auto!important;left:auto!important;right:-40px!important;transform:translateY(-50%)!important}
+.space.side-top,.space.side-bottom,.space.side-left,.space.side-right{overflow:visible!important}
+.space.side-top .property-layout,.space.side-bottom .property-layout,
+.space.side-left .property-layout,.space.side-right .property-layout{overflow:visible!important}
+.space.side-top .case-pawn-slot .board-pawn,.space.side-bottom .case-pawn-slot .board-pawn,
+.space.side-left .case-pawn-slot .board-pawn,.space.side-right .case-pawn-slot .board-pawn{width:29px!important;height:39px!important}
+@media(max-width:700px){
+ .space.side-left .case-pawn-slot{left:-32px!important}
+ .space.side-right .case-pawn-slot{right:-32px!important}
+ .space.side-top .case-pawn-slot{top:-34px!important}
+ .space.side-bottom .case-pawn-slot{bottom:-38px!important}
+}
