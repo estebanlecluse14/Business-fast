@@ -2854,11 +2854,39 @@ document.getElementById('sim100').onclick=()=>runDevSimulation(100);
 document.getElementById('sim1000').onclick=()=>runDevSimulation(1000);
 document.getElementById('simDebug').onclick=()=>runDevAudit(5000);
 
+let activeLobbyPlayer=1;
+function refreshLobbyCharacterGallery(){
+ const current=document.getElementById('character'+activeLobbyPlayer)?.value;
+ document.querySelectorAll('[data-character-card]').forEach(card=>{
+  const chosen=card.dataset.characterCard===current;
+  card.classList.toggle('selected',chosen);
+  card.setAttribute('aria-pressed',String(chosen));
+ });
+ document.querySelectorAll('[data-player-slot]').forEach(slot=>slot.classList.toggle('character-target',Number(slot.dataset.playerSlot)===activeLobbyPlayer));
+}
+document.querySelectorAll('[data-player-slot]').forEach(slot=>{
+ slot.addEventListener('click',event=>{
+  if(event.target.closest('.player-type-toggle,.character-select'))return;
+  activeLobbyPlayer=Number(slot.dataset.playerSlot);
+  refreshLobbyCharacterGallery();
+ });
+});
+document.querySelectorAll('[data-character-card]').forEach(card=>{
+ card.addEventListener('click',()=>{
+  const select=document.getElementById('character'+activeLobbyPlayer);
+  if(!select)return;
+  select.value=card.dataset.characterCard;
+  select.dispatchEvent(new Event('change',{bubbles:true}));
+  refreshLobbyCharacterGallery();
+ });
+});
+refreshLobbyCharacterGallery();
 document.querySelectorAll('[data-character-select]').forEach(select=>{
  select.addEventListener('change',()=>{
   const slot=select.dataset.characterSelect;
   const preview=document.querySelector('[data-character-preview="'+slot+'"]');
   if(preview){preview.src='assets/characters/'+select.value+'.svg';preview.alt=characterNames[characterIds.indexOf(select.value)]||'Personnage'}
+  refreshLobbyCharacterGallery();
  });
 });
 const playerCountSelect=document.getElementById('playerCount');
