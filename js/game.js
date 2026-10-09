@@ -1193,20 +1193,20 @@ function openJailDecision(playerIndex=current,opts={}){
     '<div class="decision-balance"><span>Trésorerie</span><strong>'+moneyFmt(p.money)+'</strong></div>'+
     '<div class="jail-options">'+
       '<div class="jail-option '+(p.money>=150000?'recommended':'locked')+'"><span class="jail-option-code">SÛR</span><b>Payer la caution</b><strong>150 000 €</strong><small>Sortie immédiate et garantie.</small></div>'+
-      '<div class="jail-option '+(p.money>=100000?'escape':'locked')+'"><span class="jail-option-code">RISQUÉ</span><b>Tenter l’évasion</b><strong>100 000 €</strong><small>La somme est payée avant le mini-jeu. Si la lame casse, tu restes détenu.</small></div>'+
+      '<div class="jail-option escape"><span class="jail-option-code">RISQUÉ</span><b>Tenter l’évasion</b><strong>0 € à avancer</strong><small>Échec : 150 000 € à régler, vente de biens si nécessaire, faillite si impossible.</small></div>'+
       '<div class="jail-option wait"><span class="jail-option-code">GRATUIT</span><b>Attendre</b><strong>'+p.jailTurnsLeft+' tour(s)</strong><small>Pas de déplacement. Les loyers continuent de fonctionner.</small></div>'+
     '</div></div>';
    modal('Prison',body,'decision');
    document.getElementById('modal').classList.add('modal-jail');
    const row=document.querySelector('#modal .row');row.innerHTML='';
    const bail=document.createElement('button');bail.className='jail-bail';bail.textContent='Caution · 150 000 €';bail.disabled=p.money<150000;
-   const escape=document.createElement('button');escape.className='jail-escape';escape.textContent='Évasion · 100 000 €';escape.disabled=p.money<100000;
+   const escape=document.createElement('button');escape.className='jail-escape';escape.textContent='Tenter l’évasion · 0 €';
    const wait=document.createElement('button');wait.className='jail-wait';wait.textContent=fromArrival?'Attendre 3 tours':'Passer ce tour';
    bail.onclick=()=>{if(p.money<150000)return;p.money-=150000;stat('moneyRemoved',150000);stat('jailBails');document.getElementById('modal').classList.remove('open','modal-decision','modal-jail');releaseFromJail(playerIndex,'caution payée',!fromArrival);if(fromArrival)repairTurnState()};
-   escape.onclick=()=>{if(p.money<100000)return;p.money-=100000;stat('moneyRemoved',100000);stat('jailEscapeAttempts');document.getElementById('modal').classList.remove('open','modal-decision','modal-jail');if(p.isAI)simulateAIEscape(playerIndex,fromArrival);else startJailEscapeGame(playerIndex,fromArrival)};
+   escape.onclick=()=>{stat('jailEscapeAttempts');document.getElementById('modal').classList.remove('open','modal-decision','modal-jail');if(p.isAI)simulateAIEscape(playerIndex,fromArrival);else startJailEscapeGame(playerIndex,fromArrival)};
    wait.onclick=()=>chooseJailWait(playerIndex,fromArrival);
    row.append(bail,escape,wait);
-   if(p.isAI)setTimeout(()=>{if(!p.jailed||current!==playerIndex)return;if(p.money>=260000)bail.click();else if(p.money>=100000)escape.click();else wait.click()},520);
+   if(p.isAI)setTimeout(()=>{if(!p.jailed||current!==playerIndex)return;if(p.money>=260000)bail.click();else escape.click()},520);
  };
  if(recidive)applyJailRecidive(playerIndex,render);else render();
 }
@@ -1234,9 +1234,10 @@ function maybeOpenJailTurn(){
 function showJailEscapeFailure(playerIndex,onResolved){
  const p=players[playerIndex];if(!p)return;
  const extraFine=50000;
+ const totalPenalty=100000+extraFine;
  p.jailTurnsLeft=Math.max(1,p.jailTurnsLeft||3)+1;
  p.jailJustEntered=false;
- addLog('Évasion ratée : <b>'+p.name+'</b> reçoit '+moneyFmt(extraFine)+' d’amende supplémentaire et +1 tour de prison.');
+ addLog('Évasion ratée : <b>'+p.name+'</b> doit '+moneyFmt(totalPenalty)+' après son évasion ratée et +1 tour de prison.');
  status.textContent='Évasion ratée : amende et détention prolongée.';
  const body='<div class="jail-fail-screen">'+
    '<div class="jail-fail-visual"><div class="jail-alarm"></div><div class="broken-blade"><span></span><i></i></div><div class="jail-fail-bars"><i></i><i></i><i></i><i></i></div></div>'+
@@ -1244,7 +1245,7 @@ function showJailEscapeFailure(playerIndex,onResolved){
    '<div class="jail-fail-title">ÉVASION RATÉE</div>'+
    '<div class="jail-fail-copy">La lame a surchauffé et s’est brisée. Les gardiens vous ont intercepté avant votre fuite.</div>'+
    '<div class="jail-fail-penalties">'+
-     '<div><span>AMENDE SUPPLÉMENTAIRE</span><strong>'+moneyFmt(extraFine)+'</strong></div>'+
+     '<div><span>ÉVASION + AMENDE</span><strong>'+moneyFmt(totalPenalty)+'</strong></div>'+
      '<div><span>DÉTENTION PROLONGÉE</span><strong>+1 TOUR</strong></div>'+
    '</div>'+
    '<div class="jail-fail-total">Il reste maintenant <b>'+p.jailTurnsLeft+' tour(s)</b> de prison.</div>'+
@@ -1256,7 +1257,7 @@ function showJailEscapeFailure(playerIndex,onResolved){
  ok.onclick=()=>{
    modalEl.classList.remove('open','modal-danger','modal-jail-fail');
    playSfx('close');
-   chargePlayer(playerIndex,extraFine,'Amende supplémentaire — évasion ratée',()=>{
+   chargePlayer(playerIndex,totalPenalty,'Évasion ratée — coût et amende',()=>{
      refresh();
      if(onResolved)onResolved();
    });
@@ -1290,7 +1291,7 @@ function finishJailEscape(success){
  if(!jailGameState||jailGameState.finished)return;
  jailGameState.finished=true;jailHold=false;const state={...jailGameState},p=players[state.playerIndex],overlay=document.getElementById('jailEscapeOverlay');
  if(success){stat('jailEscapes');p.hasEscapedJail=true;overlay?.classList.add('escaped');document.getElementById('jailEscapeStatus').textContent='Évasion réussie. Les 4 barreaux sont coupés.';addLog('Évasion réussie : <b>'+p.name+'</b> quitte la prison.');playSfx('start')}
- else{stat('jailBladeBreaks');overlay?.classList.add('blade-broken');document.getElementById('jailEscapeStatus').textContent='SURCHAUFFE — la lame vient de casser.';addLog('Évasion ratée : la lame de <b>'+p.name+'</b> casse. Les 100 000 € sont perdus.');playSfx('bad')}
+ else{stat('jailBladeBreaks');overlay?.classList.add('blade-broken');document.getElementById('jailEscapeStatus').textContent='SURCHAUFFE — la lame vient de casser.';addLog('Évasion ratée : la lame de <b>'+p.name+'</b> casse. La pénalité sera exigée après l’échec.');playSfx('bad')}
  setTimeout(()=>{
    closeJailEscapeGame();
    if(success){
@@ -2649,15 +2650,19 @@ function renderInitiativePlayers(scores=initiativeScores){
 async function animateInitiativeDie(finalRoll){
  if(!initiativeDice)return;
  initiativeDice.classList.add('rolling');
- const start=performance.now();
- while(performance.now()-start<430){
-   initiativeDice.dataset.face=String(1+Math.floor(Math.random()*6));
-   playSfx('dice');
-   await sleep(75);
- }
+ const start=performance.now(),duration=520;
+ let last=-1;
+ await new Promise(resolve=>{
+  function frame(now){
+   const step=Math.floor((now-start)/85);
+   if(step!==last){last=step;initiativeDice.dataset.face=String(1+Math.floor(Math.random()*6));if(step%3===0)playSfx('dice')}
+   if(now-start<duration)requestAnimationFrame(frame);else resolve();
+  }
+  requestAnimationFrame(frame);
+ });
  initiativeDice.dataset.face=String(finalRoll);
  initiativeDice.classList.remove('rolling');
- await sleep(260);
+ await sleep(140);
 }
 
 async function rollInitiativeFor(index){
